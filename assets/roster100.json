@@ -1,0 +1,1502 @@
+[
+ {
+  "i": "solarixprime",
+  "n": "SOLARIX PRIME",
+  "e": "SOL",
+  "r": "gold",
+  "l": "radiant orange and white solar knight mecha with a circular sun emblem reactor on its chest, solar-panel wings folded on its back, twin golden blade gauntlets, amber visor eyes",
+  "a": "dual golden blade slash",
+  "s": [
+   "CORTE SOLAR",
+   "LAMINA DE HELIO",
+   "SUPERNOVA PRIME",
+   "ESCUDO FOTONICO"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "lunargeist",
+  "n": "LUNAR GEIST",
+  "e": "LUA",
+  "r": "silver",
+  "l": "pale silver and deep indigo lunar mecha with a crescent moon crest on its forehead, flowing ghostly cape of moonlight, hollow glowing white eyes",
+  "a": "crescent moon scythe swing",
+  "s": [
+   "FOICE MINGUANTE",
+   "LUZ DA LUA CHEIA",
+   "MALDICAO LUNAR",
+   "VEU DE ECLIPSE"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "dunecrawler",
+  "n": "DUNE CRAWLER",
+  "e": "AREIA",
+  "r": "bronze",
+  "l": "sand-beige and rust six-legged crawler mecha with a drill snout, sand vents spraying dust, two red sensor eyes",
+  "a": "spinning drill charge",
+  "s": [
+   "BROCA DE AREIA",
+   "TEMPESTADE DE PO",
+   "AREIA MOVEDICA",
+   "CARAPACA DUNA"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "junglemaw",
+  "n": "JUNGLE MAW",
+  "e": "SELVA",
+  "r": "silver",
+  "l": "mossy green and bark-brown jungle beast mecha with vine cables on its arms, leafy shoulder plates, glowing yellow feline eyes",
+  "a": "vine whip lash",
+  "s": [
+   "CHICOTE DE CIPO",
+   "MORDIDA DA SELVA",
+   "ESPOROS TOXICOS",
+   "CASCA REFORCADA"
+  ],
+  "f": "poison"
+ },
+ {
+  "i": "abyssalord",
+  "n": "ABYSSA LORD",
+  "e": "ABISSO",
+  "r": "gold",
+  "l": "deep-sea black and bioluminescent teal abyssal mecha with anglerfish lure on its head, tentacle arms, many small glowing blue eyes",
+  "a": "tentacle crush",
+  "s": [
+   "TENTACULO ABISSAL",
+   "PRESSAO DE MIL METROS",
+   "ISCA HIPNOTICA",
+   "COURACA DO ABISMO"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "toxinvore",
+  "n": "TOXINVORE",
+  "e": "TOXINA",
+  "r": "bronze",
+  "l": "sickly purple and lime hazmat mecha with bubbling toxin tanks on its back, dripping syringe claws, single green lens eye",
+  "a": "syringe claw stab",
+  "s": [
+   "GARRA SEPTICA",
+   "JATO DE TOXINA",
+   "PRAGA CORROSIVA",
+   "FILTRO BLINDADO"
+  ],
+  "f": "poison"
+ },
+ {
+  "i": "ruinwarden",
+  "n": "RUIN WARDEN",
+  "e": "RUINA",
+  "r": "silver",
+  "l": "cracked stone-grey and gold ancient guardian mecha covered in broken glyphs, one arm a giant crumbling shield, dim orange glowing cracks",
+  "a": "stone shield bash",
+  "s": [
+   "PANCADA DE RUINA",
+   "GLIFO ANCESTRAL",
+   "SELO ESQUECIDO",
+   "MURALHA ETERNA"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "forgeheart",
+  "n": "FORGE HEART",
+  "e": "FORJA",
+  "r": "silver",
+  "l": "blackened iron and molten orange blacksmith mecha with a furnace chest glowing white-hot, giant hammer arm, sparks flying from its shoulders",
+  "a": "molten hammer smash",
+  "s": [
+   "MARTELO EM BRASA",
+   "BIGORNA FUNDIDA",
+   "METAL DERRETIDO",
+   "TEMPERA DE ACO"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "snowreaver",
+  "n": "SNOW REAVER",
+  "e": "NEVE",
+  "r": "bronze",
+  "l": "white and pale grey snow raider mecha with a fur-like frost mantle, twin ice hook blades, frosted visor with blue slit eyes",
+  "a": "twin ice hook slash",
+  "s": [
+   "GANCHO GELIDO",
+   "NEVASCA CORTANTE",
+   "CONGELAMENTO",
+   "MANTO DE NEVE"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "ashenrevenant",
+  "n": "ASHEN REVENANT",
+  "e": "CINZAS",
+  "r": "gold",
+  "l": "charcoal grey and dull ember-red undead mecha wrapped in smoldering ash cloth, cracked skull faceplate, embers leaking from its joints",
+  "a": "ash claw rake",
+  "s": [
+   "GARRA DE CINZAS",
+   "SOPRO INCANDESCENTE",
+   "CREMACAO",
+   "SUDARIO DE FUMACA"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "plasmawraith",
+  "n": "PLASMA WRAITH",
+  "e": "PLASMA",
+  "r": "gold",
+  "l": "translucent magenta and white plasma phantom mecha with a containment ring core, semi-transparent flowing limbs, bright white core eye",
+  "a": "plasma lance thrust",
+  "s": [
+   "LANCA DE PLASMA",
+   "ARCO IONIZADO",
+   "FUSAO INSTAVEL",
+   "CAMPO DE CONTENCAO"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "shadowfang",
+  "n": "SHADOWFANG",
+  "e": "SOMBRA",
+  "r": "silver",
+  "l": "pitch black and dark purple wolf-shaped stealth mecha with smoke trailing from its paws, long fanged muzzle, piercing violet eyes",
+  "a": "shadow pounce bite",
+  "s": [
+   "MORDIDA SOMBRIA",
+   "SALTO NOTURNO",
+   "BREU ABSOLUTO",
+   "MANTO DE SOMBRAS"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "mirrorclad",
+  "n": "MIRRORCLAD",
+  "e": "ESPELHO",
+  "r": "gold",
+  "l": "chrome mirror-plated humanoid mecha with a perfectly reflective faceless head, sharp glass shard shoulders, thin blue seams of light",
+  "a": "mirror shard slash",
+  "s": [
+   "ESTILHACO ESPELHADO",
+   "REFLEXO CORTANTE",
+   "IMAGEM INVERTIDA",
+   "BARREIRA REFLETORA"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "bonemarshal",
+  "n": "BONE MARSHAL",
+  "e": "OSSO",
+  "r": "silver",
+  "l": "bone-white and dark iron skeletal commander mecha with a ribcage torso, tattered red officer cape, skull helm with red eye lights",
+  "a": "bone saber slash",
+  "s": [
+   "SABRE DE OSSO",
+   "ORDEM MORTAL",
+   "MEDULA DRENADA",
+   "COSTELAS DE ACO"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "cloudpiercer",
+  "n": "CLOUD PIERCER",
+  "e": "NUVEM",
+  "r": "bronze",
+  "l": "white and sky-blue aerial mecha with jet turbine wings, streamlined pointed helmet, contrail vapor trailing behind, cyan eyes",
+  "a": "aerial dive strike",
+  "s": [
+   "ESTOCADA AEREA",
+   "FURA-NUVENS",
+   "VACUO DE ALTITUDE",
+   "CASULO DE VAPOR"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "vulcanargo",
+  "n": "VULCAN ARGO",
+  "e": "VULCAO",
+  "r": "silver",
+  "l": "obsidian black and lava-orange volcano titan mecha with a cracked magma chest, jagged rock shoulders, glowing lava veins",
+  "a": "magma fist slam",
+  "s": [
+   "PUNHO DE MAGMA",
+   "ERUPCAO",
+   "CHUVA DE LAPILLI",
+   "CROSTA VULCANICA"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "mireclad",
+  "n": "MIRECLAD",
+  "e": "PANTANO",
+  "r": "bronze",
+  "l": "swamp-green and mud-brown bog mecha with dripping algae plating, wide clawed feet, glowing sickly yellow eyes",
+  "a": "mud claw swipe",
+  "s": [
+   "GARRA DE LODO",
+   "ATOLEIRO",
+   "MIASMA",
+   "COURACA DE LIMO"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "aridfang",
+  "n": "ARID FANG",
+  "e": "DESERTO",
+  "r": "bronze",
+  "l": "tan and burnt-orange desert scorpion mecha with a segmented tail stinger, curved pincer arms, black slit eyes",
+  "a": "tail stinger strike",
+  "s": [
+   "FERRAO ARIDO",
+   "PINCA DUPLA",
+   "VENENO SECO",
+   "CARAPACA ESCALDANTE"
+  ],
+  "f": "poison"
+ },
+ {
+  "i": "tundrakeeper",
+  "n": "TUNDRA KEEPER",
+  "e": "TUNDRA",
+  "r": "silver",
+  "l": "pale blue and weathered steel tundra sentinel mecha with a heavy frost-caked coat, ice-plated pauldrons, calm white eyes",
+  "a": "frozen mace swing",
+  "s": [
+   "MACA GLACIAL",
+   "VENTO DA TUNDRA",
+   "GEADA PROFUNDA",
+   "MURO DE GELO"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "reefsovereign",
+  "n": "REEF SOVEREIGN",
+  "e": "RECIFE",
+  "r": "gold",
+  "l": "coral pink and turquoise reef king mecha with branching coral crown, shell armor plates, pearlescent trident, aqua eyes",
+  "a": "coral trident thrust",
+  "s": [
+   "TRIDENTE DE CORAL",
+   "MARE VIVA",
+   "POLIPO PARASITA",
+   "CONCHA REAL"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "obsidianfist",
+  "n": "OBSIDIAN FIST",
+  "e": "OBSIDIANA",
+  "r": "silver",
+  "l": "glossy black volcanic glass brawler mecha with razor-sharp fractured knuckles, faint red inner glow, angular helmet",
+  "a": "obsidian knuckle combo",
+  "s": [
+   "PUNHO DE OBSIDIANA",
+   "ESTILHACO NEGRO",
+   "CORTE VITREO",
+   "PLACA VULCANICA"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "amberlock",
+  "n": "AMBERLOCK",
+  "e": "AMBAR",
+  "r": "bronze",
+  "l": "golden amber translucent mecha with fossilized insects visible inside its resin limbs, warm honey glow, dark brown joints",
+  "a": "resin fist strike",
+  "s": [
+   "RESINA ENDURECIDA",
+   "SELO DE AMBAR",
+   "FOSSILIZAR",
+   "CASULO DOURADO"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "neondrifter",
+  "n": "NEON DRIFTER",
+  "e": "NEON",
+  "r": "silver",
+  "l": "black chassis with hot pink and cyan neon tube lighting, street racer mecha with wheeled skates, glowing visor strip",
+  "a": "neon skate dash slash",
+  "s": [
+   "CORTE NEON",
+   "DERRAPAGEM",
+   "SOBRECARGA LUMINOSA",
+   "GRADE DE LUZ"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "rustpriest",
+  "n": "RUST PRIEST",
+  "e": "FERRUGEM",
+  "r": "bronze",
+  "l": "heavily rusted orange-brown priest mecha with a tattered mechanical robe, censer chain arm, dim green pilot light eyes",
+  "a": "censer chain swing",
+  "s": [
+   "CORRENTE ENFERRUJADA",
+   "BENCAO CORROSIVA",
+   "OXIDACAO",
+   "MANTO OXIDADO"
+  ],
+  "f": "poison"
+ },
+ {
+  "i": "graphenex",
+  "n": "GRAPHENEX",
+  "e": "GRAFENO",
+  "r": "gold",
+  "l": "matte black hexagonal-lattice mecha with glowing white hex seams, ultra-thin sharp limbs, minimalist featureless head",
+  "a": "hex blade slice",
+  "s": [
+   "LAMINA HEXAGONAL",
+   "MALHA CORTANTE",
+   "COLAPSO ATOMICO",
+   "ESCUDO MONOCAMADA"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "quantumecho",
+  "n": "QUANTUM ECHO",
+  "e": "QUANTUM",
+  "r": "gold",
+  "l": "translucent white and electric blue mecha with duplicated ghost afterimages of itself, probability wave patterns on its armor, no fixed face",
+  "a": "phase punch through space",
+  "s": [
+   "SOCO DEFASADO",
+   "SUPERPOSICAO",
+   "COLAPSO DE ONDA",
+   "INCERTEZA"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "nebulaseer",
+  "n": "NEBULA SEER",
+  "e": "NEBULOSA",
+  "r": "silver",
+  "l": "violet and rose nebula-patterned mystic mecha with a swirling galaxy orb in its chest, long star-dust mantle, three glowing eyes",
+  "a": "star dust beam",
+  "s": [
+   "FEIXE ESTELAR",
+   "VENTO NEBULAR",
+   "VISAO DO VAZIO",
+   "AURA COSMICA"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "eclipsar",
+  "n": "ECLIPSAR",
+  "e": "ECLIPSE",
+  "r": "gold",
+  "l": "half-black half-white eclipse mecha with a black sun corona ring behind its head, dual-tone split armor, one white and one black eye",
+  "a": "corona ring cut",
+  "s": [
+   "ANEL DE CORONA",
+   "TOTALIDADE",
+   "SOMBRA SOLAR",
+   "UMBRA PROTETORA"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "meteorpunch",
+  "n": "METEOR PUNCH",
+  "e": "METEORO",
+  "r": "silver",
+  "l": "scorched grey and glowing red meteor brawler mecha with a giant crater-pitted right fist, burning entry trails on its shoulders",
+  "a": "falling meteor uppercut",
+  "s": [
+   "SOCO METEORO",
+   "IMPACTO DE CRATERA",
+   "CHUVA DE ROCHAS",
+   "CASCA CARBONIZADA"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "ringwarden",
+  "n": "RING WARDEN",
+  "e": "ANEL",
+  "r": "silver",
+  "l": "pale gold and cream planetary-ring mecha with rotating debris rings around its waist and arms, smooth ovoid helmet, calm blue eye band",
+  "a": "spinning ring disc throw",
+  "s": [
+   "DISCO ORBITAL",
+   "ANEL CORTANTE",
+   "GRAVIDADE DE ANEL",
+   "ORBITA DEFENSIVA"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "pulsarcore",
+  "n": "PULSAR CORE",
+  "e": "PULSAR",
+  "r": "gold",
+  "l": "blinding white and deep blue neutron star mecha with a rapidly pulsing core, radiation beam antennae on its back, no visible face",
+  "a": "pulsar beam sweep",
+  "s": [
+   "FEIXE PULSAR",
+   "ROTACAO ULTRAVELOZ",
+   "RADIOPULSO",
+   "CAMPO MAGNETAR"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "voidsingularity",
+  "n": "VOID SINGULARITY",
+  "e": "BURACO NEGRO",
+  "r": "gold",
+  "l": "absolute black void mecha with an accretion disc of orange light around its torso, warped light bending at its edges, single white pinpoint eye",
+  "a": "gravity crush pull",
+  "s": [
+   "ATRACAO FATAL",
+   "HORIZONTE DE EVENTOS",
+   "ESPAGUETIFICACAO",
+   "POCO GRAVITACIONAL"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "seraphcircuit",
+  "n": "SERAPH CIRCUIT",
+  "e": "LUZ",
+  "r": "gold",
+  "l": "white and pale gold angelic mecha with six holographic circuit wings, halo of floating data rings, serene faceplate with blue light cross",
+  "a": "holy circuit blade",
+  "s": [
+   "LAMINA SACRA",
+   "SEIS ASAS",
+   "JULGAMENTO DIGITAL",
+   "AUREOLA BLINDADA"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "cinderhound",
+  "n": "CINDERHOUND",
+  "e": "BRASA",
+  "r": "bronze",
+  "l": "charcoal black hound mecha with glowing ember cracks along its spine, fiery breath vents, burning orange eyes",
+  "a": "burning bite lunge",
+  "s": [
+   "MORDIDA EM BRASA",
+   "LATIDO IGNEO",
+   "RASTRO DE FAGULHAS",
+   "PELAGEM DE CARVAO"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "glacierjaw",
+  "n": "GLACIER JAW",
+  "e": "GELO",
+  "r": "silver",
+  "l": "thick pale blue glacier beast mecha with a massive icy lower jaw, frozen spikes along its back, deep white glowing eyes",
+  "a": "glacier jaw chomp",
+  "s": [
+   "MANDIBULA GLACIAL",
+   "AVALANCHE",
+   "PRISAO DE GELO",
+   "BLINDAGEM DE ICEBERG"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "stormlance",
+  "n": "STORMLANCE",
+  "e": "TEMPESTADE",
+  "r": "silver",
+  "l": "deep blue and white storm knight mecha with a crackling lightning lance, cloud-like shoulder plumes, electric yellow eyes",
+  "a": "lightning lance charge",
+  "s": [
+   "LANCA DE RAIO",
+   "GALOPE DE TROVAO",
+   "DESCARGA EM CADEIA",
+   "PARA-RAIOS"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "terraforge",
+  "n": "TERRAFORGE",
+  "e": "TERRA",
+  "r": "bronze",
+  "l": "earth-brown and granite grey construction mecha with a jackhammer arm, boulder shoulders, dusty yellow headlamp eyes",
+  "a": "jackhammer pound",
+  "s": [
+   "BRITADEIRA",
+   "LEVANTE DE ROCHA",
+   "TREMOR",
+   "PLACA TECTONICA"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "windshear",
+  "n": "WINDSHEAR",
+  "e": "VENTO",
+  "r": "bronze",
+  "l": "pale mint and white wind mecha with wide glider wings under its arms, air intake chest, narrow slit eyes",
+  "a": "wing blade sweep",
+  "s": [
+   "CORTE DE ASA",
+   "RAJADA CORTANTE",
+   "VACUO",
+   "REDEMOINHO ESCUDO"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "voidcaller",
+  "n": "VOIDCALLER",
+  "e": "VAZIO",
+  "r": "silver",
+  "l": "dark violet and black cultist mecha with a floating cracked mask, void portal in its chest, long ragged energy sleeves",
+  "a": "void hand grasp",
+  "s": [
+   "MAO DO VAZIO",
+   "CHAMADO PROFUNDO",
+   "SUGAR ESSENCIA",
+   "PORTAL DEFENSIVO"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "acidbloom",
+  "n": "ACIDBLOOM",
+  "e": "ACIDO",
+  "r": "bronze",
+  "l": "lime green and dark grey flower-shaped mecha with corrosive petal blades, dripping acid stamen cannon, tiny black eyes",
+  "a": "petal blade spin",
+  "s": [
+   "PETALA CORROSIVA",
+   "JATO ACIDO",
+   "FLORACAO TOXICA",
+   "CALICE BLINDADO"
+  ],
+  "f": "poison"
+ },
+ {
+  "i": "gravitide",
+  "n": "GRAVITIDE",
+  "e": "GRAVIDADE",
+  "r": "silver",
+  "l": "navy blue and chrome floating mecha with no legs, orbiting gravity spheres around its hands, wide visor with a single white line eye",
+  "a": "gravity sphere slam",
+  "s": [
+   "ESFERA GRAVITICA",
+   "MARE DE PESO",
+   "COMPRESSAO",
+   "BOLHA INERCIAL"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "chronofracture",
+  "n": "CHRONOFRACTURE",
+  "e": "TEMPO",
+  "r": "gold",
+  "l": "silver and cyan clockwork mecha with shattered floating clock faces around it, gear-filled torso, glowing cyan pendulum core",
+  "a": "time slash rewind",
+  "s": [
+   "CORTE TEMPORAL",
+   "REBOBINAR",
+   "PARADOXO",
+   "AMPULHETA BLINDADA"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "biolattice",
+  "n": "BIOLATTICE",
+  "e": "BIO",
+  "r": "silver",
+  "l": "dark green and pale bone organic mecha with exposed muscle-cable fibers, growing crystal spine, pulsing red bio-core",
+  "a": "tendril whip strike",
+  "s": [
+   "TENDAO CHICOTE",
+   "CRESCIMENTO VORAZ",
+   "INFECCAO",
+   "CASCA REGENERATIVA"
+  ],
+  "f": "hp_regen"
+ },
+ {
+  "i": "crystallux",
+  "n": "CRYSTALLUX",
+  "e": "CRISTAL",
+  "r": "gold",
+  "l": "clear white and rainbow-prismatic crystal mecha with faceted geometric limbs, refracting light beams, glowing prism core chest",
+  "a": "prism beam refraction",
+  "s": [
+   "FEIXE PRISMATICO",
+   "LAMINA FACETADA",
+   "REFRACAO CEGANTE",
+   "GEODO BLINDADO"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "aquabastion",
+  "n": "AQUA BASTION",
+  "e": "AGUA",
+  "r": "silver",
+  "l": "deep blue and white fortress mecha with water cannon shoulders, wave-etched shield, calm cyan eyes behind a diving helm",
+  "a": "water cannon blast",
+  "s": [
+   "CANHAO DE AGUA",
+   "MARTELO DE ONDA",
+   "CORRENTEZA",
+   "BARREIRA LIQUIDA"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "emberwing",
+  "n": "EMBERWING",
+  "e": "FOGO",
+  "r": "bronze",
+  "l": "crimson and gold phoenix mecha with flaming feather wings, sharp beaked helm, bright orange eyes",
+  "a": "flaming wing slash",
+  "s": [
+   "ASA FLAMEJANTE",
+   "BICO INCANDESCENTE",
+   "RENASCER EM FOGO",
+   "PLUMAGEM DE BRASA"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "ironsentinel",
+  "n": "IRON SENTINEL",
+  "e": "FERRO",
+  "r": "bronze",
+  "l": "grey and dark red boxy guard mecha with a riot shield arm, heavy bolted plating, single horizontal red eye slit",
+  "a": "riot shield charge",
+  "s": [
+   "INVESTIDA DE ESCUDO",
+   "BASTAO DE FERRO",
+   "TRAVA DE ACO",
+   "POSTURA DE MURO"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "thunderoni",
+  "n": "THUNDER ONI",
+  "e": "TROVAO",
+  "r": "silver",
+  "l": "dark red and black oni demon mecha with two golden horns, lightning-wrapped iron club, glowing yellow angry eyes",
+  "a": "lightning club smash",
+  "s": [
+   "CLAVA TROVEJANTE",
+   "URRO ELETRICO",
+   "MARCA DO ONI",
+   "ARMADURA DEMONIACA"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "titanbulwark",
+  "n": "TITAN BULWARK",
+  "e": "TITA",
+  "r": "gold",
+  "l": "massive gunmetal grey titan mecha with fortress-like shoulder walls, twin cannon backpack, small glowing blue cockpit eye",
+  "a": "double cannon volley",
+  "s": [
+   "SALVA DUPLA",
+   "PUNHO TITANICO",
+   "CERCO TOTAL",
+   "FORTALEZA MOVEL"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "magnashrike",
+  "n": "MAGNASHRIKE",
+  "e": "MAGNETISMO",
+  "r": "silver",
+  "l": "violet and chrome bird-of-prey mecha with magnetic scrap feathers orbiting it, hooked beak, bright magenta eyes",
+  "a": "magnetic scrap dive",
+  "s": [
+   "MERGULHO MAGNETICO",
+   "BICO DE SUCATA",
+   "POLARIDADE INVERSA",
+   "CAMPO DE FERRO"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "jadearbiter",
+  "n": "JADE ARBITER",
+  "e": "JADE",
+  "r": "gold",
+  "l": "jade green and bronze martial arbiter mecha with flowing carved robes, twin jade tonfa, serene closed-eye mask with a third glowing eye",
+  "a": "twin tonfa combo",
+  "s": [
+   "TONFA GEMEA",
+   "PALMA DE JADE",
+   "VEREDITO ANCESTRAL",
+   "POSTURA IMOVEL"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "cosmoveil",
+  "n": "COSMOVEIL",
+  "e": "COSMICO",
+  "r": "silver",
+  "l": "midnight blue and starlight white cosmic dancer mecha with a flowing veil of stars, slender limbs, twin white star eyes",
+  "a": "star veil sweep",
+  "s": [
+   "VEU ESTELAR",
+   "DANCA ORBITAL",
+   "CONSTELACAO",
+   "MANTO DO COSMOS"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "sandwyrm",
+  "n": "SANDWYRM",
+  "e": "AREIA",
+  "r": "silver",
+  "l": "tan and bronze segmented serpent mecha with a circular grinding maw, sand-blasted plating, no eyes only sensor pits",
+  "a": "burrow strike from below",
+  "s": [
+   "EMBOSCADA SUBTERRANEA",
+   "MOEDOR CIRCULAR",
+   "VORTICE DE AREIA",
+   "ANEIS BLINDADOS"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "pyreconclave",
+  "n": "PYRE CONCLAVE",
+  "e": "FOGO",
+  "r": "gold",
+  "l": "deep crimson and gold hooded inquisitor mecha with a floating ring of fire braziers, burning book in one hand, hollow flame eyes",
+  "a": "fire brazier barrage",
+  "s": [
+   "BRASEIRO SAGRADO",
+   "CONDENACAO IGNEA",
+   "PIRA FUNERARIA",
+   "CIRCULO DE CHAMAS"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "frostmonarch",
+  "n": "FROST MONARCH",
+  "e": "GELO",
+  "r": "gold",
+  "l": "white and royal blue ice monarch mecha with a jagged ice crown, long frozen cape, scepter of frost, pale glowing eyes",
+  "a": "frost scepter blast",
+  "s": [
+   "CETRO GLACIAL",
+   "DECRETO CONGELANTE",
+   "INVERNO ETERNO",
+   "TRONO DE GELO"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "voltcarnyx",
+  "n": "VOLTCARNYX",
+  "e": "TROVAO",
+  "r": "gold",
+  "l": "electric yellow and gunmetal dragon mecha with crackling tesla coil wings, sparking jaws, blazing white eyes",
+  "a": "tesla breath blast",
+  "s": [
+   "SOPRO TESLA",
+   "GARRA VOLTAICA",
+   "TROVAO PRIMORDIAL",
+   "BOBINA DEFENSIVA"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "quarrybreaker",
+  "n": "QUARRY BREAKER",
+  "e": "TERRA",
+  "r": "bronze",
+  "l": "yellow and dust-grey mining mecha with a wrecking ball chain arm, treaded lower body, twin headlamp eyes",
+  "a": "wrecking ball swing",
+  "s": [
+   "BOLA DE DEMOLICAO",
+   "BRITA",
+   "DESLIZAMENTO",
+   "ESCUDO DE PEDREIRA"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "zephyrhalo",
+  "n": "ZEPHYR HALO",
+  "e": "VENTO",
+  "r": "gold",
+  "l": "pearl white and teal wind priestess mecha with a spinning air halo above her head, ribbon-like streamers, gentle green eyes",
+  "a": "cyclone ribbon strike",
+  "s": [
+   "FITA CICLONE",
+   "BENCAO DO VENTO",
+   "OLHO DA TORMENTA",
+   "ESCUDO DE BRISA"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "nullpriest",
+  "n": "NULL PRIEST",
+  "e": "VAZIO",
+  "r": "gold",
+  "l": "void black and bone white priest mecha with an inverted halo, pages of blank paper floating around it, empty hollow face",
+  "a": "nullify palm strike",
+  "s": [
+   "PALMA NULA",
+   "SERMAO SILENCIOSO",
+   "APAGAR EXISTENCIA",
+   "DOGMA VAZIO"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "venomcarapace",
+  "n": "VENOM CARAPACE",
+  "e": "TOXINA",
+  "r": "silver",
+  "l": "dark purple and acid yellow beetle mecha with a venom-dripping horn, hardened carapace shell, compound green eyes",
+  "a": "venom horn ram",
+  "s": [
+   "CHIFRE VENENOSO",
+   "CARGA BLINDADA",
+   "GAS NEUROTOXICO",
+   "CARAPACA DUPLA"
+  ],
+  "f": "poison"
+ },
+ {
+  "i": "grimsprocket",
+  "n": "GRIM SPROCKET",
+  "e": "RUINA",
+  "r": "bronze",
+  "l": "rusted grey and blood-red broken clockwork mecha with exposed grinding gears, one missing arm replaced by a hook, flickering red eye",
+  "a": "gear hook tear",
+  "s": [
+   "GANCHO DENTADO",
+   "ENGRENAGEM QUEBRADA",
+   "COLAPSO MECANICO",
+   "SUCATA PROTETORA"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "blastfurnace",
+  "n": "BLAST FURNACE",
+  "e": "FORJA",
+  "r": "gold",
+  "l": "huge black iron furnace mecha with an open white-hot core door in its belly, chimney stacks, molten metal dripping from its arms",
+  "a": "molten pour smash",
+  "s": [
+   "JORRO FUNDIDO",
+   "PORTA DA FORNALHA",
+   "FUSAO TOTAL",
+   "REVESTIMENTO REFRATARIO"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "hailstriker",
+  "n": "HAILSTRIKER",
+  "e": "NEVE",
+  "r": "silver",
+  "l": "white and steel-blue artillery mecha with hail launcher shoulder pods, frost-caked barrel arms, glowing pale blue targeting eye",
+  "a": "hail barrage launch",
+  "s": [
+   "BARRAGEM DE GRANIZO",
+   "OBUS GELADO",
+   "TORMENTA BRANCA",
+   "REDOMA DE GRANIZO"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "emberlash",
+  "n": "EMBERLASH",
+  "e": "BRASA",
+  "r": "bronze",
+  "l": "dark iron and glowing orange whip-wielding mecha with a molten chain whip, ember particles trailing, burning slit eyes",
+  "a": "molten whip crack",
+  "s": [
+   "ACOITE EM BRASA",
+   "CHICOTE FUNDIDO",
+   "MARCA A FOGO",
+   "ESPIRAL DE CINZAS"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "lumenblade",
+  "n": "LUMEN BLADE",
+  "e": "LUZ",
+  "r": "silver",
+  "l": "white and cyan light duelist mecha with a thin glowing energy rapier, sleek fencing armor, single bright cyan eye",
+  "a": "light rapier lunge",
+  "s": [
+   "FLORETE DE LUZ",
+   "ESTOCADA VELOZ",
+   "BRILHO OFUSCANTE",
+   "PARADA LUMINOSA"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "gloomtide",
+  "n": "GLOOMTIDE",
+  "e": "ABISSO",
+  "r": "silver",
+  "l": "black and dark teal drowned mecha covered in wet seaweed and barnacles, cracked diving helmet, one flickering green lamp eye",
+  "a": "drowning grasp",
+  "s": [
+   "AGARRAO AFOGADO",
+   "MARE ESCURA",
+   "PULMAO INUNDADO",
+   "CASCO ENCRUSTADO"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "sporeherald",
+  "n": "SPORE HERALD",
+  "e": "BIO",
+  "r": "bronze",
+  "l": "pale grey and mushroom-brown fungal mecha with glowing spore caps on its shoulders, mycelium cables, dim yellow dot eyes",
+  "a": "spore burst puff",
+  "s": [
+   "EXPLOSAO DE ESPOROS",
+   "MICELIO INVASOR",
+   "NUVEM FUNGICA",
+   "CAPA DE MUSGO"
+  ],
+  "f": "poison"
+ },
+ {
+  "i": "prismvector",
+  "n": "PRISM VECTOR",
+  "e": "CRISTAL",
+  "r": "silver",
+  "l": "pale pink and white geometric mecha made of floating crystal shards held by light, sharp triangular head, glowing pink core",
+  "a": "shard vector volley",
+  "s": [
+   "SALVA DE ESTILHACOS",
+   "VETOR CORTANTE",
+   "DISPERSAO",
+   "CONSTRUCTO CRISTALINO"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "maelstromfist",
+  "n": "MAELSTROM FIST",
+  "e": "AGUA",
+  "r": "gold",
+  "l": "deep blue and white water martial artist mecha with swirling whirlpool gauntlets, streamlined finned helm, sharp blue eyes",
+  "a": "whirlpool punch",
+  "s": [
+   "SOCO REDEMOINHO",
+   "GOLPE MAELSTROM",
+   "AFOGAMENTO",
+   "ESPIRAL DEFENSIVA"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "scrapbaron",
+  "n": "SCRAP BARON",
+  "e": "FERRUGEM",
+  "r": "silver",
+  "l": "patchwork rusted mecha built from mismatched junk parts, one huge crane claw arm, top-hat-shaped helm, mismatched glowing eyes",
+  "a": "crane claw grab slam",
+  "s": [
+   "GARRA DE GRUA",
+   "FERRO-VELHO",
+   "PRENSA HIDRAULICA",
+   "MONTE DE SUCATA"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "stelladrake",
+  "n": "STELLADRAKE",
+  "e": "COSMICO",
+  "r": "gold",
+  "l": "deep purple and gold star dragon mecha with galaxy-patterned wings, constellation lines glowing on its scales, brilliant gold eyes",
+  "a": "star breath beam",
+  "s": [
+   "SOPRO ESTELAR",
+   "GARRA DE COMETA",
+   "NOVA DRACONICA",
+   "ESCAMAS SIDERAIS"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "terminuscore",
+  "n": "TERMINUS CORE",
+  "e": "QUANTUM",
+  "r": "gold",
+  "l": "white and black polygonal mecha with a rotating cube core in its chest, glitching pixel edges, faceless mirrored head",
+  "a": "cube core beam",
+  "s": [
+   "FEIXE DO NUCLEO",
+   "GLITCH LETAL",
+   "REINICIAR REALIDADE",
+   "CUBO INVIOLAVEL"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "heliondriver",
+  "n": "HELION DRIVER",
+  "e": "SOL",
+  "r": "silver",
+  "l": "bright yellow and white racer mecha with solar sail fins, boosters on its heels, aerodynamic visor with orange glow",
+  "a": "boosted ramming charge",
+  "s": [
+   "INVESTIDA SOLAR",
+   "PROPULSAO MAXIMA",
+   "EXPLOSAO DE CROMOSFERA",
+   "AEROFOLIO BLINDADO"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "noxfeather",
+  "n": "NOXFEATHER",
+  "e": "SOMBRA",
+  "r": "silver",
+  "l": "black and deep purple raven mecha with shadow-feather cloak, curved beak mask, glowing purple eyes",
+  "a": "shadow feather volley",
+  "s": [
+   "PENAS SOMBRIAS",
+   "VOO NOTURNO",
+   "GRASNADO MALDITO",
+   "ASAS DE BREU"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "basaltguard",
+  "n": "BASALT GUARD",
+  "e": "OBSIDIANA",
+  "r": "bronze",
+  "l": "dark grey hexagonal basalt column mecha, blocky angular body, faint orange glow between its stone plates, square red eyes",
+  "a": "basalt column slam",
+  "s": [
+   "COLUNA DE BASALTO",
+   "IMPACTO ROCHOSO",
+   "LASCAS VULCANICAS",
+   "PILAR DEFENSIVO"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "hexweaver",
+  "n": "HEXWEAVER",
+  "e": "GRAFENO",
+  "r": "silver",
+  "l": "black and neon green spider mecha weaving glowing hex-lattice webs, six thin sharp legs, cluster of green lens eyes",
+  "a": "lattice web snare",
+  "s": [
+   "TEIA HEXAGONAL",
+   "PERNA CORTANTE",
+   "REDE PARALISANTE",
+   "CASULO DE GRAFENO"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "solstitia",
+  "n": "SOLSTITIA",
+  "e": "ECLIPSE",
+  "r": "silver",
+  "l": "cream white and deep navy dual-natured mecha with a rotating sun-and-moon disc on her back, split-color robes, one gold one silver eye",
+  "a": "sun-moon disc spin",
+  "s": [
+   "DISCO SOLSTICIO",
+   "GIRO DUPLO",
+   "EQUINOCIO",
+   "CICLO PROTETOR"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "cometfang",
+  "n": "COMETFANG",
+  "e": "METEORO",
+  "r": "bronze",
+  "l": "icy white and blazing blue comet wolf mecha with a long glowing tail trail, frosted fangs, bright blue eyes",
+  "a": "comet tail lunge",
+  "s": [
+   "CAUDA DE COMETA",
+   "PRESA CONGELANTE",
+   "QUEDA DE COMETA",
+   "HALO GELADO"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "orbitalmarshal",
+  "n": "ORBITAL MARSHAL",
+  "e": "ANEL",
+  "r": "gold",
+  "l": "white and gold space station commander mecha with rotating ring modules on its back, cape of solar panels, blue holographic visor",
+  "a": "orbital strike call",
+  "s": [
+   "ATAQUE ORBITAL",
+   "ANEL DE COMANDO",
+   "BOMBARDEIO SATELITE",
+   "ESCUDO ESTACAO"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "neutronmaul",
+  "n": "NEUTRON MAUL",
+  "e": "PULSAR",
+  "r": "silver",
+  "l": "dense dark grey and glowing white mecha carrying an impossibly heavy hammer, compressed matter core, narrow white eye slit",
+  "a": "neutron hammer drop",
+  "s": [
+   "MARRETA DE NEUTRONS",
+   "PESO ESTELAR",
+   "COMPRESSAO BRUTAL",
+   "MATERIA DENSA"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "eventhorizon",
+  "n": "EVENT HORIZON",
+  "e": "BURACO NEGRO",
+  "r": "gold",
+  "l": "black sphere-headed mecha with a swirling accretion disc collar, light streaks bending around its long limbs, no visible eyes",
+  "a": "singularity pull slash",
+  "s": [
+   "CORTE SINGULAR",
+   "ATRACAO INFINITA",
+   "DILATACAO",
+   "DISCO DE ACRECAO"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "mossknight",
+  "n": "MOSS KNIGHT",
+  "e": "SELVA",
+  "r": "bronze",
+  "l": "green moss-covered stone knight mecha with flowering vines on its shield, wooden sword arm, warm amber eyes",
+  "a": "wooden sword chop",
+  "s": [
+   "ESPADA DE MADEIRA",
+   "BROTO CORTANTE",
+   "RAIZES PRENSANTES",
+   "ESCUDO FLORIDO"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "quicksilverr",
+  "n": "QUICKSILVER",
+  "e": "ESPELHO",
+  "r": "gold",
+  "l": "liquid mercury humanoid mecha with a constantly shifting reflective body, sharp dripping blade arms, featureless silver face",
+  "a": "liquid metal blade slash",
+  "s": [
+   "LAMINA LIQUIDA",
+   "FORMA MUTAVEL",
+   "GOTA LETAL",
+   "SUPERFICIE ESPELHADA"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "boneorchestra",
+  "n": "BONE ORCHESTRA",
+  "e": "OSSO",
+  "r": "gold",
+  "l": "ivory white conductor mecha with a fan of bone pipes on its back, baton arm, opera mask face with black eye holes",
+  "a": "conducting baton strike",
+  "s": [
+   "BATUTA MORTAL",
+   "SINFONIA DE OSSOS",
+   "REQUIEM",
+   "ORQUESTRA BLINDADA"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "stratoveil",
+  "n": "STRATOVEIL",
+  "e": "NUVEM",
+  "r": "silver",
+  "l": "soft white and pale grey cloud mecha with a body of layered vapor plates, thin blue lightning inside, gentle glowing white eyes",
+  "a": "vapor palm push",
+  "s": [
+   "PALMA DE VAPOR",
+   "CAMADA ESTRATO",
+   "NEVOEIRO DENSO",
+   "MANTO DE NUVENS"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "lavabastion",
+  "n": "LAVA BASTION",
+  "e": "VULCAO",
+  "r": "gold",
+  "l": "black rock fortress mecha with lava waterfalls pouring down its shoulders, crater cannon on its back, deep red core eye",
+  "a": "crater cannon eruption",
+  "s": [
+   "CANHAO DE CRATERA",
+   "MURALHA DE LAVA",
+   "CALDEIRA",
+   "ESCUDO DE ROCHA IGNEA"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "bogtyrant",
+  "n": "BOG TYRANT",
+  "e": "PANTANO",
+  "r": "silver",
+  "l": "huge muddy green toad-shaped mecha with a wide swallowing mouth, algae-slick plating, bulging yellow eyes",
+  "a": "tongue whip swallow",
+  "s": [
+   "LINGUA CHICOTE",
+   "ENGOLIR",
+   "LAMA FERVENTE",
+   "PELE VISCOSA"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "mirageblade",
+  "n": "MIRAGE BLADE",
+  "e": "DESERTO",
+  "r": "gold",
+  "l": "sand-gold and white desert swordsman mecha with a heat-shimmer aura, curved scimitar, face wrap and glowing turquoise eyes",
+  "a": "scimitar mirage slash",
+  "s": [
+   "CIMITARRA MIRAGEM",
+   "CORTE DE MIRAGEM",
+   "CALOR ILUSORIO",
+   "VEU DE MIRAGEM"
+  ],
+  "f": "blind"
+ },
+ {
+  "i": "permafrostmk",
+  "n": "PERMAFROST MK",
+  "e": "TUNDRA",
+  "r": "gold",
+  "l": "heavy white and gunmetal arctic assault mecha with ice-drill legs, frost cannon arms, glowing pale cyan optic bar",
+  "a": "frost cannon volley",
+  "s": [
+   "CANHAO DE GEADA",
+   "BROCA POLAR",
+   "PERMAFROST",
+   "BLINDAGEM ARTICA"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "coralshiv",
+  "n": "CORAL SHIV",
+  "e": "RECIFE",
+  "r": "bronze",
+  "l": "pink and orange small agile reef mecha with sharp coral daggers, shell shoulder pads, quick bright eyes",
+  "a": "twin coral dagger jab",
+  "s": [
+   "ADAGA DE CORAL",
+   "GOLPE RAPIDO",
+   "ESPINHO VENENOSO",
+   "ARMADURA DE CONCHA"
+  ],
+  "f": "poison"
+ },
+ {
+  "i": "resinjudge",
+  "n": "RESIN JUDGE",
+  "e": "AMBAR",
+  "r": "silver",
+  "l": "amber orange translucent judge mecha with a gavel arm, fossil insects suspended in its chest, glowing golden eyes",
+  "a": "amber gavel strike",
+  "s": [
+   "MARTELO DE AMBAR",
+   "SENTENCA RESINOSA",
+   "PRISAO FOSSIL",
+   "TOGA ENDURECIDA"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "gridrunner",
+  "n": "GRIDRUNNER",
+  "e": "NEON",
+  "r": "bronze",
+  "l": "black and electric blue cyber runner mecha with glowing grid lines on its limbs, light disc on its back, bright blue visor",
+  "a": "light disc throw",
+  "s": [
+   "DISCO DE LUZ",
+   "CORRIDA NA GRADE",
+   "SOBRECARGA",
+   "PAREDE DE DADOS"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "seraphimvoid",
+  "n": "SERAPHIM VOID",
+  "e": "VAZIO",
+  "r": "gold",
+  "l": "black and gold fallen angel mecha with torn void wings leaking darkness, broken halo, gold cracks across a black faceplate",
+  "a": "void wing sweep",
+  "s": [
+   "ASA CORROMPIDA",
+   "QUEDA CELESTIAL",
+   "ABISMO SAGRADO",
+   "AUREOLA QUEBRADA"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "tempestcrown",
+  "n": "TEMPEST CROWN",
+  "e": "TEMPESTADE",
+  "r": "gold",
+  "l": "royal blue and silver storm king mecha with a lightning crown, thundercloud mantle, twin storm scepters, blazing white eyes",
+  "a": "twin scepter thunder",
+  "s": [
+   "CETRO GEMEO",
+   "COROA DE TROVAO",
+   "TEMPESTADE REAL",
+   "OLHO DO FURACAO"
+  ],
+  "f": "paralyze"
+ },
+ {
+  "i": "ironmonarch",
+  "n": "IRON MONARCH",
+  "e": "FERRO",
+  "r": "gold",
+  "l": "dark steel and crimson emperor mecha with a spiked iron crown, heavy cape of chainmail, massive greatsword, red glowing eyes",
+  "a": "greatsword overhead cleave",
+  "s": [
+   "MONTANTE DE FERRO",
+   "DECRETO DE ACO",
+   "EXECUCAO REAL",
+   "COURACA IMPERIAL"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "vireoblade",
+  "n": "VIREO BLADE",
+  "e": "JADE",
+  "r": "silver",
+  "l": "jade green and white slender swordsman mecha with a bamboo-styled blade, flowing sash, calm narrow green eyes",
+  "a": "bamboo blade draw cut",
+  "s": [
+   "CORTE DE BAMBU",
+   "LAMINA DE JADE",
+   "VENTO VERDE",
+   "POSTURA SERENA"
+  ],
+  "f": "weakening"
+ },
+ {
+  "i": "aetherloom",
+  "n": "AETHER LOOM",
+  "e": "NEBULOSA",
+  "r": "gold",
+  "l": "pink and violet weaver mecha with floating spindles of star thread, six delicate arms, veiled face with a single glowing eye",
+  "a": "star thread bind",
+  "s": [
+   "FIO ESTELAR",
+   "TEAR COSMICO",
+   "TECER DESTINO",
+   "TAPECARIA BLINDADA"
+  ],
+  "f": "trapped"
+ },
+ {
+  "i": "cindercrown",
+  "n": "CINDER CROWN",
+  "e": "CINZAS",
+  "r": "silver",
+  "l": "grey ash and dull gold ruined king mecha with a crumbling crown, ash falling constantly from its shoulders, empty burning eye sockets",
+  "a": "ash sword swing",
+  "s": [
+   "ESPADA DE CINZAS",
+   "COROA RUIDA",
+   "TEMPESTADE DE CINZAS",
+   "MANTO CINZENTO"
+  ],
+  "f": "burn"
+ },
+ {
+  "i": "magnetarfist",
+  "n": "MAGNETAR FIST",
+  "e": "MAGNETISMO",
+  "r": "gold",
+  "l": "violet and chrome powerhouse mecha with giant magnetic gauntlets pulling scrap into fists, coil-wrapped arms, magenta eye lights",
+  "a": "magnetic scrap fist",
+  "s": [
+   "PUNHO MAGNETAR",
+   "ATRACAO DE SUCATA",
+   "PULSO MAGNETICO",
+   "CAMPO POLARIZADO"
+  ],
+  "f": "drain"
+ },
+ {
+  "i": "ravenousbloom",
+  "n": "RAVENOUS BLOOM",
+  "e": "BIO",
+  "r": "gold",
+  "l": "deep red and dark green carnivorous plant mecha with a toothed flower head, thorny vine arms, glowing red pistil core",
+  "a": "toothed bloom bite",
+  "s": [
+   "MORDIDA FLORAL",
+   "ESPINHOS VORAZES",
+   "SEIVA CORROSIVA",
+   "BOTAO BLINDADO"
+  ],
+  "f": "poison"
+ }
+]
