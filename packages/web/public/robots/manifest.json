@@ -481,6 +481,406 @@
   {
    "id": "ravenousbloom",
    "name": "RAVENOUS BLOOM"
+  },
+  {
+   "id": "obsidianfang",
+   "name": "OBSIDIAN FANG"
+  },
+  {
+   "id": "aurumtitan",
+   "name": "AURUM TITAN"
+  },
+  {
+   "id": "mycelor",
+   "name": "MYCELOR"
+  },
+  {
+   "id": "tidebreaker",
+   "name": "TIDEBREAKER"
+  },
+  {
+   "id": "nimbusaint",
+   "name": "NIMBUS SAINT"
+  },
+  {
+   "id": "scrapjaw",
+   "name": "SCRAPJAW"
+  },
+  {
+   "id": "chronowraith",
+   "name": "CHRONO WRAITH"
+  },
+  {
+   "id": "basaltgore",
+   "name": "BASALT GORE"
+  },
+  {
+   "id": "seraphlux",
+   "name": "SERAPH LUX"
+  },
+  {
+   "id": "venomcoil",
+   "name": "VENOM COIL"
+  },
+  {
+   "id": "magnetarch",
+   "name": "MAGNETARCH"
+  },
+  {
+   "id": "emberkite",
+   "name": "EMBER KITE"
+  },
+  {
+   "id": "gravelord",
+   "name": "GRAVELORD"
+  },
+  {
+   "id": "silkarachne",
+   "name": "SILK ARACHNE"
+  },
+  {
+   "id": "boreaxe",
+   "name": "BOREAXE"
+  },
+  {
+   "id": "plasmoth",
+   "name": "PLASMOTH"
+  },
+  {
+   "id": "steelmonk",
+   "name": "IRON MONK"
+  },
+  {
+   "id": "nebulynx",
+   "name": "NEBULYNX"
+  },
+  {
+   "id": "rustsaurus",
+   "name": "RUSTSAURUS"
+  },
+  {
+   "id": "crystalquartz",
+   "name": "CRYSTAL QUARTZ"
+  },
+  {
+   "id": "bogmire",
+   "name": "BOGMIRE"
+  },
+  {
+   "id": "solstice",
+   "name": "SOLSTICE"
+  },
+  {
+   "id": "neonrunner",
+   "name": "NEON RUNNER"
+  },
+  {
+   "id": "cathedron",
+   "name": "CATHEDRON"
+  },
+  {
+   "id": "kelpwarden",
+   "name": "KELP WARDEN"
+  },
+  {
+   "id": "thunderbison",
+   "name": "THUNDER BISON"
+  },
+  {
+   "id": "prismblade",
+   "name": "PRISM BLADE"
+  },
+  {
+   "id": "ashenhound",
+   "name": "CINDER HOUND"
+  },
+  {
+   "id": "aetherbell",
+   "name": "AETHER BELL"
+  },
+  {
+   "id": "dreadnought",
+   "name": "DREADNOUGHT X"
+  },
+  {
+   "id": "wispkin",
+   "name": "WISPKIN"
+  },
+  {
+   "id": "obeliskar",
+   "name": "OBELISKAR"
+  },
+  {
+   "id": "sirenfall",
+   "name": "SIRENFALL"
+  },
+  {
+   "id": "boilerbrute",
+   "name": "BOILER BRUTE"
+  },
+  {
+   "id": "voidmantis",
+   "name": "VOID MANTIS"
+  },
+  {
+   "id": "harvestking",
+   "name": "HARVEST KING"
+  },
+  {
+   "id": "polarisguard",
+   "name": "POLARIS GUARD"
+  },
+  {
+   "id": "sandvizier",
+   "name": "SAND VIZIER"
+  },
+  {
+   "id": "clockthrone",
+   "name": "CLOCK THRONE"
+  },
+  {
+   "id": "fenrisbyte",
+   "name": "FENRISBYTE"
+  },
+  {
+   "id": "emberlotus",
+   "name": "EMBER LOTUS"
+  },
+  {
+   "id": "stygianox",
+   "name": "STYGIAN OX"
+  },
+  {
+   "id": "photonveil",
+   "name": "PHOTON VEIL"
+  },
+  {
+   "id": "grimquill",
+   "name": "GRIM QUILL"
+  },
+  {
+   "id": "magmaticus",
+   "name": "MAGMATICUS"
+  },
+  {
+   "id": "frostpike",
+   "name": "FROST PIKE"
+  },
+  {
+   "id": "orbitalance",
+   "name": "ORBITALANCE"
+  },
+  {
+   "id": "bramblewrath",
+   "name": "BRAMBLE WRATH"
+  },
+  {
+   "id": "cobaltronin",
+   "name": "COBALT RONIN"
+  },
+  {
+   "id": "sporequeen",
+   "name": "SPORE QUEEN"
+  },
+  {
+   "id": "quakejaw",
+   "name": "QUAKE JAW"
+  },
+  {
+   "id": "astrafox",
+   "name": "ASTRA FOX"
+  },
+  {
+   "id": "hullbreaker",
+   "name": "HULL BREAKER"
+  },
+  {
+   "id": "aurorafin",
+   "name": "AURORA FIN"
+  },
+  {
+   "id": "mirrorage",
+   "name": "MIRRORAGE"
+  },
+  {
+   "id": "carrionvex",
+   "name": "CARRION VEX"
+  },
+  {
+   "id": "titanforge",
+   "name": "TITAN FORGE"
+  },
+  {
+   "id": "glasscicada",
+   "name": "GLASS CICADA"
+  },
+  {
+   "id": "shogunplate",
+   "name": "SHOGUN PLATE"
+  },
+  {
+   "id": "dustmoth",
+   "name": "DUST MOTH"
+  },
+  {
+   "id": "hydroquake",
+   "name": "HYDROQUAKE"
+  },
+  {
+   "id": "emberfang",
+   "name": "EMBER FANG"
+  },
+  {
+   "id": "lanternghast",
+   "name": "LANTERN GHAST"
+  },
+  {
+   "id": "cobblegolem",
+   "name": "COBBLE GOLEM"
+  },
+  {
+   "id": "skyforgewing",
+   "name": "SKYFORGE WING"
+  },
+  {
+   "id": "scarabking",
+   "name": "SCARAB KING"
+  },
+  {
+   "id": "tempestcoil",
+   "name": "TEMPEST COIL"
+  },
+  {
+   "id": "marblesaint",
+   "name": "MARBLE SAINT"
+  },
+  {
+   "id": "gearwidow",
+   "name": "GEAR WIDOW"
+  },
+  {
+   "id": "radiantcalf",
+   "name": "RADIANT CALF"
+  },
+  {
+   "id": "acidgrin",
+   "name": "ACID GRIN"
+  },
+  {
+   "id": "bastionhold",
+   "name": "BASTION HOLD"
+  },
+  {
+   "id": "meteorachi",
+   "name": "METEORACHI"
+  },
+  {
+   "id": "silentquill",
+   "name": "SILENT QUILL"
+  },
+  {
+   "id": "boltbunny",
+   "name": "BOLT BUNNY"
+  },
+  {
+   "id": "furnaceoni",
+   "name": "FURNACE ONI"
+  },
+  {
+   "id": "glacierarch",
+   "name": "GLACIER ARCH"
+  },
+  {
+   "id": "swiftgale",
+   "name": "SWIFT GALE"
+  },
+  {
+   "id": "darkharbor",
+   "name": "DARK HARBOR"
+  },
+  {
+   "id": "solderjack",
+   "name": "SOLDER JACK"
+  },
+  {
+   "id": "valkyrune",
+   "name": "VALKYRUNE"
+  },
+  {
+   "id": "mudlarker",
+   "name": "MUDLARKER"
+  },
+  {
+   "id": "crimsonaria",
+   "name": "CRIMSON ARIA"
+  },
+  {
+   "id": "stonewhisker",
+   "name": "STONE WHISKER"
+  },
+  {
+   "id": "skyreef",
+   "name": "SKY REEF"
+  },
+  {
+   "id": "ironpilgrim",
+   "name": "IRON PILGRIM"
+  },
+  {
+   "id": "nightjarx",
+   "name": "NIGHTJAR X"
+  },
+  {
+   "id": "pyreherald",
+   "name": "PYRE HERALD"
+  },
+  {
+   "id": "dunemaw",
+   "name": "DUNE MAW"
+  },
+  {
+   "id": "circuitmonk",
+   "name": "CIRCUIT MONK"
+  },
+  {
+   "id": "frostmourn",
+   "name": "FROST MOURN"
+  },
+  {
+   "id": "brasslion",
+   "name": "BRASS LION"
+  },
+  {
+   "id": "tarpitfiend",
+   "name": "TARPIT FIEND"
+  },
+  {
+   "id": "skyloomweaver",
+   "name": "SKYLOOM WEAVER"
+  },
+  {
+   "id": "boulderox",
+   "name": "BOULDER OX"
+  },
+  {
+   "id": "halcyonix",
+   "name": "HALCYONIX"
+  },
+  {
+   "id": "gravebyte",
+   "name": "GRAVEBYTE"
+  },
+  {
+   "id": "emberveilla",
+   "name": "EMBER VEILLA"
+  },
+  {
+   "id": "titanomaw",
+   "name": "TITANOMAW"
+  },
+  {
+   "id": "zenithara",
+   "name": "ZENITHARA"
   }
  ],
  "arenas": [

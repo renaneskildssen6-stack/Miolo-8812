@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Icon, Panel, PixelButton, RobotSprite, StatBar } from "../components/pixel";
-import { TournamentMap } from "../components/tourmap";
-import { fightReward, grantXP, robotMaxXP, type RobotSave } from "../game/engine";
+import { Icon, Panel, PixelButton, RobotSprite, StatBar } from "@/components/pixel";
+import { TournamentMap } from "@/components/tourmap";
+import { fightReward, grantXP, robotMaxXP, type RobotSave } from "@/game/engine";
 import {
   addGold,
   addItem,
+  applyPetRewards,
   addPlayerXP,
   incBattlesWon,
   markTournamentWon,
@@ -13,11 +14,11 @@ import {
   unlockRobot,
   updateRobots,
   useGame,
-} from "../game/save";
-import { faceUrl, ROBOT_MAP } from "../game/robots";
-import { type TournamentDef } from "../game/tournaments";
-import { BattleScreen } from "./battle";
-import { TopBar } from "./roster";
+} from "@/game/save";
+import { faceUrl, ROBOT_MAP } from "@/game/robots";
+import { type TournamentDef } from "@/game/tournaments";
+import { BattleScreen } from "@/screens/battle";
+import { TopBar } from "@/screens/roster";
 
 type Mode = "list" | "brief" | "fight" | "report";
 
@@ -78,12 +79,14 @@ export function TournamentsScreen({ onBack }: { onBack: () => void }) {
   function finishFight(result: "win" | "lose") {
     if (!tour) return;
     const enemies = enemyTeamFor(tour, fightIndex);
-    const earned = enemies.reduce(
-      (acc, e) => {
-        const r = fightReward(ROBOT_MAP[e.id].ratios, e.level);
-        return { gold: acc.gold + r.gold, xp: acc.xp + r.xp };
-      },
-      { gold: 0, xp: 0 },
+    const earned = applyPetRewards(
+      enemies.reduce(
+        (acc, e) => {
+          const r = fightReward(ROBOT_MAP[e.id].ratios, e.level);
+          return { gold: acc.gold + r.gold, xp: acc.xp + r.xp };
+        },
+        { gold: 0, xp: 0 },
+      ),
     );
 
     if (result === "lose") {
@@ -144,6 +147,7 @@ export function TournamentsScreen({ onBack }: { onBack: () => void }) {
       <BattleScreen
         key={`${tour.id}-${fightIndex}`}
         arena={tour.arena}
+        round={fightIndex}
         playerTeam={team}
         enemyTeam={enemyTeamFor(tour, fightIndex)}
         items={g.items}

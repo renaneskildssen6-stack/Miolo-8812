@@ -12,6 +12,10 @@ export interface RobotSave {
   level: number;
   xp: number;
   trained: TrainedStats;
+  /** 4 habilidades escolhidas para a partida. */
+  loadout?: string[];
+  /** nivel do gadget equipado (0 = sem gadget). */
+  gadgetLevel?: number;
 }
 
 export interface FullStats {

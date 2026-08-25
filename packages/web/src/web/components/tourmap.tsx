@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Icon, PixelButton } from "./pixel";
-import { faceUrl, ROBOT_MAP } from "../game/robots";
-import { MAP_HEIGHT, MAP_WIDTH, TOURNAMENTS, type TournamentDef } from "../game/tournaments";
+import { Icon, PixelButton } from "@/components/pixel";
+import { faceUrl, ROBOT_MAP } from "@/game/robots";
+import { MAP_HEIGHT, MAP_WIDTH, TOURNAMENTS, type TournamentDef } from "@/game/tournaments";
 
 const NODE = 96;
 
@@ -363,8 +363,13 @@ function TournamentCard({
   return (
     <div
       style={{
-        borderTop: "2px solid var(--mk-accent)",
-        background: "rgba(4,9,18,0.97)",
+        borderTop: "2px solid var(--mk-accent2)",
+        boxShadow: "0 -8px 0 rgba(53,226,240,0.18), 0 -22px 40px rgba(0,0,0,0.7)",
+        backgroundImage:
+          "linear-gradient(rgba(4,9,18,0.72), rgba(4,9,18,0.93)), url(/ui/bg_tour_modal.png)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        imageRendering: "pixelated",
         padding: 0,
         flexShrink: 0,
       }}

@@ -254,7 +254,7 @@ const CORE_TOURNAMENTS: TournamentDef[] = [
 export const TOURNAMENTS: TournamentDef[] = [...CORE_TOURNAMENTS, ...EXTRA_TOURNAMENTS];
 
 export const MAP_WIDTH = 3600;
-export const MAP_HEIGHT = 2600;
+export const MAP_HEIGHT = 5200;
 
 export const TOURNAMENT_MAP: Record<string, TournamentDef> = Object.fromEntries(
   TOURNAMENTS.map((t) => [t.id, t]),

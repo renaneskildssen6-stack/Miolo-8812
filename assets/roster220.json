@@ -1,0 +1,902 @@
+[
+ {
+  "i": "obsidianfang",
+  "n": "OBSIDIAN FANG",
+  "e": "OBSIDIANA",
+  "r": "silver",
+  "l": "jet-black volcanic glass mecha with razor-sharp obsidian shards jutting from its shoulders, molten red cracks glowing between armor plates, fanged faceplate",
+  "a": "obsidian claw rake",
+  "f": "burn"
+ },
+ {
+  "i": "aurumtitan",
+  "n": "AURUM TITAN",
+  "e": "OURO",
+  "r": "gold",
+  "l": "massive polished gold plated titan mecha with baroque engravings, jeweled chest core, enormous ornate gauntlets, glowing white eyes",
+  "a": "gilded hammer smash",
+  "f": "weakening"
+ },
+ {
+  "i": "mycelor",
+  "n": "MYCELOR",
+  "e": "FUNGO",
+  "r": "bronze",
+  "l": "hunched mossy green mecha covered in bioluminescent mushroom caps, spore vents on its back, rusted damp plating, two glowing spore-lantern eyes",
+  "a": "spore burst punch",
+  "f": "poison"
+ },
+ {
+  "i": "tidebreaker",
+  "n": "TIDEBREAKER",
+  "e": "MARE",
+  "r": "silver",
+  "l": "deep blue and white naval mecha with an anchor-shaped mace, wave-crest shoulder fins, water jets on its legs, cyan visor",
+  "a": "crashing wave mace swing",
+  "f": "trapped"
+ },
+ {
+  "i": "nimbusaint",
+  "n": "NIMBUS SAINT",
+  "e": "NUVEM",
+  "r": "gold",
+  "l": "pearl white cloud-armored mecha with fluffy vapor billowing from its joints, halo ring above its head, feathered vapor cape",
+  "a": "cloud pillar uppercut",
+  "f": "hp_regen"
+ },
+ {
+  "i": "scrapjaw",
+  "n": "SCRAPJAW",
+  "e": "SUCATA",
+  "r": "bronze",
+  "l": "junkyard mecha welded from mismatched rusty car parts, one headlight eye, a chainsaw arm, exhaust pipes on its back",
+  "a": "chainsaw arm rip",
+  "f": "weakening"
+ },
+ {
+  "i": "chronowraith",
+  "n": "CHRONO WRAITH",
+  "e": "TEMPO",
+  "r": "gold",
+  "l": "translucent violet mecha with clock gears floating around its torso, hourglass core, tattered temporal cloak, hollow clock-face head",
+  "a": "time-stutter phantom strike",
+  "f": "paralyze"
+ },
+ {
+  "i": "basaltgore",
+  "n": "BASALT GORE",
+  "e": "BASALTO",
+  "r": "bronze",
+  "l": "hexagonal black basalt column armor mecha, blocky angular limbs, orange lava seams, brutalist blank faceplate",
+  "a": "basalt column slam",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "seraphlux",
+  "n": "SERAPH LUX",
+  "e": "SANTO",
+  "r": "gold",
+  "l": "radiant white and gold winged mecha with six light wings, a floating halo of rings, a lance of pure light, serene masked face",
+  "a": "holy lance thrust",
+  "f": "blind"
+ },
+ {
+  "i": "venomcoil",
+  "n": "VENOM COIL",
+  "e": "VENENO",
+  "r": "silver",
+  "l": "sleek purple serpentine mecha with a segmented coiling tail, dripping fang mandibles, toxic green vents, slitted yellow optics",
+  "a": "venom fang lunge",
+  "f": "poison"
+ },
+ {
+  "i": "magnetarch",
+  "n": "MAGNETARCH",
+  "e": "MAGNETISMO",
+  "r": "silver",
+  "l": "dark steel mecha with two enormous horseshoe magnet arms, blue arcing field lines between them, floating metal debris orbiting its body",
+  "a": "magnetic crush field",
+  "f": "trapped"
+ },
+ {
+  "i": "emberkite",
+  "n": "EMBER KITE",
+  "e": "BRASA",
+  "r": "bronze",
+  "l": "slim orange and charcoal flying mecha with kite-like ember wings, trailing sparks, narrow beak helm, glowing coal chest",
+  "a": "ember dive slash",
+  "f": "burn"
+ },
+ {
+  "i": "gravelord",
+  "n": "GRAVELORD",
+  "e": "GRAVIDADE",
+  "r": "gold",
+  "l": "hulking dark navy mecha with a swirling black singularity sphere in its open chest cavity, heavy gauntlets, rings of compressed space at its wrists",
+  "a": "gravity well crush",
+  "f": "paralyze"
+ },
+ {
+  "i": "silkarachne",
+  "n": "SILK ARACHNE",
+  "e": "SEDA",
+  "r": "silver",
+  "l": "elegant white and lavender spider mecha with four extra thin blade legs from its back, silk spinnerets on its wrists, eight small ruby optics",
+  "a": "silk garrote slice",
+  "f": "trapped"
+ },
+ {
+  "i": "boreaxe",
+  "n": "BOREAXE",
+  "e": "VENTANIA",
+  "r": "bronze",
+  "l": "pale cyan nordic mecha with a huge twin-bladed wind axe, fur-like vapor mantle, frost-bitten helm with horns",
+  "a": "howling wind axe cleave",
+  "f": "weakening"
+ },
+ {
+  "i": "plasmoth",
+  "n": "PLASMOTH",
+  "e": "PLASMA",
+  "r": "silver",
+  "l": "pink and violet moth mecha with translucent glowing plasma wings, fuzzy fiber-optic collar, giant compound eyes, antenna sensors",
+  "a": "plasma dust wing beat",
+  "f": "blind"
+ },
+ {
+  "i": "steelmonk",
+  "n": "IRON MONK",
+  "e": "DISCIPLINA",
+  "r": "bronze",
+  "l": "bald bronze monk mecha in tattered saffron robes over steel plating, prayer bead chain around its neck, calm sculpted face, bare mechanical fists",
+  "a": "focused palm strike",
+  "f": "adrenalin"
+ },
+ {
+  "i": "nebulynx",
+  "n": "NEBULYNX",
+  "e": "NEBULOSA",
+  "r": "gold",
+  "l": "sleek feline mecha with a body of swirling purple and teal nebula gas contained in glass panels, star-fleck fur pattern, glowing white eyes",
+  "a": "starfall claw combo",
+  "f": "drain"
+ },
+ {
+  "i": "rustsaurus",
+  "n": "RUSTSAURUS",
+  "e": "FERRUGEM",
+  "r": "bronze",
+  "l": "heavy quadrupedal dinosaur-shaped mecha of oxidized orange metal, riveted plates flaking off, steam vents, tiny red eye slits",
+  "a": "rusted tail sweep",
+  "f": "poison"
+ },
+ {
+  "i": "crystalquartz",
+  "n": "CRYSTAL QUARTZ",
+  "e": "CRISTAL",
+  "r": "silver",
+  "l": "humanoid mecha made of clear pink quartz prisms, refracting rainbow light, sharp crystal shoulder spikes, faceted geometric head",
+  "a": "prism shard barrage",
+  "f": "blind"
+ },
+ {
+  "i": "bogmire",
+  "n": "BOGMIRE",
+  "e": "PANTANO",
+  "r": "bronze",
+  "l": "lumbering swamp mecha dripping with mud and algae, reeds growing from its shoulders, one broken glowing lantern eye, webbed clawed hands",
+  "a": "mud grasp slam",
+  "f": "trapped"
+ },
+ {
+  "i": "solstice",
+  "n": "SOLSTICE",
+  "e": "ESTACAO",
+  "r": "gold",
+  "l": "split-design mecha, left half blazing summer gold, right half frozen winter blue, dual-season crest, staff of balanced light and frost",
+  "a": "dual season staff sweep",
+  "f": "burn"
+ },
+ {
+  "i": "neonrunner",
+  "n": "NEON RUNNER",
+  "e": "NEON",
+  "r": "silver",
+  "l": "slim black racer mecha covered in bright neon pink and cyan light strips, aerodynamic visor helm, wheel-heeled boots, motion blur trails",
+  "a": "neon dash elbow",
+  "f": "adrenalin"
+ },
+ {
+  "i": "cathedron",
+  "n": "CATHEDRON",
+  "e": "CATEDRAL",
+  "r": "gold",
+  "l": "towering gothic cathedral mecha with flying buttress shoulders, stained-glass chest window glowing, bell tower head, censer flail",
+  "a": "consecrated bell flail",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "kelpwarden",
+  "n": "KELP WARDEN",
+  "e": "ALGA",
+  "r": "bronze",
+  "l": "green-brown seaweed-draped mecha with barnacle-crusted plating, kelp whip arms, a helm shaped like an angler fish skull",
+  "a": "kelp whip lash",
+  "f": "trapped"
+ },
+ {
+  "i": "thunderbison",
+  "n": "THUNDER BISON",
+  "e": "TROVAO",
+  "r": "silver",
+  "l": "massive quadruped bison mecha of storm-grey steel with lightning arcing between its horns, sparking hooves, thunderhead mane",
+  "a": "charging horn thunder ram",
+  "f": "paralyze"
+ },
+ {
+  "i": "prismblade",
+  "n": "PRISM BLADE",
+  "e": "ARCO-IRIS",
+  "r": "gold",
+  "l": "sleek white duelist mecha wielding a blade that shifts through rainbow colors, prismatic pauldrons, mirrored visor reflecting spectra",
+  "a": "spectrum blade flurry",
+  "f": "blind"
+ },
+ {
+  "i": "ashenhound",
+  "n": "CINDER HOUND",
+  "e": "CINZAS",
+  "r": "bronze",
+  "l": "wolf-shaped mecha of charcoal grey plating with glowing ember cracks, ash smoke pouring from its jaws, tail of flame",
+  "a": "burning fang pounce",
+  "f": "burn"
+ },
+ {
+  "i": "aetherbell",
+  "n": "AETHER BELL",
+  "e": "ETER",
+  "r": "silver",
+  "l": "floating bell-shaped mecha of pale bronze with no legs, ethereal ribbons hanging beneath, a single glowing rune eye, resonating rings around it",
+  "a": "resonance shockwave",
+  "f": "weakening"
+ },
+ {
+  "i": "dreadnought",
+  "n": "DREADNOUGHT X",
+  "e": "GUERRA",
+  "r": "gold",
+  "l": "gigantic battleship mecha bristling with cannon turrets on shoulders and back, riveted grey naval armor, bridge-tower head, anchor chains",
+  "a": "broadside cannon volley",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "wispkin",
+  "n": "WISPKIN",
+  "e": "ESPIRITO",
+  "r": "bronze",
+  "l": "tiny cute round mecha of soft blue light with stubby arms, a floating flame wisp for a head, trailing ghost tail instead of legs",
+  "a": "wisp flicker tackle",
+  "f": "drain"
+ },
+ {
+  "i": "obeliskar",
+  "n": "OBELISKAR",
+  "e": "RUNA",
+  "r": "silver",
+  "l": "tall narrow monolith mecha covered in glowing gold runes on black stone, floating rune slabs orbiting its shoulders, no visible face",
+  "a": "rune slab hammer",
+  "f": "paralyze"
+ },
+ {
+  "i": "sirenfall",
+  "n": "SIRENFALL",
+  "e": "CANTO",
+  "r": "gold",
+  "l": "graceful aquamarine mecha with a resonating throat chamber, long flowing hair of glass fibers, sound-wave ripples around it, serene mask",
+  "a": "sonic aria burst",
+  "f": "blind"
+ },
+ {
+  "i": "boilerbrute",
+  "n": "BOILER BRUTE",
+  "e": "VAPOR",
+  "r": "bronze",
+  "l": "stout steam-powered mecha with a riveted boiler belly glowing orange, brass pressure gauges, giant piston fists, top-hat smokestack head",
+  "a": "piston pressure punch",
+  "f": "burn"
+ },
+ {
+  "i": "voidmantis",
+  "n": "VOID MANTIS",
+  "e": "VAZIO",
+  "r": "gold",
+  "l": "predatory black mantis mecha with void-purple scythe forearms that erase light, hollow star-filled eyes, thin insectile frame",
+  "a": "void scythe bisect",
+  "f": "drain"
+ },
+ {
+  "i": "harvestking",
+  "n": "HARVEST KING",
+  "e": "COLHEITA",
+  "r": "silver",
+  "l": "autumn-gold agricultural mecha with a huge scythe, wheat sheaf mantle, pumpkin lantern chest core, straw-hat helm",
+  "a": "reaping scythe arc",
+  "f": "hp_regen"
+ },
+ {
+  "i": "polarisguard",
+  "n": "POLARIS GUARD",
+  "e": "POLAR",
+  "r": "silver",
+  "l": "white and ice-blue sentinel mecha with a star compass emblem, aurora ribbon cape, tower shield of frozen glass, calm blue visor",
+  "a": "north star shield bash",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "sandvizier",
+  "n": "SAND VIZIER",
+  "e": "DESERTO",
+  "r": "gold",
+  "l": "regal desert mecha in flowing sand-gold silks over dark bronze plating, curved scimitar, turban helm with a glowing scarab gem",
+  "a": "scimitar sand cyclone",
+  "f": "blind"
+ },
+ {
+  "i": "clockthrone",
+  "n": "CLOCK THRONE",
+  "e": "ENGRENAGEM",
+  "r": "gold",
+  "l": "seated throne-shaped mecha built of interlocking brass gears, a crowned automaton torso rising from it, pendulum arms, clockface chest",
+  "a": "pendulum sweep crush",
+  "f": "paralyze"
+ },
+ {
+  "i": "fenrisbyte",
+  "n": "FENRISBYTE",
+  "e": "LOBO",
+  "r": "silver",
+  "l": "cybernetic wolf mecha of gunmetal grey with glowing blue data-stream fur, cracked digital jaw, holographic tail wisps",
+  "a": "data fang barrage",
+  "f": "weakening"
+ },
+ {
+  "i": "emberlotus",
+  "n": "EMBER LOTUS",
+  "e": "FLOR",
+  "r": "silver",
+  "l": "elegant red-and-gold mecha with lotus petal armor that opens to reveal a fire core, geisha-like mask, twin folding fan blades",
+  "a": "blooming fan slash",
+  "f": "burn"
+ },
+ {
+  "i": "stygianox",
+  "n": "STYGIAN OX",
+  "e": "ABISMO",
+  "r": "bronze",
+  "l": "immense black bull mecha with chains wrapped around its horns, glowing red abyssal eyes, cracked stone hide, steam from its nostrils",
+  "a": "chained horn charge",
+  "f": "trapped"
+ },
+ {
+  "i": "photonveil",
+  "n": "PHOTON VEIL",
+  "e": "FOTON",
+  "r": "gold",
+  "l": "slender mecha wrapped in shifting sheets of hard light, semi-transparent body, halo of light shards, featureless glowing face",
+  "a": "light veil cleave",
+  "f": "blind"
+ },
+ {
+  "i": "grimquill",
+  "n": "GRIM QUILL",
+  "e": "PENA",
+  "r": "silver",
+  "l": "raven-headed mecha in charcoal feather-plate armor, quill dagger in hand, ink dripping from its wings, single glowing amber eye",
+  "a": "ink quill stab",
+  "f": "poison"
+ },
+ {
+  "i": "magmaticus",
+  "n": "MAGMATICUS",
+  "e": "MAGMA",
+  "r": "gold",
+  "l": "colossal mecha of cooled black rock with rivers of bright orange magma flowing through its body, volcanic crater shoulders, molten fists",
+  "a": "magma eruption fist",
+  "f": "burn"
+ },
+ {
+  "i": "frostpike",
+  "n": "FROST PIKE",
+  "e": "GEADA",
+  "r": "bronze",
+  "l": "lean pale-blue soldier mecha with a long icicle pike, frost-caked armor, breath vapor, narrow slit visor",
+  "a": "icicle pike impale",
+  "f": "paralyze"
+ },
+ {
+  "i": "orbitalance",
+  "n": "ORBITALANCE",
+  "e": "ORBITA",
+  "r": "silver",
+  "l": "white space-station mecha with rotating ring segments around its waist, solar panel wings, satellite dish shoulder, antenna crown",
+  "a": "orbital ring cutter",
+  "f": "drain"
+ },
+ {
+  "i": "bramblewrath",
+  "n": "BRAMBLE WRATH",
+  "e": "ESPINHO",
+  "r": "bronze",
+  "l": "gnarled wooden mecha overgrown with thorny brambles and red berries, bark plating, whipping vine arms, hollow knothole eyes",
+  "a": "thorn vine whip",
+  "f": "poison"
+ },
+ {
+  "i": "cobaltronin",
+  "n": "COBALT RONIN",
+  "e": "AÇO AZUL",
+  "r": "gold",
+  "l": "masterless samurai mecha in deep cobalt blue lacquered plate, straw rain-cape over shoulders, twin katanas, oni mask faceplate",
+  "a": "twin katana crossing cut",
+  "f": "adrenalin"
+ },
+ {
+  "i": "sporequeen",
+  "n": "SPORE QUEEN",
+  "e": "ESPORO",
+  "r": "gold",
+  "l": "regal fungal mecha with a wide mushroom-cap crown, trailing spore-veil gown, chitin plating, many small glowing eyes under the cap",
+  "a": "spore cloud embrace",
+  "f": "poison"
+ },
+ {
+  "i": "quakejaw",
+  "n": "QUAKE JAW",
+  "e": "TERREMOTO",
+  "r": "silver",
+  "l": "heavy earthmover mecha with a drill jaw, tracked legs, seismic hammer arms, cracked concrete plating, dust clouds around its feet",
+  "a": "seismic hammer drop",
+  "f": "paralyze"
+ },
+ {
+  "i": "astrafox",
+  "n": "ASTRA FOX",
+  "e": "ESTRELA",
+  "r": "silver",
+  "l": "nimble nine-tailed fox mecha of white and star-gold, each tail tipped with a glowing star, mischievous glowing eyes, constellation markings",
+  "a": "nine star tail strike",
+  "f": "adrenalin"
+ },
+ {
+  "i": "hullbreaker",
+  "n": "HULL BREAKER",
+  "e": "TITANIO",
+  "r": "bronze",
+  "l": "industrial salvage mecha with an oversized hydraulic claw and cutting torch arm, scuffed yellow-black hazard paint, welding mask head",
+  "a": "hydraulic claw crush",
+  "f": "weakening"
+ },
+ {
+  "i": "aurorafin",
+  "n": "AURORA FIN",
+  "e": "AURORA",
+  "r": "gold",
+  "l": "graceful whale-like flying mecha with aurora-colored translucent fins, glowing belly runes, smooth white ceramic body, gentle eyes",
+  "a": "aurora fin sweep",
+  "f": "hp_regen"
+ },
+ {
+  "i": "mirrorage",
+  "n": "MIRRORAGE",
+  "e": "ESPELHO",
+  "r": "gold",
+  "l": "humanoid mecha with fully mirrored chrome skin reflecting its surroundings, shard-like edges, no facial features, duplicating afterimages",
+  "a": "mirror double slash",
+  "f": "blind"
+ },
+ {
+  "i": "carrionvex",
+  "n": "CARRION VEX",
+  "e": "PRAGA",
+  "r": "silver",
+  "l": "vulture mecha in tarnished bronze with tattered leather wings, plague-doctor beak helm, hooked talons, sickly green glow in its chest",
+  "a": "plague talon dive",
+  "f": "poison"
+ },
+ {
+  "i": "titanforge",
+  "n": "TITAN FORGE",
+  "e": "FORJA",
+  "r": "gold",
+  "l": "blacksmith titan mecha with an anvil chest, one arm a giant glowing hammer, forge fire burning inside its ribcage, soot-stained iron plating",
+  "a": "white-hot hammer strike",
+  "f": "burn"
+ },
+ {
+  "i": "glasscicada",
+  "n": "GLASS CICADA",
+  "e": "VIDRO",
+  "r": "bronze",
+  "l": "cicada mecha with transparent glass wings and a translucent green shell, visible glowing circuitry inside, faceted bulging eyes",
+  "a": "glass wing shear",
+  "f": "blind"
+ },
+ {
+  "i": "shogunplate",
+  "n": "SHOGUN PLATE",
+  "e": "SAMURAI",
+  "r": "gold",
+  "l": "imposing warlord mecha in layered crimson and black lacquer armor, enormous horned kabuto helm, war fan and naginata, banner poles on its back",
+  "a": "naginata sweeping arc",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "dustmoth",
+  "n": "DUST MOTH",
+  "e": "POEIRA",
+  "r": "bronze",
+  "l": "grey-brown moth mecha caked in fine dust, tattered powdery wings, dim yellow eyes, ragged fur collar",
+  "a": "dust cloud flutter",
+  "f": "blind"
+ },
+ {
+  "i": "hydroquake",
+  "n": "HYDROQUAKE",
+  "e": "TSUNAMI",
+  "r": "silver",
+  "l": "broad-shouldered blue mecha with churning water contained in glass chest tanks, wave-shaped pauldrons, jets on the forearms",
+  "a": "tsunami palm blast",
+  "f": "trapped"
+ },
+ {
+  "i": "emberfang",
+  "n": "EMBER FANG",
+  "e": "CHAMA",
+  "r": "bronze",
+  "l": "small agile red mecha with saber-tooth fangs on its helm, flame-jet claws, ember trail from its heels, fierce orange eyes",
+  "a": "flame saber pounce",
+  "f": "burn"
+ },
+ {
+  "i": "lanternghast",
+  "n": "LANTERN GHAST",
+  "e": "ALMA",
+  "r": "silver",
+  "l": "gaunt tall mecha holding a soul lantern, ragged spectral shroud, chains hanging from its arms, hollow blue flame eyes",
+  "a": "soul lantern swing",
+  "f": "drain"
+ },
+ {
+  "i": "cobblegolem",
+  "n": "COBBLE GOLEM",
+  "e": "PEDRA",
+  "r": "bronze",
+  "l": "blocky mecha built of mortared cobblestones with moss in the cracks, wide flat feet, glowing green sigil on its forehead",
+  "a": "cobble fist pound",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "skyforgewing",
+  "n": "SKYFORGE WING",
+  "e": "CEU",
+  "r": "gold",
+  "l": "aerial knight mecha with jet-turbine wings, sky-blue and silver plating, contrail streamers, lance mounted on the forearm, eagle-crest helm",
+  "a": "sky lance dive",
+  "f": "adrenalin"
+ },
+ {
+  "i": "scarabking",
+  "n": "SCARAB KING",
+  "e": "BESOURO",
+  "r": "gold",
+  "l": "royal scarab mecha in iridescent blue-green chitin plating with gold trim, a sun disc held between its horns, jeweled elytra wings",
+  "a": "solar horn thrust",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "tempestcoil",
+  "n": "TEMPEST COIL",
+  "e": "TEMPESTADE",
+  "r": "silver",
+  "l": "storm mecha with spiraling wind coils for arms, dark cloud shoulders crackling with lightning, rain streaming off its frame",
+  "a": "cyclone coil lash",
+  "f": "paralyze"
+ },
+ {
+  "i": "marblesaint",
+  "n": "MARBLE SAINT",
+  "e": "MARMORE",
+  "r": "silver",
+  "l": "classical statue mecha of white marble with gold seams repairing its cracks, laurel crown, serene sculpted face, flowing stone toga",
+  "a": "marble fist judgment",
+  "f": "hp_regen"
+ },
+ {
+  "i": "gearwidow",
+  "n": "GEAR WIDOW",
+  "e": "RELOJOARIA",
+  "r": "silver",
+  "l": "spider-shaped clockwork mecha of dark brass, eight jointed legs of gears and springs, ticking abdomen, ruby cluster eyes",
+  "a": "clockwork leg impale",
+  "f": "trapped"
+ },
+ {
+  "i": "radiantcalf",
+  "n": "RADIANT CALF",
+  "e": "SOL",
+  "r": "bronze",
+  "l": "small sturdy golden calf mecha with a sun disc between its horns, warm glowing hide plates, gentle round eyes, stubby strong legs",
+  "a": "sun disc headbutt",
+  "f": "hp_regen"
+ },
+ {
+  "i": "acidgrin",
+  "n": "ACID GRIN",
+  "e": "ACIDO",
+  "r": "silver",
+  "l": "unsettling lanky mecha with a permanent wide grin faceplate, dripping green acid from its knuckles, corroded pitted plating",
+  "a": "acid knuckle spray",
+  "f": "poison"
+ },
+ {
+  "i": "bastionhold",
+  "n": "BASTION HOLD",
+  "e": "FORTALEZA",
+  "r": "gold",
+  "l": "fortress mecha with castle wall shoulders, portcullis chest, tower shield arms, battlement crown, banners hanging from its arms",
+  "a": "portcullis slam",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "meteorachi",
+  "n": "METEORACHI",
+  "e": "METEORO",
+  "r": "gold",
+  "l": "burning meteor-core mecha with a cracked rocky shell over blazing white-hot interior, trailing fire, comet-tail cape, glowing crater eye",
+  "a": "meteor impact drop",
+  "f": "burn"
+ },
+ {
+  "i": "silentquill",
+  "n": "SILENT QUILL",
+  "e": "SILENCIO",
+  "r": "silver",
+  "l": "monastic scribe mecha in muted grey robes with a sealed mouth plate, floating parchment scrolls, calligraphy brush spear, ink-stained hands",
+  "a": "brush spear sweep",
+  "f": "weakening"
+ },
+ {
+  "i": "boltbunny",
+  "n": "BOLT BUNNY",
+  "e": "FAISCA",
+  "r": "bronze",
+  "l": "cute small rabbit mecha of white and yellow with lightning-bolt ears, oversized spring legs, round cheerful screen face",
+  "a": "spark hop kick",
+  "f": "adrenalin"
+ },
+ {
+  "i": "furnaceoni",
+  "n": "FURNACE ONI",
+  "e": "INFERNO",
+  "r": "gold",
+  "l": "demonic oni mecha with a roaring furnace mouth in its belly, twin iron horns, chained kanabo club, red-hot iron skin",
+  "a": "kanabo furnace smash",
+  "f": "burn"
+ },
+ {
+  "i": "glacierarch",
+  "n": "GLACIER ARCH",
+  "e": "GLACIAL",
+  "r": "gold",
+  "l": "colossal walking glacier mecha with translucent blue ice slabs as armor, frozen ancient tools embedded in its body, cold mist rolling off",
+  "a": "glacier calve slam",
+  "f": "paralyze"
+ },
+ {
+  "i": "swiftgale",
+  "n": "SWIFT GALE",
+  "e": "BRISA",
+  "r": "bronze",
+  "l": "lean green messenger mecha with winged ankles, a light rapier, streamlined helm with a feather crest, scarf trailing in the wind",
+  "a": "gale rapier flurry",
+  "f": "adrenalin"
+ },
+ {
+  "i": "darkharbor",
+  "n": "DARK HARBOR",
+  "e": "BREU",
+  "r": "silver",
+  "l": "lighthouse mecha with a dead black lantern head that flickers, barnacle-crusted stone body, chains and rusted anchors, ominous fog",
+  "a": "anchor chain swing",
+  "f": "blind"
+ },
+ {
+  "i": "solderjack",
+  "n": "SOLDER JACK",
+  "e": "SOLDA",
+  "r": "bronze",
+  "l": "wiry technician mecha with a soldering-iron finger, tool belt of spare parts, cracked goggles over a screen face, patchwork panels",
+  "a": "solder iron jab",
+  "f": "burn"
+ },
+ {
+  "i": "valkyrune",
+  "n": "VALKYRUNE",
+  "e": "VALQUIRIA",
+  "r": "gold",
+  "l": "winged warrior maiden mecha in white and gold plate with rune-etched feathers, spear of lightning, braided cable hair, glowing visor",
+  "a": "rune spear javelin",
+  "f": "paralyze"
+ },
+ {
+  "i": "mudlarker",
+  "n": "MUDLARKER",
+  "e": "LODO",
+  "r": "bronze",
+  "l": "small scavenger mecha caked in river mud, mismatched salvaged limbs, a net and hook, dim single lamp eye",
+  "a": "hook and net snag",
+  "f": "trapped"
+ },
+ {
+  "i": "crimsonaria",
+  "n": "CRIMSON ARIA",
+  "e": "SANGUE",
+  "r": "gold",
+  "l": "operatic crimson mecha in a flowing blood-red gown of metal ribbons, conductor baton rapier, porcelain mask, red crystal core",
+  "a": "crimson baton thrust",
+  "f": "drain"
+ },
+ {
+  "i": "stonewhisker",
+  "n": "STONE WHISKER",
+  "e": "GRANITO",
+  "r": "bronze",
+  "l": "cat-shaped granite mecha with chipped stone whiskers, moss on its back, heavy paws, glowing amber crack eyes",
+  "a": "granite paw swipe",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "skyreef",
+  "n": "SKY REEF",
+  "e": "CORAL",
+  "r": "silver",
+  "l": "floating coral-reef mecha with pastel coral growths on white plating, tiny robotic fish orbiting it, anemone shoulder tufts",
+  "a": "coral spine volley",
+  "f": "poison"
+ },
+ {
+  "i": "ironpilgrim",
+  "n": "IRON PILGRIM",
+  "e": "PEREGRINO",
+  "r": "silver",
+  "l": "weathered traveler mecha with a heavy pack of relics, walking staff, dust-worn cloak over pitted iron plate, tired glowing eyes",
+  "a": "pilgrim staff strike",
+  "f": "hp_regen"
+ },
+ {
+  "i": "nightjarx",
+  "n": "NIGHTJAR X",
+  "e": "NOITE",
+  "r": "silver",
+  "l": "stealth bird mecha in matte midnight plating with silent feather-blades, star-speckled wings, narrow crescent visor",
+  "a": "silent feather slash",
+  "f": "blind"
+ },
+ {
+  "i": "pyreherald",
+  "n": "PYRE HERALD",
+  "e": "PIRA",
+  "r": "gold",
+  "l": "tall herald mecha holding a burning brazier standard, robes of woven flame, crowned skull faceplate, ember motes rising around it",
+  "a": "brazier standard sweep",
+  "f": "burn"
+ },
+ {
+  "i": "dunemaw",
+  "n": "DUNE MAW",
+  "e": "AREIA MOVEDIÇA",
+  "r": "silver",
+  "l": "sand worm mecha with a segmented ringed body and a circular tooth-lined maw, gritty tan plating, no eyes, sand pouring off it",
+  "a": "sand maw swallow",
+  "f": "trapped"
+ },
+ {
+  "i": "circuitmonk",
+  "n": "CIRCUIT MONK",
+  "e": "CIRCUITO",
+  "r": "gold",
+  "l": "serene mecha whose body is exposed green circuit boards and gold traces, meditating posture, floating chip halo, glowing trace eyes",
+  "a": "logic gate palm",
+  "f": "drain"
+ },
+ {
+  "i": "frostmourn",
+  "n": "FROST MOURN",
+  "e": "LAMENTO",
+  "r": "gold",
+  "l": "mourning knight mecha in frost-covered black plate with a cracked greatsword, tattered blue funeral banner, weeping ice from its visor",
+  "a": "mourning greatsword arc",
+  "f": "weakening"
+ },
+ {
+  "i": "brasslion",
+  "n": "BRASS LION",
+  "e": "LATAO",
+  "r": "silver",
+  "l": "regal brass lion mecha with a mane of curved metal blades, jeweled collar, powerful clawed forelimbs, roaring engine chest",
+  "a": "roaring brass pounce",
+  "f": "adrenalin"
+ },
+ {
+  "i": "tarpitfiend",
+  "n": "TARPIT FIEND",
+  "e": "PICHE",
+  "r": "bronze",
+  "l": "gloopy black tar mecha with a barely-held humanoid shape, dripping oily strands, bubbling surface, two yellow floating eyes",
+  "a": "tar grasp smother",
+  "f": "trapped"
+ },
+ {
+  "i": "skyloomweaver",
+  "n": "SKYLOOM WEAVER",
+  "e": "TECELA",
+  "r": "silver",
+  "l": "weaver mecha with six thread-spinning arms, tapestry cape depicting stars, spool shoulders, calm mask with thread-cross eyes",
+  "a": "thread bind slash",
+  "f": "trapped"
+ },
+ {
+  "i": "boulderox",
+  "n": "BOULDER OX",
+  "e": "ROCHA",
+  "r": "bronze",
+  "l": "enormous ox mecha with a boulder for a hump, stone-slab horns, dusty grey hide plates, iron nose ring",
+  "a": "boulder horn charge",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "halcyonix",
+  "n": "HALCYONIX",
+  "e": "CALMARIA",
+  "r": "gold",
+  "l": "serene kingfisher mecha in turquoise and white enamel, mirror-still water pooling at its feet, long beak lance, tranquil glowing eyes",
+  "a": "still water beak dive",
+  "f": "hp_regen"
+ },
+ {
+  "i": "gravebyte",
+  "n": "GRAVEBYTE",
+  "e": "TUMULO",
+  "r": "silver",
+  "l": "undead server-rack mecha with a tombstone chest displaying error glyphs, dangling frayed cables, dirt-caked frame, flickering skull screen",
+  "a": "corrupted data claw",
+  "f": "poison"
+ },
+ {
+  "i": "emberveilla",
+  "n": "EMBER VEILLA",
+  "e": "FOGO FATUO",
+  "r": "silver",
+  "l": "willowy mecha wrapped in a veil of floating ember lights, thin dark frame, no solid face, hovering slightly above the ground",
+  "a": "wisp veil caress",
+  "f": "drain"
+ },
+ {
+  "i": "titanomaw",
+  "n": "TITANOMAW",
+  "e": "TITAN",
+  "r": "gold",
+  "l": "world-ending colossus mecha with a jagged fortress-sized jaw in its torso, mountain-plate shoulders, dark iron scale skin, four burning eyes",
+  "a": "titan maw crush",
+  "f": "weakening"
+ },
+ {
+  "i": "zenithara",
+  "n": "ZENITHARA",
+  "e": "ZENITE",
+  "r": "gold",
+  "l": "ultimate radiant mecha of white gold and prismatic crystal, twelve floating halo rings, wings of pure geometry, blindingly bright core, calm masked face",
+  "a": "zenith judgment beam",
+  "f": "blind"
+ }
+]

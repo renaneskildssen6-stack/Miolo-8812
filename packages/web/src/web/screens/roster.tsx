@@ -1,116 +1,355 @@
 import { useState } from "react";
-import { Frame, Icon, Panel, PixelButton, RobotSprite, StatBar } from "../components/pixel";
-import { TRAIN_COST_PER_POINT } from "../game/config";
-import { baseStats, maxTrained, robotMaxXP, type RobotSave } from "../game/engine";
-import { addGold, setTeam, updateRobots, useGame } from "../game/save";
-import { faceUrl, ROBOT_MAP, ROBOTS } from "../game/robots";
+import { Frame, Panel, PixelButton, RobotSprite, StatBar } from "@/components/pixel";
+import { Icon } from "@/components/pixel";
+import { LoadoutEditor } from "@/components/loadout";
+import { TRAIN_COST_PER_POINT } from "@/game/config";
+import { baseStats, maxTrained, robotMaxXP, type RobotSave } from "@/game/engine";
+import { addGold, setTeam, updateRobots, useGame } from "@/game/save";
+import { faceUrl, ROBOT_MAP, ROBOTS } from "@/game/robots";
+
+const RARITY_GLOW: Record<string, string> = {
+  bronze: "rgba(205,127,50,0.9)",
+  silver: "rgba(198,214,232,0.9)",
+  gold: "rgba(255,196,58,0.95)",
+};
+
+type RosterTab = "todos" | "equipe" | "meus" | "bronze" | "silver" | "gold" | "locked";
+
+const TABS: { id: RosterTab; label: string }[] = [
+  { id: "todos", label: "TODOS" },
+  { id: "equipe", label: "EQUIPE" },
+  { id: "meus", label: "MEUS" },
+  { id: "bronze", label: "BRONZE" },
+  { id: "silver", label: "PRATA" },
+  { id: "gold", label: "OURO" },
+  { id: "locked", label: "BLOQUEADOS" },
+];
 
 export function RosterScreen({ onBack }: { onBack: () => void }) {
   const g = useGame();
-  const [selected, setSelected] = useState<string | null>(null);
-  const sel = g.robots.find((r) => r.id === selected) ?? null;
+  const [focus, setFocus] = useState<string>(g.robots[0]?.id ?? ROBOTS[0].id);
+  const [detail, setDetail] = useState<string | null>(null);
+  const [tab, setTab] = useState<RosterTab>("todos");
+  const [query, setQuery] = useState("");
+
+  const owned = g.robots;
+  const focused = owned.find((r) => r.id === focus) ?? owned[0] ?? null;
+  const focusDef = ROBOT_MAP[focused ? focused.id : focus];
+  const inTeam = focused ? g.team.includes(focused.id) : false;
+  const locked = !focused || focused.id !== focus;
+
+  function toggleTeam() {
+    if (!focused) return;
+    if (inTeam) {
+      if (g.team.length <= 1) return;
+      setTeam(g.team.filter((id) => id !== focused.id));
+    } else {
+      if (g.team.length >= 4) return;
+      setTeam([...g.team, focused.id]);
+    }
+  }
+
+  const lockedDef = locked ? ROBOT_MAP[focus] : null;
+  const showDef = lockedDef ?? focusDef;
+
+  const q = query.trim().toUpperCase();
+  const visible = ROBOTS.filter((def) => {
+    if (q && !def.name.includes(q) && !def.element.includes(q)) return false;
+    switch (tab) {
+      case "equipe":
+        return g.team.includes(def.id);
+      case "meus":
+        return owned.some((r) => r.id === def.id);
+      case "locked":
+        return !owned.some((r) => r.id === def.id);
+      case "bronze":
+      case "silver":
+      case "gold":
+        return def.rarity === tab;
+      default:
+        return true;
+    }
+  });
 
   return (
     <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
-      <TopBar title="MEUS ROBOS" gold={g.gold} onBack={onBack} />
+      <TopBar title="HEROIS MECHA" gold={g.gold} onBack={onBack} />
 
+      {/* PALCO — estilo seleção de brawlers */}
+      <div
+        style={{
+          position: "relative",
+          height: 232,
+          flexShrink: 0,
+          backgroundImage:
+            "linear-gradient(rgba(4,9,18,0.35), rgba(4,9,18,0.9)), url(/ui/bg_heroes.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center 30%",
+          imageRendering: "pixelated",
+          borderBottom: "2px solid var(--mk-accent)",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            bottom: 46,
+            transform: "translateX(-50%)",
+            width: 168,
+            height: 34,
+            borderRadius: "50%",
+            background: `radial-gradient(closest-side, ${RARITY_GLOW[showDef.rarity]}, transparent)`,
+            opacity: 0.55,
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            bottom: 42,
+            transform: "translateX(-50%)",
+            filter: locked ? "brightness(0) opacity(0.75)" : undefined,
+          }}
+        >
+          {locked ? (
+            <img
+              src={faceUrl(focus)}
+              alt=""
+              width={132}
+              height={132}
+              style={{ imageRendering: "pixelated" }}
+            />
+          ) : (
+            <RobotSprite robotId={focus} clip="idle" size={132} fps={4} />
+          )}
+        </div>
+
+        <div style={{ position: "absolute", left: 8, top: 8 }}>
+          <div
+            className="mk-title"
+            style={{
+              fontSize: 6,
+              padding: "3px 5px",
+              border: `2px solid ${RARITY_GLOW[showDef.rarity]}`,
+              background: "rgba(6,14,26,0.85)",
+              color: RARITY_GLOW[showDef.rarity],
+            }}
+          >
+            {showDef.rarity.toUpperCase()}
+          </div>
+          <div
+            className="mk-title"
+            style={{
+              fontSize: 6,
+              marginTop: 4,
+              padding: "3px 5px",
+              border: "2px solid var(--mk-accent)",
+              background: "rgba(6,14,26,0.85)",
+              color: "var(--mk-accent)",
+            }}
+          >
+            {showDef.element}
+          </div>
+        </div>
+
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: 4, textAlign: "center" }}>
+          <div className="mk-title" style={{ fontSize: 13, textShadow: "3px 3px 0 #000" }}>
+            {locked ? "? ? ? ?" : showDef.name}
+          </div>
+          <div
+            className="mk-title"
+            style={{ fontSize: 7, color: locked ? "var(--mk-muted)" : "var(--mk-accent2)" }}
+          >
+            {locked
+              ? "BLOQUEADO — USE CAPSULA MECHA"
+              : `Lv${focused!.level} · ${inTeam ? "NA EQUIPE" : "NA RESERVA"}`}
+          </div>
+        </div>
+      </div>
+
+      {/* AÇÕES */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 6,
+          padding: "6px 8px",
+          background: "rgba(6,12,22,0.95)",
+          borderBottom: "2px solid rgba(53,226,240,0.3)",
+          flexShrink: 0,
+        }}
+      >
+        <PixelButton disabled={locked} onClick={toggleTeam}>
+          {inTeam ? "TIRAR DA EQUIPE" : "ESCALAR"}
+        </PixelButton>
+        <PixelButton disabled={locked} onClick={() => setDetail(focus)}>
+          TREINAR / INFO
+        </PixelButton>
+      </div>
+
+      {/* FILTROS ESTILO BRAWL STARS */}
+      <div
+        style={{
+          flexShrink: 0,
+          padding: "6px 8px 4px",
+          background: "rgba(6,12,22,0.95)",
+          borderBottom: "2px solid rgba(53,226,240,0.2)",
+        }}
+      >
+        <div style={{ display: "flex", gap: 4, overflowX: "auto", paddingBottom: 4 }}>
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className="mk-title"
+              onClick={() => setTab(t.id)}
+              style={{
+                flexShrink: 0,
+                fontSize: 6,
+                padding: "4px 7px",
+                cursor: "pointer",
+                color: tab === t.id ? "#04121c" : "var(--mk-muted)",
+                background: tab === t.id ? "var(--mk-accent)" : "rgba(12,24,40,0.9)",
+                border: `2px solid ${tab === t.id ? "var(--mk-accent)" : "rgba(60,80,104,0.55)"}`,
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="BUSCAR HEROI OU ELEMENTO"
+          className="mk-title"
+          style={{
+            width: "100%",
+            fontSize: 6,
+            padding: "5px 6px",
+            color: "var(--mk-text)",
+            background: "rgba(4,10,18,0.9)",
+            border: "2px solid rgba(60,80,104,0.55)",
+            outline: "none",
+          }}
+        />
+      </div>
+
+      {/* GRADE DE HEROIS */}
       <div className="mk-scroll" style={{ flex: 1, padding: 8 }}>
-        <div className="mk-title" style={{ fontSize: 7, color: "var(--mk-muted)", marginBottom: 6 }}>
-          EQUIPE ({g.team.length}/4) — toque num robo para ver, treinar e escalar
+        <div
+          className="mk-title"
+          style={{
+            fontSize: 7,
+            color: "var(--mk-muted)",
+            marginBottom: 6,
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <span>EQUIPE {g.team.length}/4</span>
+          <span style={{ color: "var(--mk-accent2)" }}>
+            COLECAO {owned.length}/{ROBOTS.length}
+          </span>
+        </div>
+        <div
+          style={{
+            height: 8,
+            marginBottom: 8,
+            border: "2px solid rgba(60,80,104,0.55)",
+            background: "rgba(4,10,18,0.9)",
+          }}
+        >
+          <div
+            style={{
+              height: "100%",
+              width: `${Math.round((owned.length / ROBOTS.length) * 100)}%`,
+              background: "linear-gradient(90deg, var(--mk-accent), var(--mk-accent2))",
+            }}
+          />
         </div>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(88px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(84px, 1fr))",
             gap: 8,
           }}
         >
-          {g.robots.map((r) => {
-            const def = ROBOT_MAP[r.id];
-            const inTeam = g.team.includes(r.id);
+          {visible.map((def) => {
+            const save = owned.find((r) => r.id === def.id) ?? null;
+            const isLocked = !save;
+            const active = focus === def.id;
+            const teamed = g.team.includes(def.id);
             return (
               <button
-                key={r.id}
+                key={def.id}
                 type="button"
-                onClick={() => setSelected(r.id)}
+                onClick={() => setFocus(def.id)}
                 style={{
-                  background: inTeam ? "rgba(53,226,240,0.16)" : "rgba(8,16,28,0.8)",
-                  border: `2px solid ${inTeam ? "var(--mk-accent)" : "rgba(80,110,140,0.5)"}`,
+                  position: "relative",
+                  background: isLocked
+                    ? "rgba(8,14,24,0.85)"
+                    : `linear-gradient(rgba(10,22,38,0.9), ${RARITY_GLOW[def.rarity].replace("0.9", "0.22").replace("0.95", "0.22")})`,
+                  border: `2px solid ${active ? "var(--mk-accent2)" : isLocked ? "rgba(60,80,104,0.45)" : RARITY_GLOW[def.rarity]}`,
+                  boxShadow: active ? "0 0 0 2px rgba(53,226,240,0.5)" : undefined,
                   padding: 4,
                   display: "grid",
                   placeItems: "center",
                   gap: 2,
                   cursor: "pointer",
+                  transform: active ? "translateY(-2px)" : undefined,
                 }}
               >
-                <Frame rarity={def.rarity} size={72}>
+                <Frame rarity={def.rarity} size={68}>
                   <img
-                    src={faceUrl(r.id)}
+                    src={faceUrl(def.id)}
                     alt=""
-                    style={{ width: "100%", height: "100%", imageRendering: "pixelated" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      imageRendering: "pixelated",
+                      filter: isLocked ? "grayscale(1) brightness(0.3) contrast(1.2)" : undefined,
+                    }}
                   />
                 </Frame>
-                <span className="mk-title" style={{ fontSize: 6 }}>
-                  {def.name}
+                <span
+                  className="mk-title"
+                  style={{ fontSize: 6, color: isLocked ? "var(--mk-muted)" : undefined }}
+                >
+                  {isLocked ? "? ? ? ?" : def.name}
                 </span>
-                <span className="mk-title" style={{ fontSize: 6, color: "var(--mk-accent2)" }}>
-                  Lv{r.level}
+                <span
+                  className="mk-title"
+                  style={{ fontSize: 6, color: isLocked ? "var(--mk-muted)" : "var(--mk-accent2)" }}
+                >
+                  {isLocked ? def.rarity.toUpperCase() : `Lv${save!.level}`}
                 </span>
+                {teamed && (
+                  <span
+                    className="mk-title"
+                    style={{
+                      position: "absolute",
+                      top: 2,
+                      right: 2,
+                      fontSize: 5,
+                      padding: "1px 3px",
+                      background: "var(--mk-accent)",
+                      color: "#04121c",
+                    }}
+                  >
+                    EQUIPE
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
-
-        <div
-          className="mk-title"
-          style={{ fontSize: 7, color: "var(--mk-muted)", margin: "14px 0 6px" }}
-        >
-          NAO RECRUTADOS ({ROBOTS.length - g.robots.length}/20) — use CAPSULA MECHA na loja
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(88px, 1fr))",
-            gap: 8,
-          }}
-        >
-          {ROBOTS.filter((d) => !g.robots.some((r) => r.id === d.id)).map((def) => (
-            <div
-              key={def.id}
-              style={{
-                background: "rgba(8,16,28,0.8)",
-                border: "2px solid rgba(60,80,104,0.45)",
-                padding: 4,
-                display: "grid",
-                placeItems: "center",
-                gap: 2,
-              }}
-            >
-              <Frame rarity={def.rarity} size={72}>
-                <img
-                  src={faceUrl(def.id)}
-                  alt=""
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    imageRendering: "pixelated",
-                    filter: "grayscale(1) brightness(0.35) contrast(1.2)",
-                  }}
-                />
-              </Frame>
-              <span className="mk-title" style={{ fontSize: 6, color: "var(--mk-muted)" }}>
-                ? ? ? ?
-              </span>
-              <span className="mk-title" style={{ fontSize: 6, color: "var(--mk-muted)" }}>
-                {def.rarity.toUpperCase()}
-              </span>
-            </div>
-          ))}
-        </div>
         <div style={{ height: 52 }} />
       </div>
 
-      {sel && <RobotDetail save={sel} onClose={() => setSelected(null)} />}
+      {detail && owned.some((r) => r.id === detail) && (
+        <RobotDetail save={owned.find((r) => r.id === detail)!} onClose={() => setDetail(null)} />
+      )}
     </div>
   );
 }
@@ -207,31 +446,7 @@ function RobotDetail({ save, onClose }: { save: RobotSave; onClose: () => void }
             onTrain={() => train("agl")}
           />
 
-          <div className="mk-title" style={{ fontSize: 8, margin: "10px 0 4px" }}>
-            HABILIDADES
-          </div>
-          {def.skills.map((s) => (
-            <div
-              key={s.id}
-              style={{
-                border: "2px solid rgba(53,226,240,0.35)",
-                background: "rgba(8,18,32,0.7)",
-                padding: 5,
-                marginBottom: 4,
-              }}
-            >
-              <div
-                className="mk-title"
-                style={{ fontSize: 7, display: "flex", justifyContent: "space-between" }}
-              >
-                <span>
-                  <Icon name={s.kind === "defense" ? "shield" : "fist"} size={10} /> {s.name}
-                </span>
-                <span style={{ color: "var(--mk-accent)" }}>{s.mp} MP</span>
-              </div>
-              <div style={{ fontSize: 10, color: "var(--mk-muted)" }}>{s.desc}</div>
-            </div>
-          ))}
+          <LoadoutEditor robotId={save.id} />
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 8 }}>
             <PixelButton onClick={toggleTeam}>{inTeam ? "TIRAR DA EQUIPE" : "ESCALAR"}</PixelButton>

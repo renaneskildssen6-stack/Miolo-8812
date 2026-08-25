@@ -1,7 +1,33 @@
 import { useSyncExternalStore } from "react";
 import { GENERAL } from "./config";
 import { playerMaxXP, type RobotSave } from "./engine";
-import { ROBOTS, STARTER_ROBOTS } from "./robots";
+import { ROBOT_MAP, ROBOTS, STARTER_ROBOTS } from "./robots";
+import {
+  applyMatch,
+  claimMission,
+  claimReward,
+  initialRanked,
+  newSeason,
+  normalizeRanked,
+  type MatchPerf,
+  type RankedOpponent,
+  type RankedOutcome,
+  type RankedState,
+} from "./ranked";
+import { defaultLoadout, MAX_LOADOUT } from "./skills";
+import {
+  PET_MAP,
+  PET_MAX_LEVEL,
+  petUpgradeCost,
+  petValue,
+  type PetKind,
+} from "./pets";
+import {
+  GADGET_MAP,
+  GADGET_MAX_LEVEL,
+  GADGET_ROBOT_LEVEL,
+  upgradeCost,
+} from "./gadgets";
 
 export interface GameState {
   version: number;
@@ -13,13 +39,37 @@ export interface GameState {
   items: Record<string, number>;
   wonTournaments: string[];
   battlesWon: number;
+  /** 4 habilidades escolhidas por robô. */
+  loadouts: Record<string, string[]>;
+  /** nivel do gadget de cada robo (0/ausente = nao comprado). */
+  gadgets: Record<string, number>;
+  /** nivel de cada pet possuido (0/ausente = nao comprado). */
+  pets: Record<string, number>;
+  /** pet equipado pela equipe (null = nenhum). */
+  activePet: string | null;
+  /** progresso do modo ranqueado. */
+  ranked: RankedState;
+  /** progresso dos modos de jogo. */
+  modes: {
+    babelFloor: number;
+    babelBest: number;
+    survivalBest: number;
+    quickWins: number;
+    bossRushBest: number;
+    chaosWins: number;
+    gauntletBest: number;
+    trialsBest: number;
+    raidWins: number;
+    nightmareBest: number;
+  };
 }
 
 const KEY = "campeoes-mecha-save-v1";
+const VERSION = 2;
 
 function initialState(): GameState {
   return {
-    version: 1,
+    version: VERSION,
     gold: 500,
     playerLevel: 1,
     playerXP: 0,
@@ -33,6 +83,23 @@ function initialState(): GameState {
     items: { repair_kit: 2, energy_cell: 1 },
     wonTournaments: [],
     battlesWon: 0,
+    loadouts: {},
+    gadgets: {},
+    pets: {},
+    activePet: null,
+    ranked: initialRanked(),
+    modes: {
+      babelFloor: 1,
+      babelBest: 0,
+      survivalBest: 0,
+      quickWins: 0,
+      bossRushBest: 0,
+      chaosWins: 0,
+      gauntletBest: 0,
+      trialsBest: 0,
+      raidWins: 0,
+      nightmareBest: 0,
+    },
   };
 }
 
@@ -43,7 +110,19 @@ function read(): GameState {
     if (!raw) return initialState();
     const parsed = JSON.parse(raw) as GameState;
     if (!parsed.robots?.length) return initialState();
-    return { ...initialState(), ...parsed };
+    const base = initialState();
+    return {
+      ...base,
+      ...parsed,
+      version: VERSION,
+      loadouts: parsed.loadouts ?? {},
+      gadgets: parsed.gadgets ?? {},
+      pets: parsed.pets ?? {},
+      activePet: parsed.activePet ?? null,
+      // migração v1 -> v2: saves antigos não tinham modo ranqueado
+      ranked: normalizeRanked(parsed.ranked),
+      modes: { ...base.modes, ...(parsed.modes ?? {}) },
+    };
   } catch {
     return initialState();
   }
@@ -157,5 +236,180 @@ export function incBattlesWon() {
 export function teamSaves(s: GameState): RobotSave[] {
   return s.team
     .map((id) => s.robots.find((r) => r.id === id))
-    .filter((r): r is RobotSave => Boolean(r));
+    .filter((r): r is RobotSave => Boolean(r))
+    .map((r) => ({ ...r, loadout: loadoutOf(s, r.id), gadgetLevel: s.gadgets[r.id] ?? 0 }));
+}
+
+// ------------------------------------------------------------- loadouts
+export function loadoutOf(s: GameState, robotId: string): string[] {
+  const def = ROBOT_MAP[robotId];
+  if (!def) return [];
+  const valid = new Set(def.skills.map((k) => k.id));
+  const saved = [...new Set((s.loadouts[robotId] ?? []).filter((id) => valid.has(id)))].slice(
+    0,
+    MAX_LOADOUT,
+  );
+  if (saved.length === MAX_LOADOUT) return saved;
+  // kit incompleto: completa com o padrão mantendo a ordem escolhida
+  const fill = defaultLoadout(def.skills).filter((id) => !saved.includes(id));
+  return [...saved, ...fill].slice(0, MAX_LOADOUT);
+}
+
+export function setLoadout(robotId: string, skillIds: string[]) {
+  const def = ROBOT_MAP[robotId];
+  const valid = new Set((def?.skills ?? []).map((k) => k.id));
+  const clean = [...new Set(skillIds.filter((id) => valid.has(id)))].slice(0, MAX_LOADOUT);
+  setState((st) => ({ ...st, loadouts: { ...st.loadouts, [robotId]: clean } }));
+}
+
+/** Reseta o kit de um robô para o padrão do chassi. */
+export function resetLoadout(robotId: string) {
+  const def = ROBOT_MAP[robotId];
+  if (!def) return;
+  setLoadout(robotId, defaultLoadout(def.skills));
+}
+
+// ------------------------------------------------------------- ranqueado
+/** Registra o resultado de uma partida ranqueada, paga o ouro e devolve o resumo. */
+export function applyRankedMatch(
+  win: boolean,
+  opp: RankedOpponent,
+  perf?: MatchPerf,
+): RankedOutcome {
+  const outcome = applyMatch(state.ranked, win, opp, perf);
+  setState((s) => ({
+    ...s,
+    ranked: outcome.state,
+    gold: Math.max(0, s.gold + outcome.gold),
+  }));
+  return outcome;
+}
+
+/** Coleta a recompensa de ouro de um rank já alcançado. */
+export function claimRankReward(rankIndex: number): number {
+  const res = claimReward(state.ranked, rankIndex);
+  if (res.gold <= 0) return 0;
+  setState((s) => ({ ...s, ranked: res.state, gold: s.gold + res.gold }));
+  return res.gold;
+}
+
+/** Coleta a recompensa de uma missão de temporada concluída. */
+export function claimRankedMission(id: string): number {
+  const res = claimMission(state.ranked, id);
+  if (res.gold <= 0) return 0;
+  setState((s) => ({ ...s, ranked: res.state, gold: s.gold + res.gold }));
+  return res.gold;
+}
+
+/** Encerra a temporada atual e inicia a próxima com reset suave. */
+export function startNewSeason() {
+  setState((s) => ({ ...s, ranked: newSeason(s.ranked) }));
+}
+
+// ------------------------------------------------------------- gadgets
+export function gadgetLevelOf(s: GameState, robotId: string): number {
+  return s.gadgets[robotId] ?? 0;
+}
+
+/** Compra o gadget do robo (nivel 1). Retorna false se nao for possivel. */
+export function buyGadget(robotId: string): boolean {
+  const def = GADGET_MAP[robotId];
+  if (!def) return false;
+  const robot = state.robots.find((r) => r.id === robotId);
+  if (!robot || robot.level < GADGET_ROBOT_LEVEL) return false;
+  if ((state.gadgets[robotId] ?? 0) > 0) return false;
+  if (state.gold < def.price) return false;
+  setState((s) => ({
+    ...s,
+    gold: s.gold - def.price,
+    gadgets: { ...s.gadgets, [robotId]: 1 },
+  }));
+  return true;
+}
+
+/** Sobe um nivel do gadget. Retorna false se nao for possivel. */
+export function upgradeGadget(robotId: string): boolean {
+  const def = GADGET_MAP[robotId];
+  if (!def) return false;
+  const cur = state.gadgets[robotId] ?? 0;
+  if (cur <= 0 || cur >= GADGET_MAX_LEVEL) return false;
+  const cost = upgradeCost(def, cur);
+  if (state.gold < cost) return false;
+  setState((s) => ({
+    ...s,
+    gold: s.gold - cost,
+    gadgets: { ...s.gadgets, [robotId]: cur + 1 },
+  }));
+  return true;
+}
+
+export function setModeProgress(patch: Partial<GameState["modes"]>) {
+  setState((st) => ({ ...st, modes: { ...st.modes, ...patch } }));
+}
+
+// ------------------------------------------------------------- pets
+export function petLevelOf(s: GameState, petId: string): number {
+  return s.pets[petId] ?? 0;
+}
+
+/** Compra o pet (nivel 1). Retorna false se nao for possivel. */
+export function buyPet(petId: string): boolean {
+  const def = PET_MAP[petId];
+  if (!def) return false;
+  if ((state.pets[petId] ?? 0) > 0) return false;
+  if (state.playerLevel < def.requiredLevel) return false;
+  if (state.gold < def.price) return false;
+  setState((s) => ({
+    ...s,
+    gold: s.gold - def.price,
+    pets: { ...s.pets, [petId]: 1 },
+    activePet: s.activePet ?? petId,
+  }));
+  return true;
+}
+
+/** Sobe um nivel do pet. Retorna false se nao for possivel. */
+export function upgradePet(petId: string): boolean {
+  const def = PET_MAP[petId];
+  if (!def) return false;
+  const cur = state.pets[petId] ?? 0;
+  if (cur <= 0 || cur >= PET_MAX_LEVEL) return false;
+  const cost = petUpgradeCost(def, cur);
+  if (state.gold < cost) return false;
+  setState((s) => ({
+    ...s,
+    gold: s.gold - cost,
+    pets: { ...s.pets, [petId]: cur + 1 },
+  }));
+  return true;
+}
+
+/** Bonus percentual do pet ativo para o tipo informado (0 quando nao aplicavel). */
+export function activePetBonus(kind: PetKind): number {
+  const id = state.activePet;
+  if (!id) return 0;
+  const def = PET_MAP[id];
+  if (!def || def.kind !== kind) return 0;
+  const lvl = state.pets[id] ?? 0;
+  if (lvl <= 0) return 0;
+  return petValue(def, lvl);
+}
+
+/** Aplica os bonus de ouro (scavenger) e XP (mentor) do pet ativo. */
+export function applyPetRewards(r: { gold: number; xp: number }): {
+  gold: number;
+  xp: number;
+} {
+  const g = activePetBonus("scavenger");
+  const x = activePetBonus("mentor");
+  return {
+    gold: Math.round(r.gold * (1 + g / 100)),
+    xp: Math.round(r.xp * (1 + x / 100)),
+  };
+}
+
+/** Equipa (ou desequipa, com null) o pet ativo da equipe. */
+export function setActivePet(petId: string | null) {
+  if (petId && (state.pets[petId] ?? 0) <= 0) return;
+  setState((s) => ({ ...s, activePet: petId }));
 }
