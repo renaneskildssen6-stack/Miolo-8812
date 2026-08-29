@@ -5,6 +5,7 @@ import { LoadingScreen } from "@/components/loading-screen";
 import { type Screen } from "@/screens/menu";
 import { EngineerScreen } from "@/screens/engineer";
 import { ModesScreen } from "@/screens/modes";
+import { CardsScreen } from "@/screens/cards";
 import { PetsScreen } from "@/screens/pets";
 import { RankedScreen } from "@/screens/ranked";
 import { RosterScreen } from "@/screens/roster";
@@ -89,6 +90,7 @@ function GameContent() {
             {screen === "tournaments" && <TournamentsScreen onBack={close} />}
             {screen === "engineer" && <EngineerScreen onBack={close} />}
             {screen === "pets" && <PetsScreen onBack={close} />}
+            {screen === "cards" && <CardsScreen onBack={close} />}
           </div>
         </div>
       )}

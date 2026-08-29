@@ -28,6 +28,14 @@ import {
   GADGET_ROBOT_LEVEL,
   upgradeCost,
 } from "./gadgets";
+import {
+  CARD_MAP,
+  MAX_CARDS,
+  deckBudget,
+  resolveDeck,
+  type CardStat,
+  type DeckResult,
+} from "./cards";
 
 export interface GameState {
   version: number;
@@ -47,6 +55,10 @@ export interface GameState {
   pets: Record<string, number>;
   /** pet equipado pela equipe (null = nenhum). */
   activePet: string | null;
+  /** ids dos cards possuidos. */
+  cards: string[];
+  /** ate 3 cards equipados no deck de combate. */
+  deck: string[];
   /** progresso do modo ranqueado. */
   ranked: RankedState;
   /** progresso dos modos de jogo. */
@@ -87,6 +99,8 @@ function initialState(): GameState {
     gadgets: {},
     pets: {},
     activePet: null,
+    cards: [],
+    deck: [],
     ranked: initialRanked(),
     modes: {
       babelFloor: 1,
@@ -119,6 +133,8 @@ function read(): GameState {
       gadgets: parsed.gadgets ?? {},
       pets: parsed.pets ?? {},
       activePet: parsed.activePet ?? null,
+      cards: (parsed.cards ?? []).filter((id) => Boolean(CARD_MAP[id])),
+      deck: (parsed.deck ?? []).filter((id) => Boolean(CARD_MAP[id])).slice(0, MAX_CARDS),
       // migração v1 -> v2: saves antigos não tinham modo ranqueado
       ranked: normalizeRanked(parsed.ranked),
       modes: { ...base.modes, ...(parsed.modes ?? {}) },
@@ -412,4 +428,54 @@ export function applyPetRewards(r: { gold: number; xp: number }): {
 export function setActivePet(petId: string | null) {
   if (petId && (state.pets[petId] ?? 0) <= 0) return;
   setState((s) => ({ ...s, activePet: petId }));
+}
+
+// ------------------------------------------------------------- cards
+export function ownsCard(s: GameState, cardId: string): boolean {
+  return s.cards.includes(cardId);
+}
+
+/** Compra um card. Retorna false quando nao for possivel. */
+export function buyCard(cardId: string): boolean {
+  const def = CARD_MAP[cardId];
+  if (!def) return false;
+  if (state.cards.includes(cardId)) return false;
+  if (state.playerLevel < def.requiredLevel) return false;
+  if (state.gold < def.price) return false;
+  setState((s) => ({
+    ...s,
+    gold: s.gold - def.price,
+    cards: [...s.cards, cardId],
+  }));
+  return true;
+}
+
+/** Equipa ou desequipa um card, respeitando slots e orcamento de energia. */
+export function toggleCard(cardId: string): boolean {
+  const def = CARD_MAP[cardId];
+  if (!def) return false;
+  if (state.deck.includes(cardId)) {
+    setState((s) => ({ ...s, deck: s.deck.filter((id) => id !== cardId) }));
+    return true;
+  }
+  if (!state.cards.includes(cardId)) return false;
+  if (state.deck.length >= MAX_CARDS) return false;
+  const cost = resolveDeck(state.deck).cost + def.cost;
+  if (cost > deckBudget(state.playerLevel)) return false;
+  setState((s) => ({ ...s, deck: [...s.deck, cardId] }));
+  return true;
+}
+
+export function clearDeck() {
+  setState((s) => ({ ...s, deck: [] }));
+}
+
+/** Deck resolvido do jogador (cards + sinergias ativas). */
+export function playerDeck(s: GameState = state): DeckResult {
+  return resolveDeck(s.deck);
+}
+
+/** Modificador do deck do jogador para um atributo. */
+export function deckBonus(stat: CardStat): number {
+  return playerDeck().mods[stat] ?? 0;
 }

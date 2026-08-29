@@ -5,6 +5,28 @@ import { MAP_HEIGHT, MAP_WIDTH, TOURNAMENTS, type TournamentDef } from "@/game/t
 
 const NODE = 96;
 
+/** Regioes/biomas do mapa: cada faixa horizontal tem seu proprio plano de fundo. */
+interface Region {
+  id: string;
+  name: string;
+  art: string;
+  tint: string;
+  accent: string;
+}
+
+const REGIONS: Region[] = [
+  { id: "nebula", name: "SETOR NEBULOSA", art: "/map/region_nebula.png", tint: "rgba(20,12,48,0.45)", accent: "#a97bff" },
+  { id: "city", name: "METROPOLE NEON", art: "/map/region_city.png", tint: "rgba(8,10,30,0.42)", accent: "#ff5ad1" },
+  { id: "jungle", name: "SELVA BIOLUMINOSA", art: "/map/region_jungle.png", tint: "rgba(4,26,18,0.42)", accent: "#57d76a" },
+  { id: "desert", name: "DUNAS DAS RUINAS", art: "/map/region_desert.png", tint: "rgba(38,26,6,0.42)", accent: "#ffc43a" },
+  { id: "volcano", name: "CALDEIRA VULCANICA", art: "/map/region_volcano.png", tint: "rgba(34,8,4,0.45)", accent: "#e2453a" },
+  { id: "frozen", name: "TUNDRA CONGELADA", art: "/map/region_frozen.png", tint: "rgba(8,22,38,0.42)", accent: "#8fe6ff" },
+  { id: "abyss", name: "ABISMO SUBMERSO", art: "/map/region_abyss.png", tint: "rgba(2,12,32,0.5)", accent: "#35e2f0" },
+  { id: "sky", name: "ILHAS CELESTES", art: "/map/region_sky.png", tint: "rgba(14,24,44,0.38)", accent: "#ffffff" },
+];
+
+const BAND_H = MAP_HEIGHT / REGIONS.length;
+
 function nodeX(t: TournamentDef, i: number) {
   return t.x ?? 300 + (i % 12) * 270;
 }
@@ -198,6 +220,44 @@ export function TournamentMap({ playerLevel, won, teamEmpty, onEnter, onBack, go
             height: MAP_HEIGHT * zoom,
           }}
         >
+          {/* faixas de bioma: cada regiao tem seu proprio plano de fundo */}
+          {REGIONS.map((rg, ri) => (
+            <div
+              key={rg.id}
+              style={{
+                position: "absolute",
+                left: 0,
+                top: ri * BAND_H * zoom,
+                width: MAP_WIDTH * zoom,
+                height: BAND_H * zoom,
+                backgroundColor: "#050914",
+                backgroundImage: `linear-gradient(${rg.tint}, ${rg.tint}), url(${rg.art})`,
+                backgroundRepeat: "repeat",
+                backgroundSize: `auto, ${Math.round(384 * zoom)}px ${Math.round(384 * zoom)}px`,
+                imageRendering: "pixelated",
+                boxShadow: `inset 0 0 ${Math.round(60 * zoom)}px rgba(2,6,12,0.85)`,
+                pointerEvents: "none",
+              }}
+            >
+              <span
+                className="mk-title"
+                style={{
+                  position: "absolute",
+                  left: 10,
+                  top: 8,
+                  fontSize: Math.max(6, Math.round(11 * zoom)),
+                  color: rg.accent,
+                  background: "rgba(4,9,18,0.78)",
+                  border: `1px solid ${rg.accent}`,
+                  padding: "3px 6px",
+                  letterSpacing: 1,
+                }}
+              >
+                {rg.name}
+              </span>
+            </div>
+          ))}
+
           {/* rota entre estacoes */}
           <svg
             width={MAP_WIDTH * zoom}

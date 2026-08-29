@@ -10,6 +10,7 @@ import { ROBOT_MAP, type EffectType, type Skill } from "./robots";
 import { defaultLoadout, MAX_LOADOUT } from "./skills";
 import { PET_MAP, petValue, type PetKind } from "./pets";
 import { getState } from "./save";
+import { aiDeck, resolveDeck, type CardMods, type CardStat } from "./cards";
 import {
   aiGadgetLevel,
   GADGET_MAP,
@@ -47,6 +48,14 @@ export interface Fighter {
   gadget: { kind: GadgetKind; level: number; value: number } | null;
   /** pet da equipe (so do lado do jogador). */
   pet: { kind: PetKind; level: number; value: number } | null;
+  /** cards equipados no deck (ids) e modificadores ja agregados. */
+  cardIds: string[];
+  cards: CardMods;
+}
+
+/** valor do modificador de deck do lutador. */
+export function cardBonus(f: Fighter, stat: CardStat): number {
+  return f.cards[stat] ?? 0;
 }
 
 /** valor do bonus do pet equipado pelo jogador, 0 quando nao aplicavel. */
@@ -128,18 +137,26 @@ export function makeFighter(save: RobotSave, ai: boolean, uid: string): Fighter 
     pdef && petLevel > 0
       ? { kind: pdef.kind, level: petLevel, value: petValue(pdef, petLevel) }
       : null;
+  const deck = ai ? resolveDeck(aiDeck(save.id, save.level)) : resolveDeck(st8.deck);
+  const cmods = deck.mods;
+  const cpct = (stat: CardStat) => cmods[stat] ?? 0;
   const ppct = (kind: PetKind) => (pet && pet.kind === kind ? pet.value : 0);
   const pct = (kind: GadgetKind) => (gadget && gadget.kind === kind ? gadget.value : 0);
-  const hp = Math.max(1, Math.round(st.hp * (1 + pct("vitality") / 100)));
+  const hp = Math.max(
+    1,
+    Math.round(st.hp * (1 + pct("vitality") / 100 + cpct("hp") / 100)),
+  );
   const mp = Math.max(
     1,
-    Math.round(st.mp * (1 + pct("reactor") / 100 + ppct("reactor") / 100)),
+    Math.round(st.mp * (1 + pct("reactor") / 100 + ppct("reactor") / 100 + cpct("mp") / 100)),
   );
-  const str = Math.max(1, Math.round(st.str * (1 + pct("power") / 100)));
-  const dfn = Math.max(1, Math.round(st.def * (1 + pct("guard") / 100)));
+  const str = Math.max(1, Math.round(st.str * (1 + pct("power") / 100 + cpct("str") / 100)));
+  const dfn = Math.max(1, Math.round(st.def * (1 + pct("guard") / 100 + cpct("def") / 100)));
   const agl = Math.max(
     1,
-    Math.round(st.agl * (1 + pct("speed") / 100 + ppct("sprinter") / 100)),
+    Math.round(
+      st.agl * (1 + pct("speed") / 100 + ppct("sprinter") / 100 + cpct("agl") / 100),
+    ),
   );
   const kitIds = new Set(def.skills.map((s) => s.id));
   const chosen = [
@@ -171,6 +188,8 @@ export function makeFighter(save: RobotSave, ai: boolean, uid: string): Fighter 
     counter: 0,
     gadget,
     pet,
+    cardIds: deck.ids,
+    cards: cmods,
   };
 }
 
@@ -237,7 +256,10 @@ function effectiveStr(f: Fighter): number {
 function damageReduction(f: Fighter): number {
   return Math.min(
     80,
-    sumEffect(f, "damage_reduction") + gadgetBonus(f, "aegis") + petBonus(f, "bulwark"),
+    sumEffect(f, "damage_reduction") +
+      gadgetBonus(f, "aegis") +
+      petBonus(f, "bulwark") +
+      cardBonus(f, "aegis"),
   );
 }
 
@@ -337,7 +359,10 @@ function doAttack(ctx: Ctx, side: Side, skill: Skill) {
   const blind = sumEffect(atk, "blind") / 100;
   const evade = Math.min(
     0.85,
-    evasionChance(atk.agl, vic.agl) + blind + gadgetBonus(vic, "phase") / 100,
+    evasionChance(atk.agl, vic.agl) +
+      blind +
+      gadgetBonus(vic, "phase") / 100 +
+      cardBonus(vic, "evade") / 100,
   );
   if (Math.random() < evade) {
     push(ctx, { t: "float", side: vicSide, text: "ERROU", tone: "miss" });
@@ -350,25 +375,33 @@ function doAttack(ctx: Ctx, side: Side, skill: Skill) {
     Math.random() <
     criticalChance(atk.agl, vic.agl) +
       gadgetBonus(atk, "crit") / 100 +
-      petBonus(atk, "hunter") / 100;
+      petBonus(atk, "hunter") / 100 +
+      cardBonus(atk, "crit") / 100;
   const dmg = computeDamage({
     attackerStr: effectiveStr(atk),
     attackerLevel: atk.level,
     victimDef: vic.def,
     skillPower:
-      skill.power * (1 + gadgetBonus(atk, "amp") / 100 + petBonus(atk, "striker") / 100),
+      skill.power *
+      (1 +
+        gadgetBonus(atk, "amp") / 100 +
+        petBonus(atk, "striker") / 100 +
+        cardBonus(atk, "amp") / 100 +
+        (ctx.b.turn <= 2 ? cardBonus(atk, "opening") / 100 : 0) +
+        (atk.hp / atk.maxHp <= 0.35 ? cardBonus(atk, "rage") / 100 : 0)),
     critical: crit,
     damageReduction: damageReduction(vic),
   });
   vic.hp = Math.max(0, vic.hp - dmg);
 
-  const leech = gadgetBonus(atk, "leech") + petBonus(atk, "vampire");
+  const leech =
+    gadgetBonus(atk, "leech") + petBonus(atk, "vampire") + cardBonus(atk, "lifesteal");
   if (leech > 0 && atk.hp > 0) {
     const gain = Math.max(1, Math.round((dmg * leech) / 100));
     atk.hp = Math.min(atk.maxHp, atk.hp + gain);
     push(ctx, { t: "float", side, text: `+${gain}`, tone: "heal" });
   }
-  const thorns = gadgetBonus(vic, "thorns");
+  const thorns = gadgetBonus(vic, "thorns") + cardBonus(vic, "thorns");
   if (thorns > 0 && vic.hp > 0) {
     const back = Math.max(1, Math.round((dmg * thorns) / 100));
     atk.hp = Math.max(0, atk.hp - back);
@@ -393,8 +426,20 @@ function doAttack(ctx: Ctx, side: Side, skill: Skill) {
   }
 
   if (skill.effect && vic.hp > 0 && Math.random() < skill.effect.chance) {
-    const ef = skill.effect;
-    if (ef.type === "hp_regen" || ef.type === "adrenalin" || ef.type === "damage_reduction") {
+    const raw = skill.effect;
+    const boosted = Math.max(
+      1,
+      Math.round(raw.power * (1 + cardBonus(atk, "venom") / 100)),
+    );
+    const ef = { ...raw, power: boosted };
+    const helpful =
+      ef.type === "hp_regen" || ef.type === "adrenalin" || ef.type === "damage_reduction";
+    if (!helpful && Math.random() < cardBonus(vic, "resist") / 100) {
+      push(ctx, { t: "float", side: vicSide, text: "RESISTIU", tone: "info" });
+      sync(ctx);
+      return;
+    }
+    if (helpful) {
       applyEffect(atk, ef.type, ef.power, ef.turns);
       push(ctx, { t: "float", side, text: EFFECT_NAME[ef.type], tone: "info" });
       msg(ctx, `${atk.name}: ${EFFECT_NAME[ef.type]}`);
@@ -523,7 +568,11 @@ function runAction(ctx: Ctx, side: Side, action: BattleAction) {
 function tickEffects(ctx: Ctx, side: Side) {
   const f = activeOf(ctx.b, side);
   if (!alive(f)) return;
-  const regen = gadgetBonus(f, "regen") + petBonus(f, "medic");
+  const regen = gadgetBonus(f, "regen") + petBonus(f, "medic") + cardBonus(f, "regen");
+  const mpreg = cardBonus(f, "mpregen");
+  if (mpreg > 0 && f.mp < f.maxMp) {
+    f.mp = Math.min(f.maxMp, f.mp + mpreg);
+  }
   if (regen > 0 && f.hp < f.maxHp) {
     const heal = Math.max(1, Math.round((f.maxHp * regen) / 100));
     f.hp = Math.min(f.maxHp, f.hp + heal);

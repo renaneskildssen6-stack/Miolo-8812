@@ -9,7 +9,7 @@ import { useGate } from "@/components/gate";
  * partículas, parallax em 3 camadas e câmera suave.
  * ------------------------------------------------------------------------- */
 
-const WORLD_W = 3760;
+const WORLD_W = 4300;
 const GROUND_Y = 620; // y do chão em coordenadas de mundo
 const SKY_TOP = -260; // topo do mundo
 
@@ -57,6 +57,7 @@ const BUILDINGS: Building[] = [
   { id: "tournaments", label: "COLISEU", art: "/city/b_tourney.png", x: 2320, w: 360, h: 360 },
   { id: "engineer", label: "OFICINA DO ENGENHEIRO", art: "/city/b_engineer.png", x: 2820, w: 300, h: 372 },
   { id: "pets", label: "RANCHO DOS PETS", art: "/city/b_pets.png", x: 3320, w: 300, h: 360 },
+  { id: "cards", label: "SALAO DE CARDS", art: "/city/b_cards.png", x: 3800, w: 300, h: 372 },
 ];
 
 type Platform = { x: number; y: number; w: number; range?: number; speed?: number };
@@ -74,6 +75,8 @@ const PLATFORMS: Platform[] = [
   { x: 2620, y: 470, w: 150 },
   { x: 2780, y: 340, w: 140, range: 110, speed: 0.7 },
   { x: 2960, y: 430, w: 130 },
+  { x: 3620, y: 460, w: 150 },
+  { x: 4120, y: 380, w: 140, range: 120, speed: 0.6 },
 ];
 
 type Core = { x: number; y: number; taken: number };

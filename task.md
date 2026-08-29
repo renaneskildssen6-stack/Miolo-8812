@@ -35,3 +35,10 @@
 - [ ] redesign screens/tournaments.tsx (mapa com pan/zoom, filtros por elemento)
 - [ ] mobile Expo WebView
 - [ ] typecheck/build/E2E/deliver
+
+## Sessão pets + modos + mapa (220 robôs)
+- [x] Fase 4 PETS: 12 pets com arte processada (public/pets, 192x192), prédio b_pets.png no hub, PetsScreen ligado no game-shell, bônus scavenger(+ouro)/mentor(+XP) aplicados em torneios e modos
+- [x] Fase 5 MODOS: 9 modos (novos: GAUNTLET ELEMENTAL, PROVAS DOS ANCIOES, ASSALTO AO NUCLEO, PESADELO) + arte, stages e progresso salvo
+- [x] Fase 6 MAPA: 8 regiões/biomas com planos de fundo próprios (nebulosa, metrópole neon, selva, dunas, vulcânica, tundra, abismo, ilhas celestes) + rótulo de setor
+- [x] typecheck verde, build verde, E2E sem erros de console e sem imagens quebradas
+- [x] mobile Expo WebView rodando (porta 4300), web na 4200

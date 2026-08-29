@@ -12,7 +12,8 @@ export type Screen =
   | "modes"
   | "ranked"
   | "engineer"
-  | "pets";
+  | "pets"
+  | "cards";
 
 export function MenuScreen({ onGo }: { onGo: (s: Screen) => void }) {
   const g = useGame();
