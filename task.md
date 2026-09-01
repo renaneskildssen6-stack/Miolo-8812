@@ -42,3 +42,13 @@
 - [x] Fase 6 MAPA: 8 regiões/biomas com planos de fundo próprios (nebulosa, metrópole neon, selva, dunas, vulcânica, tundra, abismo, ilhas celestes) + rótulo de setor
 - [x] typecheck verde, build verde, E2E sem erros de console e sem imagens quebradas
 - [x] mobile Expo WebView rodando (porta 4300), web na 4200
+
+## Fase A — Sistema de Cards (concluída)
+- [x] game/cards.ts: 30 cards (4 raridades, 10 tags), custo de energia, orçamento por nível (6→12), 22 sinergias/combos, decks de IA determinísticos por robô/nível
+- [x] screens/cards.tsx: SALAO DE CARDS com deck de 3 slots, medidor de energia, sinergias ativas, "A 1 CARD DE:", abas DECK/MEUS/LOJA/TODOS, modal de detalhe
+- [x] 30 artes de card por IA processadas (128x128, 48 cores) em public/cards + prédio public/city/b_cards.png (hub estendido para 4300px)
+- [x] save.ts: cards/deck persistidos + buyCard/toggleCard/clearDeck/deckBonus
+- [x] battle.ts: 19 stats de card aplicados em combate (aegis, evade, crit, amp, opening, rage, lifesteal, thorns, venom, resist, regen, mpregen...) para jogador E inimigos
+- [x] typecheck verde, build verde (EXIT=0)
+- [x] E2E (assets/e2e_cards2.py): deck 3 cards CHAMA → sinergias COMBUSTAO EM CADEIA + INFERNO TOTAL ativas, PODER +72% / FORCA +39% / FURIA +28%, remover/persistir OK, 0 erros de console, 0 imagens quebradas
+- Próxima: Fase B (parallax do hub em camadas geradas por IA)

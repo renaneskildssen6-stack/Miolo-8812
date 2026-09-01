@@ -88,6 +88,79 @@ const CORES: Core[] = PLATFORMS.map((p) => ({ x: p.x + p.w / 2, y: p.y - 34, tak
   { x: 2980, y: GROUND_Y - 40, taken: 0 },
 ]);
 
+/* ------------------------- parallax (Fase B) -------------------------
+ * Camadas independentes geradas por IA. `speed` = fator de rolagem
+ * (0 = fixo no fundo, 1 = colado no mundo). `anchor` = distancia do
+ * chao ate a base da camada; `scale` = altura relativa a tela.        */
+type Layer = {
+  src: string;
+  speed: number;
+  scale: number;
+  anchor: number;
+  alpha: number;
+  bob?: number;
+};
+const LAYERS: Layer[] = [
+  { src: "/city/pl_sky.png", speed: 0.04, scale: 1.15, anchor: 250, alpha: 1 },
+  { src: "/city/pl_mountains.png", speed: 0.12, scale: 0.5, anchor: 96, alpha: 0.75 },
+  { src: "/city/pl_skyline.png", speed: 0.24, scale: 0.72, anchor: 70, alpha: 0.85 },
+  { src: "/loading/city_f4.png", speed: 0.36, scale: 0.56, anchor: 54, alpha: 0.45 },
+  { src: "/city/bg.png", speed: 0.52, scale: 0.9, anchor: 30, alpha: 0.8 },
+  { src: "/city/pl_mid.png", speed: 0.7, scale: 0.62, anchor: 8, alpha: 0.9 },
+];
+/** camada desenhada na frente de tudo, colada no chao. */
+const FG_LAYER: Layer = {
+  src: "/city/pl_fg.png",
+  speed: 1.25,
+  scale: 0.15,
+  anchor: -4,
+  alpha: 0.9,
+};
+
+type Decor = { src: string; x: number; w: number; h: number; speed: number; flip?: boolean };
+const DECOR_SRC = [
+  "/city/prop_lamp.png",
+  "/city/prop_sign.png",
+  "/city/prop_crates.png",
+  "/city/prop_vending.png",
+  "/city/prop_antenna.png",
+  "/city/prop_trash.png",
+];
+const DECOR_SIZE: Record<string, [number, number]> = {
+  "/city/prop_lamp.png": [43, 96],
+  "/city/prop_sign.png": [63, 104],
+  "/city/prop_crates.png": [77, 84],
+  "/city/prop_vending.png": [66, 92],
+  "/city/prop_antenna.png": [55, 132],
+  "/city/prop_trash.png": [44, 68],
+};
+/** decoracoes espalhadas pelo mundo: metade no plano do jogador, metade atras. */
+const DECOR: Decor[] = (() => {
+  const out: Decor[] = [];
+  let seed = 20260831;
+  const rnd = () => {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return seed / 0x7fffffff;
+  };
+  for (let x = 150; x < WORLD_W - 80; x += 118) {
+    const src = DECOR_SRC[Math.floor(rnd() * DECOR_SRC.length)];
+    const near = BUILDINGS.some((b) => Math.abs(b.x - x) < 90);
+    if (near) continue;
+    const [w, h] = DECOR_SIZE[src];
+    const back = rnd() < 0.45;
+    const sc = back ? 0.75 : 1;
+    out.push({
+      src,
+      x: x + Math.round(rnd() * 40 - 20),
+      w: Math.round(w * sc),
+      h: Math.round(h * sc),
+      speed: back ? 0.88 : 1,
+      flip: rnd() < 0.35,
+    });
+  }
+  return out;
+})();
+
 type Particle = { x: number; y: number; vx: number; vy: number; life: number; max: number; c: string };
 
 export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => void }) {
@@ -202,7 +275,13 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
       }
       return im;
     };
-    [...Object.values(CLIP_SRC), "/city/bg.png", "/loading/city_f4.png", ...BUILDINGS.map((b) => b.art)].forEach(get);
+    [
+      ...Object.values(CLIP_SRC),
+      ...LAYERS.map((l) => l.src),
+      FG_LAYER.src,
+      ...DECOR_SRC,
+      ...BUILDINGS.map((b) => b.art),
+    ].forEach(get);
 
     let w = 480;
     let h = 800;
@@ -375,29 +454,39 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, w, h);
 
-      // parallax distante
-      const far = imgs["/loading/city_f4.png"];
-      if (far?.complete && far.naturalWidth) {
-        const fh = h * 0.62;
-        const fw = fh * (far.naturalWidth / far.naturalHeight);
-        const off = -((cx * 0.15) % fw);
-        for (let i = -1; i < Math.ceil(w / fw) + 1; i++) {
-          ctx.globalAlpha = 0.55;
-          ctx.drawImage(far, off + i * fw, GROUND_Y - cy - fh + 90, fw, fh);
+      // parallax multicamadas (Fase B)
+      const drawLayer = (l: Layer) => {
+        const im = imgs[l.src];
+        if (!im?.complete || !im.naturalWidth) return;
+        const lh = h * l.scale;
+        const lw = lh * (im.naturalWidth / im.naturalHeight);
+        const off = -(((cx * l.speed) % lw) + lw) % lw;
+        const y = GROUND_Y - cy - lh + l.anchor;
+        ctx.globalAlpha = l.alpha;
+        for (let i = 0; i < Math.ceil(w / lw) + 2; i++) {
+          ctx.drawImage(im, off + i * lw, y, lw, lh);
         }
         ctx.globalAlpha = 1;
-      }
+      };
+      for (const l of LAYERS) drawLayer(l);
 
-      // cidade média
-      const bg = imgs["/city/bg.png"];
-      if (bg?.complete && bg.naturalWidth) {
-        const bh = h * 0.95;
-        const bw = bh * (bg.naturalWidth / bg.naturalHeight);
-        const off = -((cx * 0.45) % bw);
-        for (let i = -1; i < Math.ceil(w / bw) + 1; i++) {
-          ctx.globalAlpha = 0.85;
-          ctx.drawImage(bg, off + i * bw, GROUND_Y - cy - bh + 120, bw, bh);
+      // decoracoes atras dos predios
+      for (const d of DECOR) {
+        if (d.speed >= 1) continue;
+        const im = imgs[d.src];
+        const dx = (d.x - cx) * d.speed + w * (1 - d.speed) * 0;
+        if (dx > w + 80 || dx + d.w < -80) continue;
+        if (!im?.complete || !im.naturalWidth) continue;
+        ctx.save();
+        ctx.globalAlpha = 0.7;
+        ctx.filter = "brightness(0.7)";
+        ctx.translate(dx, GROUND_Y - cy + 10 - d.h);
+        if (d.flip) {
+          ctx.translate(d.w, 0);
+          ctx.scale(-1, 1);
         }
+        ctx.drawImage(im, 0, 0, d.w, d.h);
+        ctx.restore();
         ctx.globalAlpha = 1;
       }
 
@@ -456,6 +545,23 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
         ctx.fillRect(px + 4, py + 16, p.w - 8, 4);
       }
 
+      // decoracoes no plano do jogador
+      for (const d of DECOR) {
+        if (d.speed < 1) continue;
+        const im = imgs[d.src];
+        const dx = d.x - cx;
+        if (dx > w + 80 || dx + d.w < -80) continue;
+        if (!im?.complete || !im.naturalWidth) continue;
+        ctx.save();
+        ctx.translate(dx, GROUND_Y - cy + 12 - d.h);
+        if (d.flip) {
+          ctx.translate(d.w, 0);
+          ctx.scale(-1, 1);
+        }
+        ctx.drawImage(im, 0, 0, d.w, d.h);
+        ctx.restore();
+      }
+
       // núcleos
       for (const c of cores.current) {
         if (c.taken > 0) continue;
@@ -495,6 +601,9 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
         ctx.drawImage(sheet, sx, 0, FRAME, FRAME, -dw / 2, -dh, dw, dh);
         ctx.restore();
       }
+
+      // camada de sucata em primeiro plano (parallax > 1)
+      drawLayer(FG_LAYER);
 
       // névoa em primeiro plano
       const fog = ctx.createLinearGradient(0, h - 90, 0, h);

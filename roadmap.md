@@ -6,7 +6,7 @@ Entrega **incremental**: uma fase (ou parte de fase) por sessão, sempre com
 
 | Fase | Sistema | Estado |
 |---|---|---|
-| A | **Cards de combate** — 30 cards pixel art por IA, 3 slots, custo de deck, sinergias por tag + combos nomeados, decks também para os inimigos/IA | em execução |
+| A | **Cards de combate** — 30 cards pixel art por IA, 3 slots, custo de deck, sinergias por tag + combos nomeados, decks também para os inimigos/IA | ✅ concluída |
 | B | **Parallax do hub** — céu, montanhas, skyline distante, construções separadas e decorações, todas geradas por IA em camadas independentes | pendente |
 | C | **Exploração** — modo side/top-down com sprites animados por ação (andar, correr, atacar, dano), todos os robôs jogáveis, chão/plataformas/props por IA (mesma técnica 4x4 + magenta) | pendente |
 | D | **1000+ robôs** — biblioteca modular de peças pixel art por IA (cabeças, torsos, braços, pernas, decorações) composta programaticamente; alimenta também a Fase F | pendente |
