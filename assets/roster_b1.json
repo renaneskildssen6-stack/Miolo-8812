@@ -1,0 +1,272 @@
+[
+ {
+  "i": "vespirion",
+  "n": "VESPIRION",
+  "e": "FERRAO",
+  "r": "silver",
+  "l": "yellow and black wasp mecha with four buzzing translucent wings, a segmented abdomen ending in a huge drill stinger, compound amber optics",
+  "a": "drill stinger dive",
+  "f": "poison"
+ },
+ {
+  "i": "scarabyss",
+  "n": "SCARABYSS",
+  "e": "ESCARAVELHO",
+  "r": "bronze",
+  "l": "armored beetle mecha with an iridescent green-blue carapace shell that splits open, two horn pincers on its head, stubby digging claws",
+  "a": "horn pincer flip",
+  "f": "trapped"
+ },
+ {
+  "i": "aranthrax",
+  "n": "ARANTHRAX",
+  "e": "TEIA",
+  "r": "gold",
+  "l": "towering black widow spider mecha with eight jointed steel legs, a crimson hourglass core glowing on its abdomen, web launcher fangs",
+  "a": "web fang snare",
+  "f": "trapped"
+ },
+ {
+  "i": "mantivore",
+  "n": "MANTIVORE",
+  "e": "LAMINA",
+  "r": "silver",
+  "l": "slender jade green mantis mecha with twin serrated scythe forearms, triangular head with glowing pink eyes, thin folded thorax plates",
+  "a": "scythe cross reap",
+  "f": "weakening"
+ },
+ {
+  "i": "formicore",
+  "n": "FORMICORE",
+  "e": "COLONIA",
+  "r": "bronze",
+  "l": "hunched red ant mecha with oversized mandible cutters, a swarm of tiny drone ants orbiting it, thick chitin shoulder plates",
+  "a": "mandible swarm bite",
+  "f": "drain"
+ },
+ {
+  "i": "cicadron",
+  "n": "CICADRON",
+  "e": "SONORO",
+  "r": "silver",
+  "l": "bronze cicada mecha with veined resonating wing membranes, a vibrating sound chamber chest, bulbous red eyes, hooked climbing legs",
+  "a": "resonant screech burst",
+  "f": "blind"
+ },
+ {
+  "i": "kagemaru",
+  "n": "KAGEMARU",
+  "e": "SOMBRA",
+  "r": "gold",
+  "l": "sleek black ninja mecha in a shadow-weave bodysuit with a scarf trailing behind, twin short tantos, glowing red visor slit under a hooded helm",
+  "a": "shadow twin tanto slash",
+  "f": "blind"
+ },
+ {
+  "i": "shurikage",
+  "n": "SHURIKAGE",
+  "e": "AGIL",
+  "r": "silver",
+  "l": "compact dark grey shinobi mecha with folding shuriken discs on its forearms, split-toe jet boots, a slim masked faceplate with cyan eye lines",
+  "a": "shuriken fan volley",
+  "f": "adrenalin"
+ },
+ {
+  "i": "fumikaze",
+  "n": "FUMIKAZE",
+  "e": "FUMACA",
+  "r": "bronze",
+  "l": "lean smoke-grey ninja mecha wrapped in smoke bomb canisters, vapor pouring from its ankles, cloth wraps over steel joints, one glowing yellow eye",
+  "a": "smoke veil elbow",
+  "f": "blind"
+ },
+ {
+  "i": "kunailock",
+  "n": "KUNAI LOCK",
+  "e": "CORRENTE",
+  "r": "silver",
+  "l": "agile indigo ninja mecha with kusarigama chain and kunai, chain coiled around its arm, sandal-like thruster feet, half-mask with sharp teeth pattern",
+  "a": "chain kunai bind",
+  "f": "trapped"
+ },
+ {
+  "i": "hayatezero",
+  "n": "HAYATE ZERO",
+  "e": "VENTO",
+  "r": "gold",
+  "l": "ultra-slim white and teal speed mecha with wind-blade ribbons on its back, afterimage trails, aerodynamic beak visor, bladed heels",
+  "a": "afterimage gale cut",
+  "f": "adrenalin"
+ },
+ {
+  "i": "nokusaki",
+  "n": "NOKUSAKI",
+  "e": "VENENO",
+  "r": "bronze",
+  "l": "wiry olive-green ninja mecha with poison dart tubes on its wrists, a straw-hat shaped helm, tattered scarf, glowing purple eye slits",
+  "a": "dart flurry strike",
+  "f": "poison"
+ },
+ {
+  "i": "bastionox",
+  "n": "BASTIONOX",
+  "e": "MURALHA",
+  "r": "gold",
+  "l": "gigantic slab-armored fortress mecha with a wall-sized tower shield fused to one arm, riveted grey plating, tiny glowing blue eye slit, tread-like feet",
+  "a": "fortress shield ram",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "mortarhulk",
+  "n": "MORTAR HULK",
+  "e": "ARTILHARIA",
+  "r": "silver",
+  "l": "squat wide-bodied tank mecha with twin mortar tubes on its shoulders, caterpillar treads instead of legs, olive drab armor, armored cockpit head",
+  "a": "twin mortar barrage",
+  "f": "burn"
+ },
+ {
+  "i": "granithor",
+  "n": "GRANITHOR",
+  "e": "GRANITO",
+  "r": "bronze",
+  "l": "hulking mecha built from rough grey granite blocks bound by iron bands, enormous fists, mossy cracks, glowing white rune eyes",
+  "a": "granite double slam",
+  "f": "weakening"
+ },
+ {
+  "i": "juggerspine",
+  "n": "JUGGERSPINE",
+  "e": "IMPACTO",
+  "r": "silver",
+  "l": "heavy charcoal juggernaut mecha with a spiked ram plate on its chest, hunched broad shoulders, hydraulic pistons on its back, no visible head",
+  "a": "spiked ram charge",
+  "f": "paralyze"
+ },
+ {
+  "i": "tectomaul",
+  "n": "TECTOMAUL",
+  "e": "TECTONICA",
+  "r": "gold",
+  "l": "colossal earth-plate mecha with continental crust armor, glowing magma seams, a wrecking maul the size of its torso, jaw-like faceplate",
+  "a": "tectonic maul quake",
+  "f": "paralyze"
+ },
+ {
+  "i": "ferroatlas",
+  "n": "FERRO ATLAS",
+  "e": "FERRO",
+  "r": "bronze",
+  "l": "broad shouldered iron laborer mecha carrying a girder on its back, chain harness across its chest, welded patch plates, single lamp eye",
+  "a": "girder overhead swing",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "xenovyre",
+  "n": "XENOVYRE",
+  "e": "XENO",
+  "r": "gold",
+  "l": "unsettling alien mecha of black chitin and violet muscle cables, an elongated eyeless head with a jaw of glass needles, a whip tail, ribbed torso",
+  "a": "needle jaw lunge",
+  "f": "drain"
+ },
+ {
+  "i": "myconaut",
+  "n": "MYCONAUT",
+  "e": "ESPORO",
+  "r": "bronze",
+  "l": "bulbous fungal-alien mecha with a translucent dome head full of floating spores, mottled purple flesh over ceramic plating, tendril fingers",
+  "a": "spore cloud grasp",
+  "f": "poison"
+ },
+ {
+  "i": "nebulith",
+  "n": "NEBULITH",
+  "e": "NEBULOSA",
+  "r": "silver",
+  "l": "floating alien mecha whose torso is a suspended nebula sphere held by three metal rings, long jellyfish tendrils, no legs, star-fleck skin",
+  "a": "gravity tendril pull",
+  "f": "trapped"
+ },
+ {
+  "i": "bioquell",
+  "n": "BIOQUELL",
+  "e": "SIMBIOSE",
+  "r": "silver",
+  "l": "symbiotic mecha half machine half pulsing coral flesh, glowing veins pumping teal fluid, asymmetric arms, one organic eye and one optic lens",
+  "a": "coral graft bash",
+  "f": "hp_regen"
+ },
+ {
+  "i": "hollowseer",
+  "n": "HOLLOW SEER",
+  "e": "PSIQUICO",
+  "r": "gold",
+  "l": "tall thin alien mecha with a smooth featureless faceplate reflecting stars, four floating hands, a levitating brain core in a glass ribcage",
+  "a": "psionic hand crush",
+  "f": "blind"
+ },
+ {
+  "i": "gastropodo",
+  "n": "GASTROPODO",
+  "e": "MUCO",
+  "r": "bronze",
+  "l": "slow alien mecha with a spiral metal shell on its back leaking luminous slime, two eyestalk sensors, a wide gliding base instead of feet",
+  "a": "slime trail bind",
+  "f": "weakening"
+ },
+ {
+  "i": "ronin_akatsu",
+  "n": "AKATSU RONIN",
+  "e": "AURORA",
+  "r": "gold",
+  "l": "crimson and gold samurai mecha with layered lamellar plating, a wide horned kabuto helm with a sunrise crest, a long glowing odachi",
+  "a": "dawn odachi draw cut",
+  "f": "burn"
+ },
+ {
+  "i": "bushidorne",
+  "n": "BUSHIDORNE",
+  "e": "HONRA",
+  "r": "silver",
+  "l": "dark indigo samurai mecha with a demon-mask menpo faceplate, twin katanas at its hip, sashimono banner on its back, plated skirt",
+  "a": "iai twin katana",
+  "f": "weakening"
+ },
+ {
+  "i": "lanceviel",
+  "n": "LANCEVIEL",
+  "e": "LANCA",
+  "r": "silver",
+  "l": "silver-white knight mecha in polished plate armor with a heater shield and a long jousting lance, plumed helm, blue tabard",
+  "a": "jousting lance charge",
+  "f": "paralyze"
+ },
+ {
+  "i": "templarion",
+  "n": "TEMPLARION",
+  "e": "JURAMENTO",
+  "r": "gold",
+  "l": "crusader knight mecha in white enamel armor with a red cross emblem, a huge two-handed claymore, chainmail underlayer, slit-visor helm",
+  "a": "oathbound claymore arc",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "kuroyari",
+  "n": "KUROYARI",
+  "e": "OBSIDIANA",
+  "r": "bronze",
+  "l": "black-lacquered ashigaru mecha with a long yari spear, conical jingasa helm, simple riveted cuirass, glowing orange eye slits",
+  "a": "spear thrust chain",
+  "f": "poison"
+ },
+ {
+  "i": "gwenshield",
+  "n": "GWEN SHIELD",
+  "e": "GUARDIA",
+  "r": "bronze",
+  "l": "stout woman-shaped knight mecha in dented iron plate with a kite shield twice her size, short mace, visor helm with a horsehair crest",
+  "a": "shield wall bash",
+  "f": "damage_reduction"
+ }
+]

@@ -52,3 +52,33 @@
 - [x] typecheck verde, build verde (EXIT=0)
 - [x] E2E (assets/e2e_cards2.py): deck 3 cards CHAMA → sinergias COMBUSTAO EM CADEIA + INFERNO TOTAL ativas, PODER +72% / FORCA +39% / FURIA +28%, remover/persistir OK, 0 erros de console, 0 imagens quebradas
 - Próxima: Fase B (parallax do hub em camadas geradas por IA)
+
+## Fase B — Parallax do hub (concluída)
+- [x] 6 artes de camada por IA processadas em public/city: pl_sky (960x540), pl_mountains, pl_skyline, pl_mid, pl_fg + 6 props (lamp, sign, crates, vending, antenna, trash)
+- [x] hub-city.tsx: 7 camadas independentes com speed/scale/anchor/alpha próprios (0.04 → 1.25), tiling infinito com módulo corrigido para offsets negativos
+- [x] camada de primeiro plano (pl_fg) desenhada na frente do robô, ajustada para faixa baixa (scale 0.15, anchor -4) para não cobrir o jogador
+- [x] ~30 decorações espalhadas pelo mundo com RNG determinístico (seed 20260831), 45% no plano de fundo (speed 0.88, brilho 0.7) e o resto no plano do jogador
+- [x] typecheck verde, build verde (EXIT=0), E2E do hub sem erros de console e sem requisições falhas; screenshots conferidos em 3 pontos do mundo
+- Próxima: Fase C (exploração com sprites animados por ação e todos os robôs jogáveis)
+
+## Fase C — Exploração com sprites por ação (concluída)
+- [x] game/hero.ts: leitura da tira 2048x128 (16 quadros de 128px) de QUALQUER robô — quadros 0-3 ocioso, 4-7 ataque, 8-11 dano, 12-15 teleporte
+- [x] 9 clipes de exploração (idle, walk, run, jump, fall, land, attack, interact, hurt) com fps, loop, bob, tilt e escala próprios
+- [x] hub-city.tsx: máquina de estados de animação ligada à física (subida x queda separadas, pousada com squash, rastro de partículas ao correr, sombra que encolhe no ar)
+- [x] TODOS os 220 robôs jogáveis no hub — seletor "TROCAR" com retrato 64x64, nome e nível de cada robô do hangar
+- [x] save.ts: campo `explorer` persistido + explorerId()/setExplorer(), com fallback para o líder da equipe
+- [x] camada de sucata do primeiro plano rebaixada (scale 0.075) para não cobrir o robô
+- [x] typecheck verde, build verde (EXIT=0), E2E do hub com troca de robô + ataque: 0 erros de console, 0 imagens quebradas
+- Próxima: Fase D (1000+ robôs via biblioteca modular de peças pixel art compostas programaticamente)
+
+## Fase D — 1000+ robôs, lote 1 (250/1000)
+- [x] Correção de rota: os robôs do roster voltam a ser feitos como os 220 originais (1 sprite sheet 4x4 por IA + pipeline). As 56 peças modulares (public/parts, game/parts.ts, game/compose.ts) ficam reservadas para o laboratório da Fase F
+- [x] game/robots.ts revertido ao formato original (spriteUrl/faceUrl → /robots/<id>.png); robots_modular.ts removido
+- [x] 30 robôs novos em 5 temas: insetoides/aracnídeos (vespirion, scarabyss, aranthrax, mantivore, formicore, cicadron), ninjas/ágeis (kagemaru, shurikage, fumikaze, kunailock, hayatezero, nokusaki), colossos/tanques (bastionox, mortarhulk, granithor, juggerspine, tectomaul, ferroatlas), alienígenas orgânico-tecnológicos (xenovyre, myconaut, nebulith, bioquell, hollowseer, gastropodo), cavaleiros e samurais (ronin_akatsu, bushidorne, lanceviel, templarion, kuroyari, gwenshield)
+- [x] assets/roster_b1.py → roster_b1.json; assets/process_batch1.py gerou 30 tiras 2048x128 + 30 faces 64x64 em public/robots (500 PNGs no total) e atualizou o manifest (250 robôs)
+- [x] assets/gen_blueprints_b1.py injetou os 30 Blueprints em game/robots.ts com 25 elementos novos mapeados no VFX_BY_ELEM (FERRAO, TEIA, XENO, JURAMENTO, GRANITO...)
+- [x] game/assets.ts: ROBOT_ASSETS regenerado a partir de public/robots (500 entradas) para o pré-carregamento
+- [x] roster.tsx paginado (PAGE=120 + botão MOSTRAR MAIS) para aguentar o roster crescendo até 1000
+- [x] typecheck verde, build verde (EXIT=0), E2E assets/e2e_lote1.py: ROBOTS=250, COLECAO x/250, 503 imagens sem nenhuma quebrada, 0 erros de console
+- Próxima: Fase D lote 2 — mais robôs no mesmo pipeline (faltam 750 para 1000)
+

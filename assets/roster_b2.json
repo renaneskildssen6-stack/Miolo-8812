@@ -1,0 +1,326 @@
+[
+ {
+  "i": "lupvexor",
+  "n": "LUPVEXOR",
+  "e": "MATILHA",
+  "r": "silver",
+  "l": "steel grey wolf mecha standing on digitigrade legs, a bristling mane of blade-quills, elongated snout with exposed piston fangs, glowing amber eyes",
+  "a": "pack fang lunge",
+  "f": "drain"
+ },
+ {
+  "i": "tigravox",
+  "n": "TIGRAVOX",
+  "e": "PRESA",
+  "r": "gold",
+  "l": "orange and black striped tiger mecha with retractable plasma claws, a heavy armored chest, whiskers of thin antennae, snarling metal jaw",
+  "a": "quad claw rend",
+  "f": "weakening"
+ },
+ {
+  "i": "ursagrind",
+  "n": "URSA GRIND",
+  "e": "URSO",
+  "r": "bronze",
+  "l": "massive brown bear mecha with shaggy cable fur, riveted shoulder pauldrons, enormous grinding paw drills, small red eye lenses",
+  "a": "grinding paw crush",
+  "f": "paralyze"
+ },
+ {
+  "i": "cornubrute",
+  "n": "CORNU BRUTE",
+  "e": "CHIFRE",
+  "r": "silver",
+  "l": "muscular bull mecha with two curved iron horns, a snorting steam nose vent, hoof pistons kicking up dust, plated hump back",
+  "a": "horn charge trample",
+  "f": "paralyze"
+ },
+ {
+  "i": "simiaslam",
+  "n": "SIMIA SLAM",
+  "e": "PRIMATA",
+  "r": "bronze",
+  "l": "broad-armed gorilla mecha with knuckle walker fists, a barrel chest with a glowing core, short legs, angry brow plate over green optics",
+  "a": "double fist ground slam",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "draknoir",
+  "n": "DRAKNOIR",
+  "e": "DRAGAO",
+  "r": "gold",
+  "l": "black scaled dragon mecha with tattered metal wings, a long spiked tail, a furnace throat glowing orange, curved horns sweeping back",
+  "a": "furnace breath sweep",
+  "f": "burn"
+ },
+ {
+  "i": "abyssquid",
+  "n": "ABYSS SQUID",
+  "e": "ABISSO",
+  "r": "silver",
+  "l": "deep sea squid mecha with eight cable tentacles, a torpedo mantle body with bioluminescent blue dots, two huge glass eye domes",
+  "a": "tentacle ink coil",
+  "f": "blind"
+ },
+ {
+  "i": "krakenvolt",
+  "n": "KRAKEN VOLT",
+  "e": "MARE",
+  "r": "gold",
+  "l": "colossal kraken mecha with barnacled dark teal plating, electrified suckers along its arms, a beaked maw, storm clouds of static around it",
+  "a": "electro tentacle slam",
+  "f": "paralyze"
+ },
+ {
+  "i": "orcapulse",
+  "n": "ORCA PULSE",
+  "e": "SONAR",
+  "r": "silver",
+  "l": "sleek black and white orca mecha with hydro jet fins, a rounded sonar dome forehead, streamlined torso, short powerful arms",
+  "a": "sonar pulse ram",
+  "f": "blind"
+ },
+ {
+  "i": "coralarch",
+  "n": "CORAL ARCH",
+  "e": "RECIFE",
+  "r": "bronze",
+  "l": "reef mecha overgrown with pink and orange coral branches, cracked white ceramic plating, anemone shoulders, calm turquoise eye lights",
+  "a": "coral spire uppercut",
+  "f": "hp_regen"
+ },
+ {
+  "i": "hadalmaw",
+  "n": "HADAL MAW",
+  "e": "PRESSAO",
+  "r": "gold",
+  "l": "anglerfish mecha of pitted black steel with a glowing lure antenna, an enormous jaw of needle teeth, tiny useless arms, pressure ribbed hull",
+  "a": "lure light chomp",
+  "f": "trapped"
+ },
+ {
+  "i": "nauticrust",
+  "n": "NAUTICRUST",
+  "e": "CASCO",
+  "r": "bronze",
+  "l": "armored crab mecha with a wide barnacle shell back, one oversized crusher claw and one shield claw, stalk eyes, six skittering legs",
+  "a": "crusher claw pinch",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "solvarion",
+  "n": "SOLVARION",
+  "e": "SOLAR",
+  "r": "gold",
+  "l": "radiant golden mecha with a sun disc halo behind its head, molten light seams across white armor, flowing solar flare cape, blank glowing faceplate",
+  "a": "solar flare judgment",
+  "f": "burn"
+ },
+ {
+  "i": "lunaris_n",
+  "n": "LUNARIS",
+  "e": "LUNAR",
+  "r": "silver",
+  "l": "pale silver mecha with a crescent moon crown, flowing star-cloth mantle, delicate filigree armor, calm violet visor, moonlight orb in its palm",
+  "a": "crescent moon arc",
+  "f": "hp_regen"
+ },
+ {
+  "i": "cometrail",
+  "n": "COMET RAIL",
+  "e": "COMETA",
+  "r": "silver",
+  "l": "streamlined ice-blue mecha trailing a burning comet tail from its back thrusters, frost-cracked plating, sharp forward-swept shoulders",
+  "a": "comet tail dive",
+  "f": "adrenalin"
+ },
+ {
+  "i": "astronex",
+  "n": "ASTRONEX",
+  "e": "ORBITA",
+  "r": "bronze",
+  "l": "bulky white astronaut mecha with a gold-mirrored bubble visor, life support backpack, ringed planet emblem on its chest, thick padded joints",
+  "a": "orbital wrench swing",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "quasarion",
+  "n": "QUASARION",
+  "e": "QUASAR",
+  "r": "gold",
+  "l": "blinding white-violet mecha whose chest is a collapsing star core, armor plates floating detached around its body, no legs, streaming light hair",
+  "a": "quasar collapse beam",
+  "f": "weakening"
+ },
+ {
+  "i": "zodiakon",
+  "n": "ZODIAKON",
+  "e": "ZODIACO",
+  "r": "silver",
+  "l": "bronze astrolabe mecha with rotating constellation rings around its waist, star-chart engraved armor, a horned diadem, twelve tiny glowing sigils",
+  "a": "constellation ring bind",
+  "f": "trapped"
+ },
+ {
+  "i": "wraithcore",
+  "n": "WRAITH CORE",
+  "e": "ESPECTRO",
+  "r": "gold",
+  "l": "tattered ghost mecha with a shredded grey shroud, a hollow chest cavity holding a floating blue soul flame, chained broken arms, faceless skull helm",
+  "a": "soul flame reach",
+  "f": "drain"
+ },
+ {
+  "i": "ossuarion",
+  "n": "OSSUARION",
+  "e": "OSSADA",
+  "r": "silver",
+  "l": "skeletal mecha assembled from bleached bone-white struts and exposed gears, a grinning skull faceplate, ribcage torso with a green lantern heart",
+  "a": "bone scythe sweep",
+  "f": "poison"
+ },
+ {
+  "i": "crypthollow",
+  "n": "CRYPT HOLLOW",
+  "e": "CRIPTA",
+  "r": "bronze",
+  "l": "hunched gravedigger mecha caked in dirt, a rusted iron mask with two eye holes, a shovel blade arm, coffin plate strapped to its back",
+  "a": "shovel grave swing",
+  "f": "weakening"
+ },
+ {
+  "i": "banshira",
+  "n": "BANSHIRA",
+  "e": "LAMENTO",
+  "r": "silver",
+  "l": "wailing spirit mecha with long floating hair of black wire, a cracked porcelain face mask, torn white gown plating, hovering above the ground",
+  "a": "wailing shriek wave",
+  "f": "blind"
+ },
+ {
+  "i": "necrovault",
+  "n": "NECROVAULT",
+  "e": "NECRO",
+  "r": "gold",
+  "l": "towering tomb mecha of black marble and gold trim, sarcophagus chest that cracks open with green light, crowned pharaoh helm, bandage cables",
+  "a": "sarcophagus seal grip",
+  "f": "trapped"
+ },
+ {
+  "i": "phantasmog",
+  "n": "PHANTASMOG",
+  "e": "NEVOA",
+  "r": "bronze",
+  "l": "half-transparent mist mecha whose lower body dissolves into fog, faint outline of ribs and spine, two drifting lantern eyes, ragged cloak",
+  "a": "fog phase strike",
+  "f": "blind"
+ },
+ {
+  "i": "aquilaris",
+  "n": "AQUILARIS",
+  "e": "AGUIA",
+  "r": "gold",
+  "l": "golden eagle mecha with a huge feathered wingspan of metal blades, hooked beak helm, taloned raptor feet, brown and gold plumage plating",
+  "a": "dive talon strike",
+  "f": "adrenalin"
+ },
+ {
+  "i": "corvexis",
+  "n": "CORVEXIS",
+  "e": "CORVO",
+  "r": "silver",
+  "l": "glossy black raven mecha with a sharp beak visor, feather-blade cloak wings, purple iridescent sheen, clawed hands, one glowing white eye",
+  "a": "beak peck barrage",
+  "f": "blind"
+ },
+ {
+  "i": "strixnova",
+  "n": "STRIX NOVA",
+  "e": "CORUJA",
+  "r": "silver",
+  "l": "round owl mecha with huge orange lens eyes, silent feather-panel wings, tufted horn ears, a swiveling head, soft grey barred plating",
+  "a": "silent talon ambush",
+  "f": "weakening"
+ },
+ {
+  "i": "falcowire",
+  "n": "FALCO WIRE",
+  "e": "FALCAO",
+  "r": "bronze",
+  "l": "compact peregrine falcon mecha built for speed, swept dart wings, a slate blue helm with cheek stripes, needle talons, thin frame",
+  "a": "stoop dive slash",
+  "f": "adrenalin"
+ },
+ {
+  "i": "pavoreal",
+  "n": "PAVO REAL",
+  "e": "PLUMA",
+  "r": "gold",
+  "l": "peacock mecha with an enormous fan of iridescent blue-green eye-spotted tail panels, a crowned crest, elegant slim armor, mirrored chest",
+  "a": "dazzling fan display",
+  "f": "blind"
+ },
+ {
+  "i": "condorax",
+  "n": "CONDORAX",
+  "e": "ALTITUDE",
+  "r": "bronze",
+  "l": "heavy condor mecha with a bald red-plated head, enormous ragged black wings, hunched shoulders, thick scavenger talons, dusty worn armor",
+  "a": "wing buffet crush",
+  "f": "damage_reduction"
+ },
+ {
+  "i": "arcanexus",
+  "n": "ARCANEXUS",
+  "e": "ARCANO",
+  "r": "gold",
+  "l": "wizard mecha in a rune-stitched deep blue robe over segmented armor, floating spell tomes orbiting its head, a long staff topped with a glowing prism",
+  "a": "prism arcane bolt",
+  "f": "weakening"
+ },
+ {
+  "i": "alchemyre",
+  "n": "ALCHEMYRE",
+  "e": "ALQUIMIA",
+  "r": "silver",
+  "l": "alchemist mecha with a glass alembic torso bubbling green fluid, brass pipe arms, a plague-doctor beak mask, vial bandolier across its chest",
+  "a": "unstable flask toss",
+  "f": "poison"
+ },
+ {
+  "i": "runeblaid",
+  "n": "RUNE BLAID",
+  "e": "RUNA",
+  "r": "silver",
+  "l": "stone-grey mecha covered in carved glowing runes, a floating rune-etched greatsword controlled without hands, a slab faceplate with three eye marks",
+  "a": "floating rune blade",
+  "f": "burn"
+ },
+ {
+  "i": "hexarion",
+  "n": "HEXARION",
+  "e": "MALDICAO",
+  "r": "bronze",
+  "l": "crooked witch mecha with a wide brimmed iron hat, a bubbling cauldron mounted on its back, gnarled claw fingers, one green and one purple eye",
+  "a": "cauldron curse splash",
+  "f": "poison"
+ },
+ {
+  "i": "sigilmark",
+  "n": "SIGILMARK",
+  "e": "SIGILO",
+  "r": "gold",
+  "l": "ceremonial mecha whose chest opens into a spinning summoning circle, gold-inlaid white armor, ribbon seals fluttering from its arms, a mask of many eyes",
+  "a": "summoning circle seal",
+  "f": "trapped"
+ },
+ {
+  "i": "elixirion",
+  "n": "ELIXIRION",
+  "e": "ELIXIR",
+  "r": "bronze",
+  "l": "apothecary mecha with tanks of red and blue elixir on its back, transfusion tube arms, a monocle lens over one optic, stained lab-coat plating",
+  "a": "elixir injection jab",
+  "f": "hp_regen"
+ }
+]

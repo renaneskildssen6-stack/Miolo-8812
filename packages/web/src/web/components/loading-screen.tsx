@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ALL_ASSETS } from "@/game/assets";
+import { preloadParts } from "@/game/compose";
 
 /* ---------------------------------------------------------------------------
  * Tela de carregamento: skyline futurista em pixel art rodando a 4fps
@@ -68,7 +69,7 @@ export function LoadingScreen({ onDone }: { onDone: () => void }) {
       }
     };
 
-    Promise.all(Array.from({ length: 8 }, worker)).then(() => {
+    Promise.all([...Array.from({ length: 8 }, worker), preloadParts()]).then(() => {
       if (!alive) return;
       setLabel("pronto");
       setDone(true);

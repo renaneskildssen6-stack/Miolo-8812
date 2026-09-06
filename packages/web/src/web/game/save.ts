@@ -59,6 +59,8 @@ export interface GameState {
   cards: string[];
   /** ate 3 cards equipados no deck de combate. */
   deck: string[];
+  /** robo usado na exploracao do hub (Fase C). null = lider da equipe. */
+  explorer: string | null;
   /** progresso do modo ranqueado. */
   ranked: RankedState;
   /** progresso dos modos de jogo. */
@@ -101,6 +103,7 @@ function initialState(): GameState {
     activePet: null,
     cards: [],
     deck: [],
+    explorer: null,
     ranked: initialRanked(),
     modes: {
       babelFloor: 1,
@@ -135,6 +138,10 @@ function read(): GameState {
       activePet: parsed.activePet ?? null,
       cards: (parsed.cards ?? []).filter((id) => Boolean(CARD_MAP[id])),
       deck: (parsed.deck ?? []).filter((id) => Boolean(CARD_MAP[id])).slice(0, MAX_CARDS),
+      explorer:
+        parsed.explorer && (parsed.robots ?? []).some((r) => r.id === parsed.explorer)
+          ? parsed.explorer
+          : null,
       // migração v1 -> v2: saves antigos não tinham modo ranqueado
       ranked: normalizeRanked(parsed.ranked),
       modes: { ...base.modes, ...(parsed.modes ?? {}) },
@@ -228,6 +235,16 @@ export function spendItem(id: string, qty = 1) {
     ...s,
     items: { ...s.items, [id]: Math.max(0, (s.items[id] ?? 0) - qty) },
   }));
+}
+
+/** robo que o jogador controla no hub (Fase C). */
+export function explorerId(s: GameState = state): string {
+  if (s.explorer && s.robots.some((r) => r.id === s.explorer)) return s.explorer;
+  return s.team[0] ?? s.robots[0]?.id ?? "";
+}
+
+export function setExplorer(id: string) {
+  setState((s) => (s.robots.some((r) => r.id === id) ? { ...s, explorer: id } : s));
 }
 
 export function setTeam(team: string[]) {

@@ -15,6 +15,8 @@ const RARITY_GLOW: Record<string, string> = {
 
 type RosterTab = "todos" | "equipe" | "meus" | "bronze" | "silver" | "gold" | "locked";
 
+const PAGE = 120;
+
 const TABS: { id: RosterTab; label: string }[] = [
   { id: "todos", label: "TODOS" },
   { id: "equipe", label: "EQUIPE" },
@@ -31,6 +33,9 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
   const [detail, setDetail] = useState<string | null>(null);
   const [tab, setTab] = useState<RosterTab>("todos");
   const [query, setQuery] = useState("");
+  // com mais de 1000 robos a grade e paginada: cada robo modular tem o sprite
+  // montado sob demanda, entao renderizamos em lotes.
+  const [limit, setLimit] = useState(PAGE);
 
   const owned = g.robots;
   const focused = owned.find((r) => r.id === focus) ?? owned[0] ?? null;
@@ -203,7 +208,10 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
               key={t.id}
               type="button"
               className="mk-title"
-              onClick={() => setTab(t.id)}
+              onClick={() => {
+                setTab(t.id);
+                setLimit(PAGE);
+              }}
               style={{
                 flexShrink: 0,
                 fontSize: 6,
@@ -220,7 +228,10 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
         </div>
         <input
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setLimit(PAGE);
+          }}
           placeholder="BUSCAR HEROI OU ELEMENTO"
           className="mk-title"
           style={{
@@ -275,7 +286,7 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
             gap: 8,
           }}
         >
-          {visible.map((def) => {
+          {visible.slice(0, limit).map((def) => {
             const save = owned.find((r) => r.id === def.id) ?? null;
             const isLocked = !save;
             const active = focus === def.id;
@@ -344,6 +355,13 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
             );
           })}
         </div>
+        {visible.length > limit && (
+          <div style={{ display: "grid", placeItems: "center", marginTop: 10 }}>
+            <PixelButton onClick={() => setLimit((l) => l + PAGE)}>
+              MOSTRAR MAIS ({visible.length - limit})
+            </PixelButton>
+          </div>
+        )}
         <div style={{ height: 52 }} />
       </div>
 

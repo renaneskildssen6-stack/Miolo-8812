@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Screen } from "@/screens/menu";
 import { useGate } from "@/components/gate";
+import { HERO_CLIPS, HERO_FRAME, clipFrame, heroFace, heroSheet, type HeroClip } from "@/game/hero";
+import { ROBOT_MAP } from "@/game/robots";
+import { explorerId, setExplorer, useGame } from "@/game/save";
 
 /* ---------------------------------------------------------------------------
  * Hub da cidade — plataforma 2D em canvas com física real.
@@ -25,20 +28,8 @@ const FRICTION = 2600;
 const COYOTE = 0.11;
 const BUFFER = 0.13;
 
-const FRAMES = 20;
-const FRAME = 64;
-const SPR = 104; // tamanho desenhado do robô
+const SPR = 112; // tamanho desenhado do robô
 const HALF_W = 22; // meia largura de colisão
-
-type Clip = "idle" | "walk_side" | "run" | "jump" | "attack" | "interact";
-const CLIP_SRC: Record<Clip, string> = {
-  idle: "/hero/idle.png",
-  walk_side: "/hero/walk_side.png",
-  run: "/hero/run.png",
-  jump: "/hero/jump.png",
-  attack: "/hero/attack.png",
-  interact: "/hero/interact.png",
-};
 
 type Building = {
   id: Exclude<Screen, "menu">;
@@ -112,9 +103,9 @@ const LAYERS: Layer[] = [
 const FG_LAYER: Layer = {
   src: "/city/pl_fg.png",
   speed: 1.25,
-  scale: 0.15,
-  anchor: -4,
-  alpha: 0.9,
+  scale: 0.075,
+  anchor: -2,
+  alpha: 0.92,
 };
 
 type Decor = { src: string; x: number; w: number; h: number; speed: number; flip?: boolean };
@@ -167,6 +158,12 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const { transition, busy } = useGate();
+  const st = useGame();
+  const hero = explorerId(st);
+  const heroRef = useRef(hero);
+  heroRef.current = hero;
+  const landT = useRef(0);
+  const [picker, setPicker] = useState(false);
 
   const [near, setNear] = useState<Building | null>(null);
   const [score, setScore] = useState(0);
@@ -175,7 +172,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
   // entradas
   const input = useRef({ left: false, right: false, run: false, jumpHeld: false });
   const jumpBuf = useRef(0);
-  const actRef = useRef<{ clip: Clip; until: number } | null>(null);
+  const actRef = useRef<{ clip: HeroClip; until: number } | null>(null);
   const onEnterRef = useRef(onEnter);
   onEnterRef.current = onEnter;
   const nearRef = useRef<Building | null>(null);
@@ -195,8 +192,8 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
     jumps: 0,
     squash: 0,
     frame: 0,
-    clip: "idle" as Clip,
-    fAcc: 0,
+    clip: "idle" as HeroClip,
+    clipT: 0,
   });
   const cam = useRef({ x: 0, y: 0 });
   const parts = useRef<Particle[]>([]);
@@ -276,7 +273,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
       return im;
     };
     [
-      ...Object.values(CLIP_SRC),
+      heroSheet(heroRef.current),
       ...LAYERS.map((l) => l.src),
       FG_LAYER.src,
       ...DECOR_SRC,
@@ -374,6 +371,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
       }
       if (grounded && !P.onGround) {
         P.squash = 0.3;
+        landT.current = 0.16;
         spawn(P.x, P.y, 8, "#cfe9ff");
         P.jumps = 0;
       }
@@ -420,27 +418,27 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
         return p.life < p.max;
       });
 
-      /* ---------------- animação ---------------- */
-      const clip: Clip = acting
+      /* ------------- animação por ação (Fase C) ------------- */
+      const clip: HeroClip = acting
         ? acting
         : !P.onGround
-          ? "jump"
-          : Math.abs(P.vx) > WALK + 12
-            ? "run"
-            : Math.abs(P.vx) > 8
-              ? "walk_side"
-              : "idle";
+          ? P.vy < -40
+            ? "jump"
+            : "fall"
+          : landT.current > 0
+            ? "land"
+            : Math.abs(P.vx) > WALK + 12
+              ? "run"
+              : Math.abs(P.vx) > 8
+                ? "walk"
+                : "idle";
       if (clip !== P.clip) {
         P.clip = clip;
-        P.frame = 0;
-        P.fAcc = 0;
+        P.clipT = 0;
       }
-      const fps = clip === "run" ? 20 : clip === "idle" ? 9 : 15;
-      P.fAcc += dt;
-      while (P.fAcc >= 1 / fps) {
-        P.fAcc -= 1 / fps;
-        P.frame = (P.frame + 1) % FRAMES;
-      }
+      P.clipT += dt;
+      P.frame = clipFrame(P.clip, P.clipT);
+      landT.current = Math.max(0, landT.current - dt);
 
       /* ---------------- render ---------------- */
       const cx = cam.current.x;
@@ -585,21 +583,31 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
       }
       ctx.globalAlpha = 1;
 
-      // robô
-      const sheet = imgs[CLIP_SRC[P.clip]];
+      // robô do jogador — tira de 16 quadros do próprio robô (Fase C)
+      const sheet = get(heroSheet(heroRef.current));
       if (sheet?.complete && sheet.naturalWidth) {
-        const sx = P.frame * FRAME;
+        const def = HERO_CLIPS[P.clip];
+        const sx = P.frame * HERO_FRAME;
         const sq = 1 + P.squash;
-        const dw = SPR / sq;
-        const dh = SPR * sq;
-        // sombra
-        ctx.fillStyle = "rgba(0,0,0,0.35)";
-        ctx.fillRect(P.x - cx - 22, GROUND_Y - cy - 4, 44, 6);
+        const dw = (SPR * def.scale) / sq;
+        const dh = SPR * def.scale * sq;
+        const bob = def.bob ? Math.sin(t * def.fps * 1.6) * def.bob : 0;
+        // sombra (encolhe no ar)
+        const air = Math.max(0, Math.min(1, (GROUND_Y - P.y) / 220));
+        ctx.globalAlpha = 0.35 * (1 - air * 0.6);
+        ctx.fillStyle = "#000";
+        ctx.fillRect(P.x - cx - 22 + air * 6, GROUND_Y - cy - 4, 44 - air * 12, 6);
+        ctx.globalAlpha = 1;
         ctx.save();
-        ctx.translate(P.x - cx, P.y - cy);
+        ctx.translate(P.x - cx, P.y - cy + bob);
         ctx.scale(P.face, 1);
-        ctx.drawImage(sheet, sx, 0, FRAME, FRAME, -dw / 2, -dh, dw, dh);
+        if (def.tilt) ctx.rotate(def.tilt);
+        ctx.drawImage(sheet, sx, 0, HERO_FRAME, HERO_FRAME, -dw / 2, -dh, dw, dh);
         ctx.restore();
+        // brilho de impulso ao correr
+        if (P.clip === "run" && Math.random() < 0.4) {
+          spawn(P.x - P.face * 14, P.y - 4, 1, "#8fe9ff");
+        }
       }
 
       // camada de sucata em primeiro plano (parallax > 1)
@@ -676,6 +684,124 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
           </button>
         ))}
       </div>
+
+      {/* Trocar robô de exploração (Fase C) */}
+      <button
+        className="mk-title"
+        onClick={() => setPicker(true)}
+        style={{
+          position: "absolute",
+          top: 40,
+          right: 8,
+          zIndex: 6,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 6,
+          padding: "5px 7px",
+          color: "#dff6ff",
+          background: "rgba(6,14,26,0.8)",
+          border: "2px solid rgba(53,226,240,0.35)",
+          cursor: "pointer",
+        }}
+      >
+        <img
+          src={heroFace(hero)}
+          alt=""
+          width={22}
+          height={22}
+          style={{ imageRendering: "pixelated", maxWidth: "none" }}
+        />
+        TROCAR
+      </button>
+
+      {picker && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 20,
+            background: "rgba(3,8,16,0.9)",
+            display: "flex",
+            flexDirection: "column",
+            padding: 12,
+          }}
+        >
+          <div
+            className="mk-title"
+            style={{ fontSize: 9, color: "var(--mk-accent)", marginBottom: 4 }}
+          >
+            EXPLORAR COM
+          </div>
+          <div className="mk-title" style={{ fontSize: 6, color: "#7fa8c4", marginBottom: 10 }}>
+            {st.robots.length} ROBOS NO HANGAR • O ESCOLHIDO ANDA, CORRE, PULA E ATACA NA CIDADE
+          </div>
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 8,
+              alignContent: "start",
+            }}
+          >
+            {st.robots.map((r) => {
+              const def = ROBOT_MAP[r.id];
+              const on = r.id === hero;
+              return (
+                <button
+                  key={r.id}
+                  className="mk-title"
+                  onClick={() => {
+                    setExplorer(r.id);
+                    setPicker(false);
+                  }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "8px 4px",
+                    fontSize: 5,
+                    color: on ? "#03121a" : "#dff6ff",
+                    background: on ? "var(--mk-accent)" : "rgba(8,18,32,0.9)",
+                    border: `2px solid ${on ? "#03121a" : "rgba(53,226,240,0.3)"}`,
+                    cursor: "pointer",
+                  }}
+                >
+                  <img
+                    src={heroFace(r.id)}
+                    alt=""
+                    width={44}
+                    height={44}
+                    style={{ imageRendering: "pixelated", maxWidth: "none" }}
+                  />
+                  <span style={{ lineHeight: 1.4, textAlign: "center" }}>
+                    {def?.name ?? r.id}
+                  </span>
+                  <span style={{ opacity: 0.75 }}>NV {r.level}</span>
+                </button>
+              );
+            })}
+          </div>
+          <button
+            className="mk-title"
+            onClick={() => setPicker(false)}
+            style={{
+              marginTop: 10,
+              fontSize: 8,
+              padding: "10px 12px",
+              color: "#dff6ff",
+              background: "rgba(8,18,32,0.9)",
+              border: "2px solid rgba(53,226,240,0.4)",
+              cursor: "pointer",
+            }}
+          >
+            FECHAR
+          </button>
+        </div>
+      )}
 
       {near && (
         <button
