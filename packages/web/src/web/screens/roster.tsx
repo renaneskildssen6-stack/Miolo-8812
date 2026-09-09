@@ -5,6 +5,7 @@ import { LoadoutEditor } from "@/components/loadout";
 import { TRAIN_COST_PER_POINT } from "@/game/config";
 import { baseStats, maxTrained, robotMaxXP, type RobotSave } from "@/game/engine";
 import { addGold, setTeam, updateRobots, useGame } from "@/game/save";
+import { isCustom } from "@/game/lab";
 import { faceUrl, ROBOT_MAP, ROBOTS } from "@/game/robots";
 
 const RARITY_GLOW: Record<string, string> = {
@@ -58,7 +59,10 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
   const showDef = lockedDef ?? focusDef;
 
   const q = query.trim().toUpperCase();
-  const visible = ROBOTS.filter((def) => {
+  // robôs montados no laboratório (Fase F) aparecem sempre no topo da grade
+  const visible = [...ROBOTS]
+    .sort((a, b) => Number(isCustom(b.id)) - Number(isCustom(a.id)))
+    .filter((def) => {
     if (q && !def.name.includes(q) && !def.element.includes(q)) return false;
     switch (tab) {
       case "equipe":

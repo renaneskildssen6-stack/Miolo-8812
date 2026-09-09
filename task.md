@@ -82,3 +82,30 @@
 - [x] typecheck verde, build verde (EXIT=0), E2E assets/e2e_lote1.py: ROBOTS=250, COLECAO x/250, 503 imagens sem nenhuma quebrada, 0 erros de console
 - Próxima: Fase D lote 2 — mais robôs no mesmo pipeline (faltam 750 para 1000)
 
+
+## Fase D — congelada a pedido do usuário (256 robôs)
+- [x] 6 robôs do lote 2 já gerados foram aproveitados (lupvexor, tigravox, ursagrind, cornubrute, simiaslam, draknoir — tema bestas selvagens): 12 PNGs novos, manifest com 256 robôs, 6 Blueprints em game/robots.ts, ROBOT_ASSETS com 512 entradas
+- [x] Geração de novos sprites de personagem interrompida conforme pedido; retomar só com pedido explícito
+
+## Fase E — Mineração em tempo real (concluída)
+- [x] Arte por IA processada em assets/process_mine.py: /city/b_mine.png (fachada da mina no hub), /ui/bg_mine.png (interior da caverna) e /ui/ore_0..7.png (8 minérios)
+- [x] game/mining.ts: 8 minérios (ferro 3g → prisma 440g), 8 camadas de profundidade (custo 0 → 800.000g, dureza crescente), sorteio de minério por camada, picareta (Lv30), silo (Lv30), perfuratriz por camada (Lv20) com produção offline de até 8h, refinaria (Lv20, 10 brutos = 1 lingote valendo 3,5x)
+- [x] game/save.ts: estado mining persistido + ações mineOre, miningTick, upgradePick/Silo/Refinery/Drill, descendMine, startRefine, collectRefine, sellMining
+- [x] screens/mine.tsx: parede de rocha com 6 veios clicáveis (HP, respawn de 9s, floaters de dano/ganho), robô explorador tocando "attack" a cada golpe, barra do silo, abas MINA / PERFURATRIZ / REFINO / ESTOQUE
+- [x] Fiação: prédio MINA PROFUNDA no hub (x=4320, WORLD_W 4300 → 4900), Screen "mine", modal no game-shell, assets no CORE_ASSETS
+- [x] typecheck verde, build verde, E2E assets/e2e_mine.py: 6 veios, silo 0 → 17 minérios (ferro 12 + cobre 5), perfuratriz N1 instalada, 4 abas abrindo, 0 imagens quebradas, 0 erros de console
+- Próxima: Fase F — laboratório de construção de robô com as 56 peças modulares
+
+## Fase F — Laboratório (em andamento)
+- [x] game/lab.ts (núcleos, stats de peça, draft, custo, CustomRobot, activate/deactivate)
+- [x] compose.ts: setCustomSet/clearCustomSet + setFor(id)
+- [x] robots.ts: setSpriteResolver/setFaceResolver + registerCustom/unregisterCustom
+- [x] save.ts: campo customs, normalize+activate no read(), buildCustom/renameCustom/scrapCustom, totalBars, lockedRobotIds ignora lab_
+- [x] screens/lab.tsx (bancada com carrosséis + hangar de protótipos)
+- [x] menu.tsx: Screen "lab"
+- [ ] game-shell.tsx wiring
+- [ ] hub-city.tsx prédio b_lab + WORLD_W 5400
+- [ ] arte: /city/b_lab.png e /ui/bg_lab.png
+- [ ] assets.ts CORE_ASSETS
+- [ ] typecheck + build + e2e_lab.py
+- [ ] roadmap.md: F concluída + linhas G1..G5 do pedido novo

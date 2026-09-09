@@ -16,6 +16,41 @@ import {
 } from "./ranked";
 import { defaultLoadout, MAX_LOADOUT } from "./skills";
 import {
+  BAR_COST,
+  DEPTHS,
+  DRILL_MAX,
+  MAX_DEPTH,
+  PICK_MAX,
+  REFINERY_MAX,
+  SILO_MAX,
+  barValue,
+  collectProduction,
+  drillCost,
+  initialMining,
+  normalizeMining,
+  ORE_MAP,
+  pickCost,
+  refineBatch,
+  refineMs,
+  refineryCost,
+  siloCapacity,
+  siloCost,
+  storedTotal,
+  type MiningState,
+} from "./mining";
+import {
+  LAB_MAX,
+  activateCustom,
+  buildCost,
+  deactivateCustom,
+  isCustom,
+  nextCustomId,
+  normalizeCustoms,
+  scrapValue,
+  type CustomRobot,
+  type LabDraft,
+} from "./lab";
+import {
   PET_MAP,
   PET_MAX_LEVEL,
   petUpgradeCost,
@@ -63,6 +98,10 @@ export interface GameState {
   explorer: string | null;
   /** progresso do modo ranqueado. */
   ranked: RankedState;
+  /** mineração em tempo real (Fase E). */
+  mining: MiningState;
+  /** robôs montados no laboratório (Fase F). */
+  customs: CustomRobot[];
   /** progresso dos modos de jogo. */
   modes: {
     babelFloor: number;
@@ -105,6 +144,8 @@ function initialState(): GameState {
     deck: [],
     explorer: null,
     ranked: initialRanked(),
+    mining: initialMining(),
+    customs: [],
     modes: {
       babelFloor: 1,
       babelBest: 0,
@@ -128,6 +169,9 @@ function read(): GameState {
     const parsed = JSON.parse(raw) as GameState;
     if (!parsed.robots?.length) return initialState();
     const base = initialState();
+    // Fase F: registra os robôs do laboratório antes de qualquer tela montar.
+    const customs = normalizeCustoms(parsed.customs);
+    for (const c of customs) activateCustom(c);
     return {
       ...base,
       ...parsed,
@@ -144,6 +188,8 @@ function read(): GameState {
           : null,
       // migração v1 -> v2: saves antigos não tinham modo ranqueado
       ranked: normalizeRanked(parsed.ranked),
+      mining: normalizeMining(parsed.mining),
+      customs,
       modes: { ...base.modes, ...(parsed.modes ?? {}) },
     };
   } catch {
@@ -223,7 +269,7 @@ export function unlockRobot(id: string): boolean {
 
 export function lockedRobotIds(): string[] {
   const owned = new Set(state.robots.map((r) => r.id));
-  return ROBOTS.filter((r) => !owned.has(r.id)).map((r) => r.id);
+  return ROBOTS.filter((r) => !owned.has(r.id) && !isCustom(r.id)).map((r) => r.id);
 }
 
 export function addItem(id: string, qty: number) {
@@ -495,4 +541,221 @@ export function playerDeck(s: GameState = state): DeckResult {
 /** Modificador do deck do jogador para um atributo. */
 export function deckBonus(stat: CardStat): number {
   return playerDeck().mods[stat] ?? 0;
+}
+
+// ------------------------------------------------------------ mineração (E)
+function withMining(s: GameState, patch: Partial<MiningState>): GameState {
+  return { ...s, mining: { ...s.mining, ...patch } };
+}
+
+/** Espaço livre no silo. */
+export function siloRoom(m: MiningState): number {
+  return Math.max(0, siloCapacity(m.silo) - storedTotal(m));
+}
+
+/**
+ * Recolhe a produção das perfuratrizes desde o último tick (funciona offline,
+ * com teto de 8h). Devolve quanto foi ganho para a UI avisar o jogador.
+ */
+export function miningTick(now = Date.now()): { gained: number; ms: number } {
+  const res = collectProduction(state.mining, now);
+  setState((s) => {
+    const ores = { ...s.mining.ores };
+    for (const [id, q] of Object.entries(res.ores)) ores[id] = (ores[id] ?? 0) + q;
+    return withMining(s, { ores, lastTick: now, totalMined: s.mining.totalMined + res.gained });
+  });
+  return { gained: res.gained, ms: res.ms };
+}
+
+/** Minério arrancado de um veio pelo robô. Respeita a capacidade do silo. */
+export function mineOre(oreId: string, qty: number): number {
+  const room = siloRoom(state.mining);
+  const got = Math.max(0, Math.min(room, qty));
+  if (got <= 0) return 0;
+  setState((s) =>
+    withMining(s, {
+      ores: { ...s.mining.ores, [oreId]: (s.mining.ores[oreId] ?? 0) + got },
+      totalMined: s.mining.totalMined + got,
+    }),
+  );
+  return got;
+}
+
+export function upgradePick(): boolean {
+  const m = state.mining;
+  if (m.pick >= PICK_MAX) return false;
+  const cost = pickCost(m.pick);
+  if (state.gold < cost) return false;
+  setState((s) => withMining({ ...s, gold: s.gold - cost }, { pick: s.mining.pick + 1 }));
+  return true;
+}
+
+export function upgradeSilo(): boolean {
+  const m = state.mining;
+  if (m.silo >= SILO_MAX) return false;
+  const cost = siloCost(m.silo);
+  if (state.gold < cost) return false;
+  setState((s) => withMining({ ...s, gold: s.gold - cost }, { silo: s.mining.silo + 1 }));
+  return true;
+}
+
+export function upgradeRefinery(): boolean {
+  const m = state.mining;
+  if (m.refinery >= REFINERY_MAX) return false;
+  const cost = refineryCost(m.refinery);
+  if (state.gold < cost) return false;
+  setState((s) => withMining({ ...s, gold: s.gold - cost }, { refinery: s.mining.refinery + 1 }));
+  return true;
+}
+
+export function upgradeDrill(depth: number): boolean {
+  const m = state.mining;
+  if (depth > m.depth) return false;
+  const lvl = m.drills[String(depth)] ?? 0;
+  if (lvl >= DRILL_MAX) return false;
+  const cost = drillCost(depth, lvl);
+  if (state.gold < cost) return false;
+  miningTick();
+  setState((s) =>
+    withMining(
+      { ...s, gold: s.gold - cost },
+      { drills: { ...s.mining.drills, [String(depth)]: lvl + 1 } },
+    ),
+  );
+  return true;
+}
+
+export function descendMine(): boolean {
+  const m = state.mining;
+  if (m.depth >= MAX_DEPTH) return false;
+  const next = DEPTHS[m.depth];
+  if (state.gold < next.cost) return false;
+  setState((s) => withMining({ ...s, gold: s.gold - next.cost }, { depth: s.mining.depth + 1 }));
+  return true;
+}
+
+/** Manda um lote de minério bruto para a refinaria (leva tempo real). */
+export function startRefine(oreId: string, bars: number): boolean {
+  const m = state.mining;
+  if (m.job) return false;
+  const max = Math.min(refineBatch(m.refinery), Math.floor((m.ores[oreId] ?? 0) / BAR_COST));
+  const n = Math.max(0, Math.min(bars, max));
+  if (n <= 0) return false;
+  const endsAt = Date.now() + refineMs(n, m.refinery);
+  setState((s) =>
+    withMining(s, {
+      ores: { ...s.mining.ores, [oreId]: (s.mining.ores[oreId] ?? 0) - n * BAR_COST },
+      job: { ore: oreId, bars: n, endsAt },
+    }),
+  );
+  return true;
+}
+
+/** Retira os lingotes prontos da refinaria. */
+export function collectRefine(now = Date.now()): number {
+  const job = state.mining.job;
+  if (!job || now < job.endsAt) return 0;
+  setState((s) =>
+    withMining(s, {
+      bars: { ...s.mining.bars, [job.ore]: (s.mining.bars[job.ore] ?? 0) + job.bars },
+      job: null,
+    }),
+  );
+  return job.bars;
+}
+
+/** Vende todo o estoque (bruto + lingotes) e devolve o ouro recebido. */
+export function sellMining(): number {
+  const m = state.mining;
+  let gold = 0;
+  for (const [id, q] of Object.entries(m.ores)) gold += (ORE_MAP[id]?.value ?? 0) * q;
+  for (const [id, q] of Object.entries(m.bars)) gold += barValue(id) * q;
+  if (gold <= 0) return 0;
+  setState((s) => ({
+    ...s,
+    gold: s.gold + gold,
+    mining: { ...s.mining, ores: {}, bars: {}, totalGold: s.mining.totalGold + gold },
+  }));
+  return gold;
+}
+
+// ---------------------------------------------------------- laboratório (F)
+/** Total de lingotes refinados disponíveis, somando todos os minérios. */
+export function totalBars(s: GameState = state): number {
+  return Object.values(s.mining.bars).reduce((a, q) => a + q, 0);
+}
+
+/** Gasta N lingotes, começando pelos minérios mais baratos. */
+function spendBars(bars: Record<string, number>, n: number): Record<string, number> {
+  const out = { ...bars };
+  let left = n;
+  const order = Object.keys(out).sort(
+    (a, b) => (ORE_MAP[a]?.value ?? 0) - (ORE_MAP[b]?.value ?? 0),
+  );
+  for (const id of order) {
+    if (left <= 0) break;
+    const take = Math.min(out[id] ?? 0, left);
+    out[id] = (out[id] ?? 0) - take;
+    left -= take;
+  }
+  return out;
+}
+
+/** Constrói um robô customizado. Devolve o id criado ou null. */
+export function buildCustom(draft: LabDraft): string | null {
+  const s = state;
+  if (s.customs.length >= LAB_MAX) return null;
+  const cost = buildCost(draft);
+  if (s.gold < cost.gold || totalBars(s) < cost.bars) return null;
+  const id = nextCustomId(s.customs);
+  const custom: CustomRobot = {
+    id,
+    name: (draft.name || "PROTOTIPO").slice(0, 14).toUpperCase(),
+    core: draft.core,
+    head: draft.head,
+    torso: draft.torso,
+    arm: draft.arm,
+    leg: draft.leg,
+    deco: draft.deco,
+    hue: draft.hue,
+    createdAt: Date.now(),
+  };
+  activateCustom(custom);
+  setState((st) => ({
+    ...st,
+    gold: st.gold - cost.gold,
+    mining: { ...st.mining, bars: spendBars(st.mining.bars, cost.bars) },
+    customs: [...st.customs, custom],
+    robots: [...st.robots, { id, level: 1, xp: 0, trained: { str: 0, def: 0, agl: 0 } }],
+  }));
+  return id;
+}
+
+export function renameCustom(id: string, name: string): boolean {
+  if (!state.customs.some((c) => c.id === id)) return false;
+  const clean = (name || "PROTOTIPO").slice(0, 14).toUpperCase();
+  setState((s) => {
+    const customs = s.customs.map((c) => (c.id === id ? { ...c, name: clean } : c));
+    const target = customs.find((c) => c.id === id);
+    if (target) activateCustom(target);
+    return { ...s, customs };
+  });
+  return true;
+}
+
+/** Desmonta um robô customizado e devolve parte do ouro. */
+export function scrapCustom(id: string): number {
+  const c = state.customs.find((x) => x.id === id);
+  if (!c) return 0;
+  const gold = scrapValue(c);
+  setState((s) => ({
+    ...s,
+    gold: s.gold + gold,
+    customs: s.customs.filter((x) => x.id !== id),
+    robots: s.robots.filter((r) => r.id !== id),
+    team: s.team.filter((t) => t !== id),
+    explorer: s.explorer === id ? null : s.explorer,
+  }));
+  deactivateCustom(id);
+  return gold;
 }

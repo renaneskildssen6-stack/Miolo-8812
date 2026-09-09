@@ -12,7 +12,7 @@ import { explorerId, setExplorer, useGame } from "@/game/save";
  * partículas, parallax em 3 camadas e câmera suave.
  * ------------------------------------------------------------------------- */
 
-const WORLD_W = 4300;
+const WORLD_W = 5400;
 const GROUND_Y = 620; // y do chão em coordenadas de mundo
 const SKY_TOP = -260; // topo do mundo
 
@@ -49,6 +49,8 @@ const BUILDINGS: Building[] = [
   { id: "engineer", label: "OFICINA DO ENGENHEIRO", art: "/city/b_engineer.png", x: 2820, w: 300, h: 372 },
   { id: "pets", label: "RANCHO DOS PETS", art: "/city/b_pets.png", x: 3320, w: 300, h: 360 },
   { id: "cards", label: "SALAO DE CARDS", art: "/city/b_cards.png", x: 3800, w: 300, h: 372 },
+  { id: "mine", label: "MINA PROFUNDA", art: "/city/b_mine.png", x: 4320, w: 340, h: 372 },
+  { id: "lab", label: "LABORATORIO", art: "/city/b_lab.png", x: 4840, w: 320, h: 384 },
 ];
 
 type Platform = { x: number; y: number; w: number; range?: number; speed?: number };

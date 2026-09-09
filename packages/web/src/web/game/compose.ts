@@ -48,6 +48,27 @@ export function partsReady(): boolean {
   return ready;
 }
 
+/* Conjuntos de pecas definidos pelo jogador (laboratorio, Fase F).
+ * Quando um id tem set customizado, ele tem prioridade sobre o set
+ * deterministico gerado por partsFor(). */
+const customSets = new Map<string, PartSet>();
+
+export function setCustomSet(id: string, set: PartSet): void {
+  customSets.set(id, set);
+  stripCache.delete(id);
+  faceCache.delete(id);
+}
+
+export function clearCustomSet(id: string): void {
+  customSets.delete(id);
+  stripCache.delete(id);
+  faceCache.delete(id);
+}
+
+function setFor(id: string): PartSet {
+  return customSets.get(id) ?? partsFor(id);
+}
+
 interface Pose {
   dx: number;
   dy: number;
@@ -161,7 +182,7 @@ function drawBody(ctx: CanvasRenderingContext2D, p: PartSet, pose: Pose) {
 }
 
 function composeStrip(id: string): string {
-  const p = partsFor(id);
+  const p = setFor(id);
   const cv = document.createElement("canvas");
   cv.width = FRAME * FRAMES;
   cv.height = FRAME;
@@ -235,7 +256,7 @@ export function modularFace(id: string): string {
   const cctx = cell.getContext("2d");
   if (!cctx) return EMPTY;
   cctx.imageSmoothingEnabled = false;
-  const p = partsFor(id);
+  const p = setFor(id);
   drawBody(cctx, p, POSES[0]);
   ctx.filter = `hue-rotate(${p.hue}deg) saturate(${p.sat}) brightness(${p.bright})`;
   // zoom no torso/cabeca: origem y 8..72 do quadro

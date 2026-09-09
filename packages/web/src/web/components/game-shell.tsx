@@ -6,6 +6,8 @@ import { type Screen } from "@/screens/menu";
 import { EngineerScreen } from "@/screens/engineer";
 import { ModesScreen } from "@/screens/modes";
 import { CardsScreen } from "@/screens/cards";
+import { LabScreen } from "@/screens/lab";
+import { MineScreen } from "@/screens/mine";
 import { PetsScreen } from "@/screens/pets";
 import { RankedScreen } from "@/screens/ranked";
 import { RosterScreen } from "@/screens/roster";
@@ -91,6 +93,8 @@ function GameContent() {
             {screen === "engineer" && <EngineerScreen onBack={close} />}
             {screen === "pets" && <PetsScreen onBack={close} />}
             {screen === "cards" && <CardsScreen onBack={close} />}
+            {screen === "mine" && <MineScreen onBack={close} />}
+            {screen === "lab" && <LabScreen onBack={close} />}
           </div>
         </div>
       )}

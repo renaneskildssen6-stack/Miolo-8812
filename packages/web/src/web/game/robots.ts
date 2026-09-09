@@ -3060,6 +3060,80 @@ const BLUEPRINTS: Blueprint[] = [
     effect: { type: "damage_reduction", power: 30, turns: 3, chance: 0.75 },
   },
   // --- FIM ROSTER LOTE 1 ---
+  // --- ROSTER LOTE 2 ---
+  {
+    id: "lupvexor",
+    name: "LUPVEXOR",
+    element: "MATILHA",
+    rarity: "silver",
+    ratios: { hp: 105, mp: 103, str: 112, def: 96, ag: 101, mv: 11, xv: 12 },
+    bio: "Lenda do circuito de MATILHA. Ninguem sobrevive a SENTENCA ZERO duas vezes.",
+    vfxStrong: VFX.slash,
+    vfxSpecial: VFX.void,
+    names: ["PANCADA DE MATILHA", "RAJADA ZERO", "SENTENCA ZERO", "BLINDAGEM DE MATILHA"],
+    effect: { type: "drain", power: 15, turns: 3, chance: 0.75 },
+  },
+  {
+    id: "tigravox",
+    name: "TIGRAVOX",
+    element: "PRESA",
+    rarity: "gold",
+    ratios: { hp: 103, mp: 122, str: 117, def: 99, ag: 116, mv: 14, xv: 15 },
+    bio: "Nucleo instavel de PRESA. Libera REQUIEM PRIMORDIAL quando encurralado.",
+    vfxStrong: VFX.slash,
+    vfxSpecial: VFX.explosion,
+    names: ["PANCADA DE PRESA", "CANHAO TITANICO", "REQUIEM PRIMORDIAL", "BARREIRA DE PRESA"],
+    effect: { type: "weakening", power: 28, turns: 3, chance: 0.75 },
+  },
+  {
+    id: "ursagrind",
+    name: "URSA GRIND",
+    element: "URSO",
+    rarity: "bronze",
+    ratios: { hp: 113, mp: 87, str: 99, def: 118, ag: 79, mv: 9, xv: 9 },
+    bio: "Piloto autonomo de URSO. Guarda APOCALIPSE FINAL para o momento decisivo.",
+    vfxStrong: VFX.impact,
+    vfxSpecial: VFX.shield,
+    names: ["TALHO DE URSO", "FENDA COLOSSAL", "APOCALIPSE FINAL", "BARREIRA DE URSO"],
+    effect: { type: "paralyze", power: 0, turns: 2, chance: 0.5 },
+  },
+  {
+    id: "cornubrute",
+    name: "CORNU BRUTE",
+    element: "CHIFRE",
+    rarity: "silver",
+    ratios: { hp: 110, mp: 112, str: 104, def: 109, ag: 106, mv: 11, xv: 12 },
+    bio: "Chassi forjado para CHIFRE. Abre a guarda inimiga com JULGAMENTO ETERNO.",
+    vfxStrong: VFX.impact,
+    vfxSpecial: VFX.explosion,
+    names: ["PATADA DE CHIFRE", "IMPACTO PROIBIDO", "JULGAMENTO ETERNO", "POSTURA DE CHIFRE"],
+    effect: { type: "paralyze", power: 0, turns: 2, chance: 0.5 },
+  },
+  {
+    id: "simiaslam",
+    name: "SIMIA SLAM",
+    element: "PRIMATA",
+    rarity: "bronze",
+    ratios: { hp: 112, mp: 92, str: 101, def: 109, ag: 84, mv: 9, xv: 9 },
+    bio: "Gladiador de PRIMATA. Cada round termina em SENTENCA INFINITO.",
+    vfxStrong: VFX.impact,
+    vfxSpecial: VFX.shield,
+    names: ["PATADA DE PRIMATA", "RAJADA VORAZ", "SENTENCA INFINITO", "EGIDE DE PRIMATA"],
+    effect: { type: "damage_reduction", power: 30, turns: 3, chance: 0.75 },
+  },
+  {
+    id: "draknoir",
+    name: "DRAKNOIR",
+    element: "DRAGAO",
+    rarity: "gold",
+    ratios: { hp: 111, mp: 116, str: 123, def: 105, ag: 111, mv: 14, xv: 15 },
+    bio: "Predador de DRAGAO. Caca sistemas rivais e finaliza com ZENITE INFINITO.",
+    vfxStrong: VFX.explosion,
+    vfxSpecial: VFX.explosion,
+    names: ["INVESTIDA DE DRAGAO", "LANCA FINAL", "ZENITE INFINITO", "POSTURA DE DRAGAO"],
+    effect: { type: "burn", power: 14, turns: 3, chance: 0.75 },
+  },
+  // --- FIM ROSTER LOTE 2 ---
 ];
 
 export const ROBOTS: RobotDef[] = BLUEPRINTS.map((b) => ({
@@ -3089,10 +3163,40 @@ export const ANIM = {
   enter: [12, 13, 14, 15],
 } as const;
 
+/* Resolvedores opcionais de sprite. O laboratorio (Fase F) instala um
+ * resolvedor que devolve a tira composta em runtime para ids "lab_";
+ * para qualquer outro id o resolvedor devolve null e caimos no PNG do disco. */
+type SpriteResolver = (id: string) => string | null;
+let spriteResolver: SpriteResolver | null = null;
+let faceResolver: SpriteResolver | null = null;
+
+export function setSpriteResolver(fn: SpriteResolver | null): void {
+  spriteResolver = fn;
+}
+
+export function setFaceResolver(fn: SpriteResolver | null): void {
+  faceResolver = fn;
+}
+
 export function spriteUrl(id: string): string {
-  return `/robots/${id}.png`;
+  return spriteResolver?.(id) ?? `/robots/${id}.png`;
 }
 
 export function faceUrl(id: string): string {
-  return `/robots/${id}_face.png`;
+  return faceResolver?.(id) ?? `/robots/${id}_face.png`;
+}
+
+/** Adiciona (ou substitui) um robo no roster em runtime. */
+export function registerCustom(def: RobotDef): void {
+  const i = ROBOTS.findIndex((r) => r.id === def.id);
+  if (i >= 0) ROBOTS[i] = def;
+  else ROBOTS.push(def);
+  ROBOT_MAP[def.id] = def;
+}
+
+/** Remove um robo customizado do roster. */
+export function unregisterCustom(id: string): void {
+  const i = ROBOTS.findIndex((r) => r.id === id);
+  if (i >= 0) ROBOTS.splice(i, 1);
+  delete ROBOT_MAP[id];
 }

@@ -1001,6 +1001,30 @@
   {
    "id": "gwenshield",
    "name": "GWEN SHIELD"
+  },
+  {
+   "id": "lupvexor",
+   "name": "LUPVEXOR"
+  },
+  {
+   "id": "tigravox",
+   "name": "TIGRAVOX"
+  },
+  {
+   "id": "ursagrind",
+   "name": "URSA GRIND"
+  },
+  {
+   "id": "cornubrute",
+   "name": "CORNU BRUTE"
+  },
+  {
+   "id": "simiaslam",
+   "name": "SIMIA SLAM"
+  },
+  {
+   "id": "draknoir",
+   "name": "DRAKNOIR"
   }
  ],
  "arenas": [
