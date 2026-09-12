@@ -12,7 +12,7 @@ Entrega **incremental**: uma fase (ou parte de fase) por sessão, sempre com
 | D | **1000+ robôs** — cada robô com sprite sheet 4x4 próprio gerado por IA, entregue em lotes sessão após sessão (insetoides, ninjas, colossos, alienígenas, cavaleiros/samurais) | ⏸️ congelada a pedido do usuário (256 robôs) |
 | E | **Mineração em tempo real** — sala de mineração, personagem jogável, veios, refino, produção offline | ✅ concluída |
 | F | **Laboratório** — construir o próprio robô com 1000+ opções por parte do corpo (peças da Fase D), stats derivados das peças | ✅ concluída |
-| G1 | **Pets em carrossel + sistema 100x** — tela de pets refeita como carrossel (um pet no centro, setas nas laterais), muito mais pets, raridades, evolução, habilidades ativas em batalha | pendente |
+| G1 | **Pets em carrossel + sistema 100x** — tela de pets refeita como carrossel (um pet no centro, setas nas laterais), 144 pets (12 espécies × 12 linhagens), 20 níveis em 3 estágios de evolução, afinidade secundária, 2 traços, 3 slots de equipe | ✅ concluída |
 | G2 | **Cards e gadgets 100x** — muito mais cards, gadgets, raridades, combos, upgrades e economia própria | pendente |
 | G3 | **Batalha 100x + 100 animações** — sistemas novos de combate, animação de turno, animação em tudo (entrada, dano, buff, morte, combo, ultimate, UI) | pendente |
 | G4 | **Mundo dos torneios** — tela de torneios vira um mundo enorme explorável com a gameplay do hub: cada prédio é um torneio, com puzzles, inimigos e NPCs no caminho; tiles, fundos e construções diferentes em cada região | pendente |

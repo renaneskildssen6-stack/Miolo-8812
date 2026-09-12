@@ -298,3 +298,28 @@ img {
 .mk-blink {
   animation: mk-blink 800ms steps(1, end) infinite;
 }
+
+/* ------------------------------------------------- rancho dos pets (G1) */
+@keyframes mk-petbob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.mk-petbob {
+  animation: mk-petbob 1200ms steps(4, end) infinite;
+}
+
+@keyframes mk-petin {
+  0% { transform: scale(0.82) translateX(var(--mk-in, 0px)); opacity: 0; }
+  100% { transform: scale(1) translateX(0); opacity: 1; }
+}
+.mk-petin {
+  animation: mk-petin 220ms steps(4, end) 1;
+}
+
+@keyframes mk-aura {
+  0%, 100% { opacity: 0.28; transform: scale(1); }
+  50% { opacity: 0.58; transform: scale(1.08); }
+}
+.mk-aura {
+  animation: mk-aura 1600ms steps(8, end) infinite;
+}

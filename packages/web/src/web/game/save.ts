@@ -53,8 +53,11 @@ import {
 import {
   PET_MAP,
   PET_MAX_LEVEL,
+  petSlots,
+  petUpgradeBars,
   petUpgradeCost,
   petValue,
+  petValue2,
   type PetKind,
 } from "./pets";
 import {
@@ -88,8 +91,8 @@ export interface GameState {
   gadgets: Record<string, number>;
   /** nivel de cada pet possuido (0/ausente = nao comprado). */
   pets: Record<string, number>;
-  /** pet equipado pela equipe (null = nenhum). */
-  activePet: string | null;
+  /** pets levados pela equipe (ate PET_SLOT_MAX, liberados por nivel). */
+  activePets: string[];
   /** ids dos cards possuidos. */
   cards: string[];
   /** ate 3 cards equipados no deck de combate. */
@@ -139,7 +142,7 @@ function initialState(): GameState {
     loadouts: {},
     gadgets: {},
     pets: {},
-    activePet: null,
+    activePets: [],
     cards: [],
     deck: [],
     explorer: null,
@@ -161,6 +164,25 @@ function initialState(): GameState {
   };
 }
 
+/** Aceita o save antigo (activePet: string|null) e o novo (activePets: string[]). */
+function normalizeActivePets(parsed: GameState): string[] {
+  const legacy = (parsed as GameState & { activePet?: string | null }).activePet;
+  const raw = Array.isArray(parsed.activePets)
+    ? parsed.activePets
+    : legacy
+      ? [legacy]
+      : [];
+  const owned = parsed.pets ?? {};
+  const out: string[] = [];
+  for (const id of raw) {
+    if (!PET_MAP[id]) continue;
+    if ((owned[id] ?? 0) <= 0) continue;
+    if (out.includes(id)) continue;
+    out.push(id);
+  }
+  return out.slice(0, petSlots(parsed.playerLevel ?? 1));
+}
+
 function read(): GameState {
   if (typeof localStorage === "undefined") return initialState();
   try {
@@ -179,7 +201,8 @@ function read(): GameState {
       loadouts: parsed.loadouts ?? {},
       gadgets: parsed.gadgets ?? {},
       pets: parsed.pets ?? {},
-      activePet: parsed.activePet ?? null,
+      // migração G1: o save antigo tinha um único pet ativo.
+      activePets: normalizeActivePets(parsed),
       cards: (parsed.cards ?? []).filter((id) => Boolean(CARD_MAP[id])),
       deck: (parsed.deck ?? []).filter((id) => Boolean(CARD_MAP[id])).slice(0, MAX_CARDS),
       explorer:
@@ -431,6 +454,11 @@ export function petLevelOf(s: GameState, petId: string): number {
   return s.pets[petId] ?? 0;
 }
 
+/** Slots de pet liberados pelo nivel atual do jogador. */
+export function petSlotCount(s: GameState = state): number {
+  return petSlots(s.playerLevel);
+}
+
 /** Compra o pet (nivel 1). Retorna false se nao for possivel. */
 export function buyPet(petId: string): boolean {
   const def = PET_MAP[petId];
@@ -442,36 +470,61 @@ export function buyPet(petId: string): boolean {
     ...s,
     gold: s.gold - def.price,
     pets: { ...s.pets, [petId]: 1 },
-    activePet: s.activePet ?? petId,
+    activePets:
+      s.activePets.length < petSlots(s.playerLevel)
+        ? [...s.activePets, petId]
+        : s.activePets,
   }));
   return true;
 }
 
-/** Sobe um nivel do pet. Retorna false se nao for possivel. */
+/** Sobe um nivel do pet. Cruzar um estagio tambem consome lingotes. */
 export function upgradePet(petId: string): boolean {
   const def = PET_MAP[petId];
   if (!def) return false;
   const cur = state.pets[petId] ?? 0;
   if (cur <= 0 || cur >= PET_MAX_LEVEL) return false;
   const cost = petUpgradeCost(def, cur);
+  const bars = petUpgradeBars(def, cur);
   if (state.gold < cost) return false;
+  if (bars > 0 && totalBars(state) < bars) return false;
   setState((s) => ({
     ...s,
     gold: s.gold - cost,
     pets: { ...s.pets, [petId]: cur + 1 },
+    mining:
+      bars > 0 ? { ...s.mining, bars: spendBars(s.mining.bars, bars) } : s.mining,
   }));
   return true;
 }
 
-/** Bonus percentual do pet ativo para o tipo informado (0 quando nao aplicavel). */
+/** Soma dos bonus de todos os pets levados (principal + metade do secundario). */
 export function activePetBonus(kind: PetKind): number {
-  const id = state.activePet;
-  if (!id) return 0;
-  const def = PET_MAP[id];
-  if (!def || def.kind !== kind) return 0;
-  const lvl = state.pets[id] ?? 0;
-  if (lvl <= 0) return 0;
-  return petValue(def, lvl);
+  let total = 0;
+  for (const id of state.activePets) {
+    const def = PET_MAP[id];
+    if (!def) continue;
+    const lvl = state.pets[id] ?? 0;
+    if (lvl <= 0) continue;
+    if (def.kind === kind) total += petValue(def, lvl);
+    if (def.kind2 === kind) total += petValue2(def, lvl);
+  }
+  return Math.round(total * 10) / 10;
+}
+
+/** Tabela completa de bonus dos pets levados, usada pela batalha. */
+export function petBonusTable(): Partial<Record<PetKind, number>> {
+  const out: Partial<Record<PetKind, number>> = {};
+  for (const id of state.activePets) {
+    const def = PET_MAP[id];
+    if (!def) continue;
+    const lvl = state.pets[id] ?? 0;
+    if (lvl <= 0) continue;
+    out[def.kind] = Math.round(((out[def.kind] ?? 0) + petValue(def, lvl)) * 10) / 10;
+    out[def.kind2] =
+      Math.round(((out[def.kind2] ?? 0) + petValue2(def, lvl)) * 10) / 10;
+  }
+  return out;
 }
 
 /** Aplica os bonus de ouro (scavenger) e XP (mentor) do pet ativo. */
@@ -487,10 +540,21 @@ export function applyPetRewards(r: { gold: number; xp: number }): {
   };
 }
 
-/** Equipa (ou desequipa, com null) o pet ativo da equipe. */
-export function setActivePet(petId: string | null) {
-  if (petId && (state.pets[petId] ?? 0) <= 0) return;
-  setState((s) => ({ ...s, activePet: petId }));
+/** Coloca ou tira o pet da equipe. Retorna false quando nao ha slot livre. */
+export function togglePetSlot(petId: string): boolean {
+  if ((state.pets[petId] ?? 0) <= 0) return false;
+  if (state.activePets.includes(petId)) {
+    setState((s) => ({ ...s, activePets: s.activePets.filter((p) => p !== petId) }));
+    return true;
+  }
+  if (state.activePets.length >= petSlots(state.playerLevel)) return false;
+  setState((s) => ({ ...s, activePets: [...s.activePets, petId] }));
+  return true;
+}
+
+/** Tira todos os pets da equipe. */
+export function clearPetSlots() {
+  setState((s) => ({ ...s, activePets: [] }));
 }
 
 // ------------------------------------------------------------- cards

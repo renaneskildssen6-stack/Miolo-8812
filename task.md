@@ -96,16 +96,31 @@
 - [x] typecheck verde, build verde, E2E assets/e2e_mine.py: 6 veios, silo 0 → 17 minérios (ferro 12 + cobre 5), perfuratriz N1 instalada, 4 abas abrindo, 0 imagens quebradas, 0 erros de console
 - Próxima: Fase F — laboratório de construção de robô com as 56 peças modulares
 
-## Fase F — Laboratório (em andamento)
+## Fase F — Laboratório (concluída)
 - [x] game/lab.ts (núcleos, stats de peça, draft, custo, CustomRobot, activate/deactivate)
 - [x] compose.ts: setCustomSet/clearCustomSet + setFor(id)
 - [x] robots.ts: setSpriteResolver/setFaceResolver + registerCustom/unregisterCustom
 - [x] save.ts: campo customs, normalize+activate no read(), buildCustom/renameCustom/scrapCustom, totalBars, lockedRobotIds ignora lab_
 - [x] screens/lab.tsx (bancada com carrosséis + hangar de protótipos)
 - [x] menu.tsx: Screen "lab"
-- [ ] game-shell.tsx wiring
-- [ ] hub-city.tsx prédio b_lab + WORLD_W 5400
-- [ ] arte: /city/b_lab.png e /ui/bg_lab.png
-- [ ] assets.ts CORE_ASSETS
-- [ ] typecheck + build + e2e_lab.py
-- [ ] roadmap.md: F concluída + linhas G1..G5 do pedido novo
+- [x] game-shell.tsx wiring
+- [x] hub-city.tsx prédio b_lab (x 4840) + WORLD_W 5400
+- [x] arte: /city/b_lab.png (320x384) e /ui/bg_lab.png (480x816) via assets/process_lab.py
+- [x] assets.ts CORE_ASSETS
+- [x] roster.tsx: robôs do laboratório no topo da grade
+- [x] typecheck --force OK, build OK, assets/e2e_lab.py OK (0 erros, 0 imagens quebradas)
+- [x] roadmap.md: F concluída + linhas G1..G5 do pedido novo
+
+## Fase G1 — Pets em carrossel + sistema 100x (concluída)
+- [x] game/pets.ts reescrito: 12 espécies × 12 linhagens = **144 pets** (12 → 144), cada um com afinidade principal + secundária (metade da força), 2 traços sorteados de 20, preço/raridade/requisito derivados da linhagem
+- [x] Linhagens recolorem a arte da espécie por filtro CSS (petFilter: sepia+saturate+hue-rotate) — nenhuma arte de personagem nova gerada, respeitando a ordem de não gerar personagem
+- [x] Progressão: PET_MAX_LEVEL 5 → **20**, em 3 estágios de evolução (FILHOTE / ADULTO / ANCIÃO, caps 6/13/20) com multiplicador de bônus 1 / 1.35 / 1.8; o pet cresce visualmente a cada estágio
+- [x] Evoluir de estágio consome lingotes da mina (petUpgradeBars), ligando pets à Fase E
+- [x] Slots de equipe: 1 → **3 pets simultâneos**, liberados nos níveis 1 / 22 / 48 (PET_SLOT_LEVELS)
+- [x] save.ts: activePet (string|null) → **activePets (string[])** com migração automática do save antigo (normalizeActivePets), togglePetSlot/clearPetSlots/petSlotCount, petBonusTable, upgradePet cobrando ouro + lingotes
+- [x] battle.ts: Fighter.pet → Fighter.pets (tabela somada dos 3 pets), petBonus lê a tabela — bônus de todos os pets levados valem juntos em combate
+- [x] screens/pets.tsx refeito como **carrossel**: pet grande no centro, seta `<` à esquerda e `>` à direita, `<<`/`>>` pulam de espécie, contador N/144, filtro TODOS/MEUS/A ADOTAR, fileira dos 3 slots no topo, ficha com efeito principal/secundário/traços, barra de nível e etiqueta de estágio I/II/III
+- [x] styles.css: animações mk-petbob (flutuação do pet), mk-petin (entrada lateral na direção da seta) e mk-aura (aura pulsante na cor da raridade)
+- [x] typecheck --force OK, build OK, assets/e2e_pets_g1.py OK (setas de pet, setas de espécie, filtro, adoção, treino, evolução Lv6→7 cobrando lingotes, slots; 0 erros de console, 0 imagens quebradas)
+
+### Próxima fase: G2 — cards e gadgets 100x maiores

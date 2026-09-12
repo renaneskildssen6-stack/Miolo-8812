@@ -8,8 +8,8 @@ import {
 } from "./engine";
 import { ROBOT_MAP, type EffectType, type Skill } from "./robots";
 import { defaultLoadout, MAX_LOADOUT } from "./skills";
-import { PET_MAP, petValue, type PetKind } from "./pets";
-import { getState } from "./save";
+import { type PetKind } from "./pets";
+import { getState, petBonusTable } from "./save";
 import { aiDeck, resolveDeck, type CardMods, type CardStat } from "./cards";
 import {
   aiGadgetLevel,
@@ -46,8 +46,8 @@ export interface Fighter {
   counter: number;
   /** gadget equipado (efeito ja calculado para o nivel). */
   gadget: { kind: GadgetKind; level: number; value: number } | null;
-  /** pet da equipe (so do lado do jogador). */
-  pet: { kind: PetKind; level: number; value: number } | null;
+  /** bonus somados dos pets levados (so do lado do jogador). */
+  pets: Partial<Record<PetKind, number>>;
   /** cards equipados no deck (ids) e modificadores ja agregados. */
   cardIds: string[];
   cards: CardMods;
@@ -58,9 +58,9 @@ export function cardBonus(f: Fighter, stat: CardStat): number {
   return f.cards[stat] ?? 0;
 }
 
-/** valor do bonus do pet equipado pelo jogador, 0 quando nao aplicavel. */
+/** soma dos bonus dos pets levados pelo jogador, 0 quando nao aplicavel. */
 export function petBonus(f: Fighter, kind: PetKind): number {
-  return f.pet && f.pet.kind === kind ? f.pet.value : 0;
+  return f.pets[kind] ?? 0;
 }
 
 /** valor do efeito do gadget do lutador, 0 quando nao aplicavel. */
@@ -130,17 +130,11 @@ export function makeFighter(save: RobotSave, ai: boolean, uid: string): Fighter 
       ? { kind: gdef.kind, level: glevel, value: gadgetValue(gdef, glevel) }
       : null;
   const st8 = getState();
-  const petId = ai ? null : st8.activePet;
-  const petLevel = petId ? (st8.pets[petId] ?? 0) : 0;
-  const pdef = petId ? PET_MAP[petId] : undefined;
-  const pet =
-    pdef && petLevel > 0
-      ? { kind: pdef.kind, level: petLevel, value: petValue(pdef, petLevel) }
-      : null;
+  const pets: Partial<Record<PetKind, number>> = ai ? {} : petBonusTable();
   const deck = ai ? resolveDeck(aiDeck(save.id, save.level)) : resolveDeck(st8.deck);
   const cmods = deck.mods;
   const cpct = (stat: CardStat) => cmods[stat] ?? 0;
-  const ppct = (kind: PetKind) => (pet && pet.kind === kind ? pet.value : 0);
+  const ppct = (kind: PetKind) => pets[kind] ?? 0;
   const pct = (kind: GadgetKind) => (gadget && gadget.kind === kind ? gadget.value : 0);
   const hp = Math.max(
     1,
@@ -187,7 +181,7 @@ export function makeFighter(save: RobotSave, ai: boolean, uid: string): Fighter 
     skillIds,
     counter: 0,
     gadget,
-    pet,
+    pets,
     cardIds: deck.ids,
     cards: cmods,
   };
