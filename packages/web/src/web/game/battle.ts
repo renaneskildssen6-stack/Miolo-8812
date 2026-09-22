@@ -1,3 +1,4 @@
+import { burstAnimFor, hitAnimFor, windupAnimFor } from "./anim";
 import { ITEM_MAP } from "./config";
 import {
   computeDamage,
@@ -9,12 +10,20 @@ import {
 import { ROBOT_MAP, type EffectType, type Skill } from "./robots";
 import { defaultLoadout, MAX_LOADOUT } from "./skills";
 import { type PetKind } from "./pets";
-import { getState, petBonusTable } from "./save";
-import { aiDeck, resolveDeck, type CardMods, type CardStat } from "./cards";
+import { gadgetChipsOf, getState, petBonusTable } from "./save";
 import {
+  aiDeck,
+  aiRefineMap,
+  resolveDeck,
+  type CardMods,
+  type CardStat,
+} from "./cards";
+import {
+  aiChips,
   aiGadgetLevel,
   GADGET_MAP,
-  gadgetValue,
+  gadgetMkLabel,
+  gadgetTotals,
   type GadgetKind,
 } from "./gadgets";
 
@@ -44,8 +53,12 @@ export interface Fighter {
   skillIds: string[];
   /** turnos restantes de postura de contra-ataque. */
   counter: number;
-  /** gadget equipado (efeito ja calculado para o nivel). */
-  gadget: { kind: GadgetKind; level: number; value: number } | null;
+  /** nivel do gadget equipado (0 = sem gadget). */
+  gadgetLevel: number;
+  /** marco do gadget (MK-I/II/III), vazio quando nao houver gadget. */
+  gadgetMk: string;
+  /** efeitos somados do gadget e dos chips encaixados. */
+  gadgetMods: Partial<Record<GadgetKind, number>>;
   /** bonus somados dos pets levados (so do lado do jogador). */
   pets: Partial<Record<PetKind, number>>;
   /** cards equipados no deck (ids) e modificadores ja agregados. */
@@ -63,9 +76,9 @@ export function petBonus(f: Fighter, kind: PetKind): number {
   return f.pets[kind] ?? 0;
 }
 
-/** valor do efeito do gadget do lutador, 0 quando nao aplicavel. */
+/** soma do efeito do gadget + chips do lutador, 0 quando nao aplicavel. */
 export function gadgetBonus(f: Fighter, kind: GadgetKind): number {
-  return f.gadget && f.gadget.kind === kind ? f.gadget.value : 0;
+  return f.gadgetMods[kind] ?? 0;
 }
 
 /** Escolhe um kit de 4 habilidades para um robô controlado pela IA. */
@@ -116,7 +129,11 @@ export type BattleEvent =
   | { t: "float"; side: Side; text: string; tone: "dmg" | "crit" | "heal" | "miss" | "info" }
   | { t: "sync"; battle: Battle }
   | { t: "faint"; side: Side }
-  | { t: "end"; result: "win" | "lose" };
+  | { t: "end"; result: "win" | "lose" }
+  /* Fase G3: animacao nomeada do catalogo (game/anim.ts). `hold` diz quantos
+   * ms a fila espera antes do proximo evento — hold 0 empilha animacoes em
+   * paralelo, o que permite camadas (sprite + aura + burst + tela) juntas. */
+  | { t: "anim"; side: Side; id: string; hold?: number };
 
 export function makeFighter(save: RobotSave, ai: boolean, uid: string): Fighter {
   const def = ROBOT_MAP[save.id];
@@ -125,17 +142,18 @@ export function makeFighter(save: RobotSave, ai: boolean, uid: string): Fighter 
   const glevel = ai
     ? aiGadgetLevel(save.id, save.level)
     : Math.max(0, save.gadgetLevel ?? 0);
-  const gadget =
-    gdef && glevel > 0
-      ? { kind: gdef.kind, level: glevel, value: gadgetValue(gdef, glevel) }
-      : null;
   const st8 = getState();
+  const chipIds = ai ? aiChips(save.id, save.level) : gadgetChipsOf(st8, save.id);
+  const gadgetMods = gadgetTotals(gdef, glevel, chipIds);
   const pets: Partial<Record<PetKind, number>> = ai ? {} : petBonusTable();
-  const deck = ai ? resolveDeck(aiDeck(save.id, save.level)) : resolveDeck(st8.deck);
+  const aiIds = ai ? aiDeck(save.id, save.level) : [];
+  const deck = ai
+    ? resolveDeck(aiIds, aiRefineMap(aiIds, save.level))
+    : resolveDeck(st8.deck, st8.cardRefine);
   const cmods = deck.mods;
   const cpct = (stat: CardStat) => cmods[stat] ?? 0;
   const ppct = (kind: PetKind) => pets[kind] ?? 0;
-  const pct = (kind: GadgetKind) => (gadget && gadget.kind === kind ? gadget.value : 0);
+  const pct = (kind: GadgetKind) => gadgetMods[kind] ?? 0;
   const hp = Math.max(
     1,
     Math.round(st.hp * (1 + pct("vitality") / 100 + cpct("hp") / 100)),
@@ -180,7 +198,9 @@ export function makeFighter(save: RobotSave, ai: boolean, uid: string): Fighter 
     ai,
     skillIds,
     counter: 0,
-    gadget,
+    gadgetLevel: glevel,
+    gadgetMk: gdef && glevel > 0 ? gadgetMkLabel(glevel) : "",
+    gadgetMods,
     pets,
     cardIds: deck.ids,
     cards: cmods,
@@ -342,13 +362,38 @@ function other(side: Side): Side {
   return side === "player" ? "enemy" : "player";
 }
 
+/* Fase G3 -------------------------------------------------------------- */
+
+/** Empilha uma animacao do catalogo. hold = 0 roda em paralelo com a proxima. */
+function anim(ctx: Ctx, side: Side, id: string, hold = 0) {
+  push(ctx, { t: "anim", side, id, hold });
+}
+
+function elementOf(f: Fighter): string {
+  return ROBOT_MAP[f.robotId]?.element ?? "IMPACTO";
+}
+
+/** Burst elemental do atacante, conforme o chassi. */
+function elementBurst(f: Fighter): string {
+  return burstAnimFor(elementOf(f));
+}
+
 function doAttack(ctx: Ctx, side: Side, skill: Skill) {
   const atk = activeOf(ctx.b, side);
   const vicSide = other(side);
   const vic = activeOf(ctx.b, vicSide);
   atk.mp = Math.max(0, atk.mp - skill.mp);
   msg(ctx, `${atk.name} usa ${skill.name}!`);
+  const ultimate = skill.mp >= 24;
+  if (ultimate) {
+    anim(ctx, side, "ban_ultimate", 260);
+    anim(ctx, side, "ult_charge", 0);
+    anim(ctx, side, "scr_slow", 0);
+    anim(ctx, side, "scr_darken", 420);
+  }
   push(ctx, { t: "clip", side, clip: "attack" });
+  anim(ctx, side, windupAnimFor(skill.id, skill.mp), 0);
+  anim(ctx, side, "scr_speedlines", 220);
 
   const blind = sumEffect(atk, "blind") / 100;
   const evade = Math.min(
@@ -359,6 +404,8 @@ function doAttack(ctx: Ctx, side: Side, skill: Skill) {
       cardBonus(vic, "evade") / 100,
   );
   if (Math.random() < evade) {
+    anim(ctx, vicSide, "wind_dash", 0);
+    anim(ctx, vicSide, "scr_chroma", 120);
     push(ctx, { t: "float", side: vicSide, text: "ERROU", tone: "miss" });
     msg(ctx, `${vic.name} desviou!`);
     sync(ctx);
@@ -388,17 +435,42 @@ function doAttack(ctx: Ctx, side: Side, skill: Skill) {
   });
   vic.hp = Math.max(0, vic.hp - dmg);
 
+  /* Fase G3: combo de tres tempos quando o golpe e forte o bastante. */
+  const heavy = dmg / Math.max(1, vic.maxHp) >= 0.18 || ultimate;
+  if (heavy) {
+    anim(ctx, side, "combo_1", 140);
+    anim(ctx, vicSide, "hit_light", 0);
+    anim(ctx, side, "combo_2", 150);
+    anim(ctx, vicSide, "hit_light", 0);
+    anim(ctx, side, ultimate ? "ult_finisher" : "combo_3", 0);
+    anim(ctx, side, "ban_combo", 120);
+  }
+  if (ultimate) anim(ctx, vicSide, "ult_beam", 0);
+  anim(ctx, vicSide, elementBurst(atk), 0);
+  if (crit) {
+    anim(ctx, vicSide, "ban_crit", 0);
+    anim(ctx, side, "scr_flash_gold", 0);
+    anim(ctx, vicSide, "scr_zoom", 0);
+  } else {
+    anim(ctx, vicSide, "scr_flash_white", 0);
+  }
+  anim(ctx, vicSide, hitAnimFor(dmg, vic.maxHp, crit), 0);
+  if (crit || ultimate) anim(ctx, vicSide, "scr_shockwave", 0);
+
   const leech =
     gadgetBonus(atk, "leech") + petBonus(atk, "vampire") + cardBonus(atk, "lifesteal");
   if (leech > 0 && atk.hp > 0) {
     const gain = Math.max(1, Math.round((dmg * leech) / 100));
     atk.hp = Math.min(atk.maxHp, atk.hp + gain);
+    anim(ctx, side, "sup_leech", 0);
     push(ctx, { t: "float", side, text: `+${gain}`, tone: "heal" });
   }
   const thorns = gadgetBonus(vic, "thorns") + cardBonus(vic, "thorns");
   if (thorns > 0 && vic.hp > 0) {
     const back = Math.max(1, Math.round((dmg * thorns) / 100));
     atk.hp = Math.max(0, atk.hp - back);
+    anim(ctx, vicSide, "sup_thorns", 0);
+    anim(ctx, side, "hit_light", 0);
     push(ctx, { t: "float", side, text: `REPULSOR -${back}`, tone: "dmg" });
   }
   push(ctx, { t: "vfx", side: vicSide, url: skill.vfx });
@@ -414,6 +486,10 @@ function doAttack(ctx: Ctx, side: Side, skill: Skill) {
   if (vic.counter > 0 && vic.hp > 0) {
     const back = Math.max(1, Math.round(dmg * 0.35));
     atk.hp = Math.max(0, atk.hp - back);
+    anim(ctx, side, "sup_counter", 0);
+    anim(ctx, side, "hit_medium", 0);
+    anim(ctx, vicSide, "def_hold_counter", 0);
+    anim(ctx, side, "scr_flash_red", 0);
     push(ctx, { t: "vfx", side, url: "/vfx/thunder.png" });
     push(ctx, { t: "float", side, text: `CONTRA -${back}`, tone: "crit" });
     msg(ctx, `${vic.name} revidou o golpe!`);
@@ -429,16 +505,19 @@ function doAttack(ctx: Ctx, side: Side, skill: Skill) {
     const helpful =
       ef.type === "hp_regen" || ef.type === "adrenalin" || ef.type === "damage_reduction";
     if (!helpful && Math.random() < cardBonus(vic, "resist") / 100) {
+      anim(ctx, vicSide, "sup_resist", 0);
       push(ctx, { t: "float", side: vicSide, text: "RESISTIU", tone: "info" });
       sync(ctx);
       return;
     }
     if (helpful) {
       applyEffect(atk, ef.type, ef.power, ef.turns);
+      anim(ctx, side, `status_on_${ef.type}`, 0);
       push(ctx, { t: "float", side, text: EFFECT_NAME[ef.type], tone: "info" });
       msg(ctx, `${atk.name}: ${EFFECT_NAME[ef.type]}`);
     } else {
       applyEffect(vic, ef.type, ef.power, ef.turns);
+      anim(ctx, vicSide, `status_on_${ef.type}`, 0);
       push(ctx, { t: "float", side: vicSide, text: EFFECT_NAME[ef.type], tone: "info" });
       msg(ctx, `${vic.name} esta ${EFFECT_NAME[ef.type]}!`);
     }
@@ -452,6 +531,9 @@ function doDefense(ctx: Ctx, side: Side, skill: Skill) {
   const spec = skill.defense ?? { kind: "guard" as const, turns: 2 };
   msg(ctx, `${f.name} usa ${skill.name}!`);
   push(ctx, { t: "clip", side, clip: "guard" });
+  anim(ctx, side, `def_cast_${spec.kind}`, 0);
+  anim(ctx, side, `def_hold_${spec.kind}`, 0);
+  anim(ctx, side, "wind_hover", 0);
   push(ctx, { t: "vfx", side, url: skill.vfx });
 
   if (spec.kind === "guard") {
@@ -492,25 +574,33 @@ function doItem(ctx: Ctx, side: Side, itemId: string, targetIndex: number) {
   if (ef.kind === "heal" && target.hp > 0) {
     const amount = Math.round((target.maxHp * ef.percent) / 100);
     target.hp = Math.min(target.maxHp, target.hp + amount);
+    anim(ctx, side, "sup_heal_pulse", 0);
+    anim(ctx, side, "sup_regen_drip", 0);
     push(ctx, { t: "vfx", side, url: "/vfx/heal.png" });
     push(ctx, { t: "float", side, text: `+${amount}`, tone: "heal" });
   } else if (ef.kind === "mp") {
     const amount = Math.round((target.maxMp * ef.percent) / 100);
     target.mp = Math.min(target.maxMp, target.mp + amount);
+    anim(ctx, side, "sup_mp_surge", 0);
     push(ctx, { t: "float", side, text: `+${amount} MP`, tone: "info" });
   } else if (ef.kind === "revive" && target.hp <= 0) {
     target.hp = Math.round((target.maxHp * ef.percent) / 100);
     target.effects = [];
+    anim(ctx, side, "enter_teleport", 0);
+    anim(ctx, side, "sup_heal_pulse", 0);
+    anim(ctx, side, "scr_flash_gold", 0);
     push(ctx, { t: "vfx", side, url: "/vfx/levelup.png" });
     push(ctx, { t: "float", side, text: "REATIVADO", tone: "heal" });
   } else if (ef.kind === "buff") {
     applyEffect(target, ef.type, ef.power, ef.turns);
+    anim(ctx, side, `status_on_${ef.type}`, 0);
     push(ctx, { t: "vfx", side, url: "/vfx/shield.png" });
     push(ctx, { t: "float", side, text: EFFECT_NAME[ef.type], tone: "info" });
   } else if (ef.kind === "purify") {
     target.effects = target.effects.filter(
       (e) => e.type === "adrenalin" || e.type === "damage_reduction" || e.type === "hp_regen",
     );
+    anim(ctx, side, "sup_purify", 0);
     push(ctx, { t: "vfx", side, url: "/vfx/heal.png" });
     push(ctx, { t: "float", side, text: "PURIFICADO", tone: "heal" });
   }
@@ -528,9 +618,12 @@ function doSwap(ctx: Ctx, side: Side, index: number) {
     sync(ctx);
     return;
   }
+  anim(ctx, side, "swap_out", 180);
   s.active = index;
   msg(ctx, `${target.name} entra em campo!`);
   push(ctx, { t: "clip", side, clip: "enter" });
+  anim(ctx, side, "swap_in", 0);
+  anim(ctx, side, "enter_dash", 0);
   sync(ctx);
 }
 
@@ -539,6 +632,8 @@ function runAction(ctx: Ctx, side: Side, action: BattleAction) {
   if (!alive(actor)) return;
   if (hasEffect(actor, "paralyze") && action.kind === "skill") {
     msg(ctx, `${actor.name} esta paralisado e perdeu o turno!`);
+    anim(ctx, side, "status_tick_paralyze", 0);
+    anim(ctx, side, "hit_light", 0);
     push(ctx, { t: "float", side, text: "PARALISADO", tone: "info" });
     sync(ctx);
     return;
@@ -570,20 +665,28 @@ function tickEffects(ctx: Ctx, side: Side) {
   if (regen > 0 && f.hp < f.maxHp) {
     const heal = Math.max(1, Math.round((f.maxHp * regen) / 100));
     f.hp = Math.min(f.maxHp, f.hp + heal);
+    anim(ctx, side, "sup_regen_drip", 0);
     push(ctx, { t: "float", side, text: `+${heal}`, tone: "heal" });
   }
+  if (mpreg > 0) anim(ctx, side, "sup_mp_surge", 0);
   for (const e of f.effects) {
     if (e.type === "burn" || e.type === "poison") {
       const dmg = Math.max(1, Math.round((f.maxHp * e.power) / 100 / 2) + e.power);
       f.hp = Math.max(0, f.hp - dmg);
+      anim(ctx, side, `status_tick_${e.type}`, 0);
+      anim(ctx, side, "hit_light", 0);
       push(ctx, { t: "float", side, text: `-${dmg} ${EFFECT_NAME[e.type]}`, tone: "dmg" });
     } else if (e.type === "hp_regen") {
       const heal = Math.max(1, Math.round((f.maxHp * e.power) / 100));
       f.hp = Math.min(f.maxHp, f.hp + heal);
+      anim(ctx, side, "status_tick_hp_regen", 0);
       push(ctx, { t: "float", side, text: `+${heal}`, tone: "heal" });
     } else if (e.type === "drain") {
       const loss = Math.max(1, Math.round((f.maxMp * e.power) / 100));
       f.mp = Math.max(0, f.mp - loss);
+      anim(ctx, side, "status_tick_drain", 0);
+    } else {
+      anim(ctx, side, `status_tick_${e.type}`, 0);
     }
     e.turns -= 1;
   }
@@ -598,6 +701,10 @@ function handleFaints(ctx: Ctx) {
     const f = s.fighters[s.active];
     if (alive(f)) continue;
     msg(ctx, `${f.name} foi desativado!`);
+    anim(ctx, side, "faint_burst", 0);
+    anim(ctx, side, "faint_sink", 0);
+    anim(ctx, side, "scr_flash_red", 0);
+    anim(ctx, side, "scr_vignette", 0);
     push(ctx, { t: "vfx", side, url: "/vfx/explosion.png" });
     push(ctx, { t: "faint", side });
     const next = s.fighters.findIndex((x) => alive(x));
@@ -606,6 +713,8 @@ function handleFaints(ctx: Ctx) {
         s.active = next;
         msg(ctx, `${s.fighters[next].name} entra em campo!`);
         push(ctx, { t: "clip", side, clip: "enter" });
+        anim(ctx, side, "enter_drop", 0);
+        anim(ctx, side, "scr_shockwave", 0);
       } else {
         ctx.b.phase = "forced_swap";
       }
@@ -620,11 +729,17 @@ function checkEnd(ctx: Ctx) {
   if (!enemyAlive) {
     ctx.b.phase = "over";
     ctx.b.result = "win";
+    anim(ctx, "player", "res_victory_pose", 0);
+    anim(ctx, "player", "res_victory_fanfare", 0);
+    anim(ctx, "enemy", "res_defeat_slump", 0);
     msg(ctx, "VITORIA!");
     push(ctx, { t: "end", result: "win" });
   } else if (!playerAlive) {
     ctx.b.phase = "over";
     ctx.b.result = "lose";
+    anim(ctx, "player", "res_defeat_slump", 0);
+    anim(ctx, "player", "res_defeat_fade", 0);
+    anim(ctx, "enemy", "res_victory_pose", 0);
     msg(ctx, "DERROTA...");
     push(ctx, { t: "end", result: "lose" });
   }
@@ -643,6 +758,7 @@ export function resolveTurn(
 ): { battle: Battle; events: BattleEvent[] } {
   const ctx: Ctx = { b: clone(battle), events: [] };
   ctx.b.phase = "resolving";
+  anim(ctx, "player", "ban_turn", 120);
   const enemyAction = chooseAIAction(ctx.b);
 
   const steps: { side: Side; action: BattleAction }[] = [
@@ -691,6 +807,8 @@ export function applyForcedSwap(
     ctx.b.phase = "menu";
     msg(ctx, `${s.fighters[index].name} entra em campo!`);
     push(ctx, { t: "clip", side: "player", clip: "enter" });
+    anim(ctx, "player", "enter_teleport", 0);
+    anim(ctx, "player", "scr_flash_white", 0);
   }
   sync(ctx);
   return { battle: ctx.b, events: ctx.events };

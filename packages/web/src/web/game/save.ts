@@ -61,15 +61,25 @@ import {
   type PetKind,
 } from "./pets";
 import {
+  CHIP_MAP,
   GADGET_MAP,
   GADGET_MAX_LEVEL,
+  GADGET_MAX_SOCKETS,
   GADGET_ROBOT_LEVEL,
+  gadgetSockets,
+  gadgetTotals,
+  gadgetUpgradeBars,
   upgradeCost,
+  type GadgetKind,
 } from "./gadgets";
 import {
   CARD_MAP,
-  MAX_CARDS,
+  CARD_MAX_REFINE,
+  cardModsAt,
+  cardSlots,
   deckBudget,
+  refineBars,
+  refineCost,
   resolveDeck,
   type CardStat,
   type DeckResult,
@@ -95,8 +105,14 @@ export interface GameState {
   activePets: string[];
   /** ids dos cards possuidos. */
   cards: string[];
-  /** ate 3 cards equipados no deck de combate. */
+  /** ate 5 cards equipados no deck de combate (slots liberados por nivel). */
   deck: string[];
+  /** nivel de refino de cada card possuido (1..CARD_MAX_REFINE). */
+  cardRefine: Record<string, number>;
+  /** ids dos chips de gadget possuidos pelo jogador. */
+  chips: string[];
+  /** chips encaixados nos sockets do gadget de cada robo. */
+  gadgetChips: Record<string, (string | null)[]>;
   /** robo usado na exploracao do hub (Fase C). null = lider da equipe. */
   explorer: string | null;
   /** progresso do modo ranqueado. */
@@ -145,6 +161,9 @@ function initialState(): GameState {
     activePets: [],
     cards: [],
     deck: [],
+    cardRefine: {},
+    chips: [],
+    gadgetChips: {},
     explorer: null,
     ranked: initialRanked(),
     mining: initialMining(),
@@ -183,6 +202,44 @@ function normalizeActivePets(parsed: GameState): string[] {
   return out.slice(0, petSlots(parsed.playerLevel ?? 1));
 }
 
+/** Refino valido apenas para cards possuidos, dentro do teto. */
+function normalizeRefine(parsed: GameState, owned: string[]): Record<string, number> {
+  const raw = parsed.cardRefine ?? {};
+  const out: Record<string, number> = {};
+  for (const id of owned) {
+    const lvl = Math.floor(raw[id] ?? 1);
+    if (!Number.isFinite(lvl) || lvl <= 1) continue;
+    out[id] = Math.min(CARD_MAX_REFINE, lvl);
+  }
+  return out;
+}
+
+/** Chips encaixados: ids validos, possuidos e dentro dos sockets liberados. */
+function normalizeGadgetChips(
+  parsed: GameState,
+  chips: string[],
+): Record<string, (string | null)[]> {
+  const raw = parsed.gadgetChips ?? {};
+  const out: Record<string, (string | null)[]> = {};
+  for (const [robotId, slots] of Object.entries(raw)) {
+    if (!GADGET_MAP[robotId]) continue;
+    const max = gadgetSockets(parsed.gadgets?.[robotId] ?? 0);
+    if (max <= 0) continue;
+    const used = new Set<string>();
+    const row: (string | null)[] = [];
+    for (const id of (Array.isArray(slots) ? slots : []).slice(0, max)) {
+      if (id && CHIP_MAP[id] && chips.includes(id) && !used.has(id)) {
+        used.add(id);
+        row.push(id);
+      } else {
+        row.push(null);
+      }
+    }
+    if (row.some(Boolean)) out[robotId] = row;
+  }
+  return out;
+}
+
 function read(): GameState {
   if (typeof localStorage === "undefined") return initialState();
   try {
@@ -194,6 +251,8 @@ function read(): GameState {
     // Fase F: registra os robôs do laboratório antes de qualquer tela montar.
     const customs = normalizeCustoms(parsed.customs);
     for (const c of customs) activateCustom(c);
+    const ownedCards = (parsed.cards ?? []).filter((id) => Boolean(CARD_MAP[id]));
+    const ownedChips = [...new Set(parsed.chips ?? [])].filter((id) => Boolean(CHIP_MAP[id]));
     return {
       ...base,
       ...parsed,
@@ -203,8 +262,14 @@ function read(): GameState {
       pets: parsed.pets ?? {},
       // migração G1: o save antigo tinha um único pet ativo.
       activePets: normalizeActivePets(parsed),
-      cards: (parsed.cards ?? []).filter((id) => Boolean(CARD_MAP[id])),
-      deck: (parsed.deck ?? []).filter((id) => Boolean(CARD_MAP[id])).slice(0, MAX_CARDS),
+      cards: ownedCards,
+      deck: (parsed.deck ?? [])
+        .filter((id) => Boolean(CARD_MAP[id]))
+        .slice(0, cardSlots(parsed.playerLevel ?? 1)),
+      // G2: refino de cards e chips de gadget
+      cardRefine: normalizeRefine(parsed, ownedCards),
+      chips: ownedChips,
+      gadgetChips: normalizeGadgetChips(parsed, ownedChips),
       explorer:
         parsed.explorer && (parsed.robots ?? []).some((r) => r.id === parsed.explorer)
           ? parsed.explorer
@@ -429,20 +494,92 @@ export function buyGadget(robotId: string): boolean {
   return true;
 }
 
-/** Sobe um nivel do gadget. Retorna false se nao for possivel. */
+/** Sobe um nivel do gadget. Marcos de MK cobram lingotes. */
 export function upgradeGadget(robotId: string): boolean {
   const def = GADGET_MAP[robotId];
   if (!def) return false;
   const cur = state.gadgets[robotId] ?? 0;
   if (cur <= 0 || cur >= GADGET_MAX_LEVEL) return false;
   const cost = upgradeCost(def, cur);
+  const bars = gadgetUpgradeBars(def, cur);
   if (state.gold < cost) return false;
+  if (bars > 0 && totalBars(state) < bars) return false;
   setState((s) => ({
     ...s,
     gold: s.gold - cost,
     gadgets: { ...s.gadgets, [robotId]: cur + 1 },
+    mining:
+      bars > 0 ? { ...s.mining, bars: spendBars(s.mining.bars, bars) } : s.mining,
   }));
   return true;
+}
+
+// --------------------------------------------------------- chips (G2)
+/** Sockets liberados pelo nivel atual do gadget do robo. */
+export function gadgetSocketCount(s: GameState, robotId: string): number {
+  return gadgetSockets(s.gadgets[robotId] ?? 0);
+}
+
+/** Chips encaixados no gadget do robo, ja limitados aos sockets liberados. */
+export function gadgetChipsOf(s: GameState, robotId: string): (string | null)[] {
+  const max = gadgetSocketCount(s, robotId);
+  const row = s.gadgetChips[robotId] ?? [];
+  return Array.from({ length: max }, (_, i) => {
+    const id = row[i];
+    return id && CHIP_MAP[id] ? id : null;
+  });
+}
+
+export function ownsChip(s: GameState, chipId: string): boolean {
+  return s.chips.includes(chipId);
+}
+
+/** Compra um chip (ouro + lingotes). Chips servem para qualquer robo. */
+export function buyChip(chipId: string): boolean {
+  const def = CHIP_MAP[chipId];
+  if (!def) return false;
+  if (state.chips.includes(chipId)) return false;
+  if (state.gold < def.price) return false;
+  if (def.bars > 0 && totalBars(state) < def.bars) return false;
+  setState((s) => ({
+    ...s,
+    gold: s.gold - def.price,
+    chips: [...s.chips, chipId],
+    mining:
+      def.bars > 0
+        ? { ...s.mining, bars: spendBars(s.mining.bars, def.bars) }
+        : s.mining,
+  }));
+  return true;
+}
+
+/** Encaixa (ou remove, com chipId null) um chip num socket do gadget. */
+export function equipChip(robotId: string, slot: number, chipId: string | null): boolean {
+  if (!GADGET_MAP[robotId]) return false;
+  const max = gadgetSocketCount(state, robotId);
+  if (slot < 0 || slot >= max) return false;
+  if (chipId !== null) {
+    if (!CHIP_MAP[chipId] || !state.chips.includes(chipId)) return false;
+  }
+  const row = gadgetChipsOf(state, robotId);
+  // o mesmo chip nao pode ocupar dois sockets do mesmo gadget
+  const next = row.map((id, i) => {
+    if (i === slot) return chipId;
+    return chipId !== null && id === chipId ? null : id;
+  });
+  setState((s) => ({
+    ...s,
+    gadgetChips: { ...s.gadgetChips, [robotId]: next.slice(0, GADGET_MAX_SOCKETS) },
+  }));
+  return true;
+}
+
+/** Efeitos totais do gadget do robo (efeito principal + chips). */
+export function gadgetBonusTable(
+  robotId: string,
+  s: GameState = state,
+): Partial<Record<GadgetKind, number>> {
+  return gadgetTotals(GADGET_MAP[robotId], s.gadgets[robotId] ?? 0, gadgetChipsOf(s, robotId));
 }
 
 export function setModeProgress(patch: Partial<GameState["modes"]>) {
@@ -586,8 +723,8 @@ export function toggleCard(cardId: string): boolean {
     return true;
   }
   if (!state.cards.includes(cardId)) return false;
-  if (state.deck.length >= MAX_CARDS) return false;
-  const cost = resolveDeck(state.deck).cost + def.cost;
+  if (state.deck.length >= cardSlots(state.playerLevel)) return false;
+  const cost = resolveDeck(state.deck, state.cardRefine).cost + def.cost;
   if (cost > deckBudget(state.playerLevel)) return false;
   setState((s) => ({ ...s, deck: [...s.deck, cardId] }));
   return true;
@@ -597,9 +734,47 @@ export function clearDeck() {
   setState((s) => ({ ...s, deck: [] }));
 }
 
-/** Deck resolvido do jogador (cards + sinergias ativas). */
+/** Slots de card liberados pelo nivel atual do jogador. */
+export function cardSlotCount(s: GameState = state): number {
+  return cardSlots(s.playerLevel);
+}
+
+/** Nivel de refino de um card possuido (1 = sem refino). */
+export function cardRefineOf(s: GameState, cardId: string): number {
+  return Math.max(1, s.cardRefine[cardId] ?? 1);
+}
+
+/** Refina um card possuido (ouro + lingotes nos marcos). */
+export function refineCard(cardId: string): boolean {
+  const def = CARD_MAP[cardId];
+  if (!def) return false;
+  if (!state.cards.includes(cardId)) return false;
+  const cur = cardRefineOf(state, cardId);
+  if (cur >= CARD_MAX_REFINE) return false;
+  const cost = refineCost(def, cur);
+  const bars = refineBars(def, cur);
+  if (state.gold < cost) return false;
+  if (bars > 0 && totalBars(state) < bars) return false;
+  setState((s) => ({
+    ...s,
+    gold: s.gold - cost,
+    cardRefine: { ...s.cardRefine, [cardId]: cur + 1 },
+    mining:
+      bars > 0 ? { ...s.mining, bars: spendBars(s.mining.bars, bars) } : s.mining,
+  }));
+  return true;
+}
+
+/** Mods efetivos de um card possuido, com refino aplicado. */
+export function cardModsOwned(cardId: string, s: GameState = state) {
+  const def = CARD_MAP[cardId];
+  if (!def) return {};
+  return cardModsAt(def, cardRefineOf(s, cardId));
+}
+
+/** Deck resolvido do jogador (cards + refino + sinergias ativas). */
 export function playerDeck(s: GameState = state): DeckResult {
-  return resolveDeck(s.deck);
+  return resolveDeck(s.deck, s.cardRefine);
 }
 
 /** Modificador do deck do jogador para um atributo. */

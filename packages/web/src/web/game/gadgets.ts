@@ -1,5 +1,6 @@
-// GERADO: um gadget unico por robo (120 no total).
-// Cada gadget tem arte propria em /public/gadgets/<robotId>.png e sobe ate o nivel 10.
+// GERADO: um gadget unico por robo (220 no total).
+// Cada gadget tem arte propria em /public/gadgets/<robotId>.png, sobe ate o nivel 30
+// em 3 marcos (MK-I/II/III) e abre ate 3 sockets de chip (ver CHIPS no fim do arquivo).
 
 export type GadgetKind =
   | "power"
@@ -31,9 +32,40 @@ export interface GadgetDef {
   flavor: string;
 }
 
-export const GADGET_MAX_LEVEL = 10;
+export const GADGET_MAX_LEVEL = 30;
 /** nivel minimo do robo para destravar o gadget */
 export const GADGET_ROBOT_LEVEL = 10;
+
+/** Marcos do gadget: MK-I (1-10), MK-II (11-20), MK-III (21-30). */
+export const GADGET_MK_CAPS = [10, 20, 30];
+export const GADGET_MK_LABEL = ["MK-I", "MK-II", "MK-III"];
+const GADGET_MK_MULT = [1, 1.25, 1.55];
+
+/** Nivel de gadget que libera cada socket de chip. */
+export const GADGET_SOCKET_LEVELS = [5, 15, 25];
+export const GADGET_MAX_SOCKETS = GADGET_SOCKET_LEVELS.length;
+
+export function gadgetMk(level: number): number {
+  const l = Math.max(1, level);
+  return l > GADGET_MK_CAPS[1] ? 2 : l > GADGET_MK_CAPS[0] ? 1 : 0;
+}
+
+export function gadgetMkLabel(level: number): string {
+  return GADGET_MK_LABEL[gadgetMk(level)];
+}
+
+/** Sockets liberados por nivel de gadget. */
+export function gadgetSockets(level: number): number {
+  return GADGET_SOCKET_LEVELS.filter((l) => level >= l).length;
+}
+
+/** Lingotes exigidos para cruzar a fronteira de um marco (10->11, 20->21). */
+export function gadgetUpgradeBars(def: GadgetDef, current: number): number {
+  const tier = def.rarity === "gold" ? 2 : def.rarity === "silver" ? 1 : 0;
+  if (current === GADGET_MK_CAPS[0]) return 10 + tier * 5;
+  if (current === GADGET_MK_CAPS[1]) return 24 + tier * 8;
+  return 0;
+}
 
 export const GADGETS: GadgetDef[] = [
   { robotId: "aurorion", name: "PUNHO SOLAR", kind: "power", element: "LUZ", rarity: "gold", base: 10.2, step: 2.6, price: 18000, desc: "+10.2% de FORCA em combate.", flavor: "Modulo solar forjado sob medida para AURORION." },
@@ -279,10 +311,11 @@ export const KIND_LABEL: Record<GadgetKind, string> = {
   aegis: "EGIDE",
 };
 
-/** valor do efeito para um nivel de gadget */
+/** valor do efeito para um nivel de gadget (escala pelo marco atual) */
 export function gadgetValue(def: GadgetDef, level: number): number {
   const l = Math.max(1, Math.min(GADGET_MAX_LEVEL, level));
-  return Math.round((def.base + def.step * (l - 1)) * 10) / 10;
+  const raw = def.base + def.step * 0.6 * (l - 1);
+  return Math.round(raw * GADGET_MK_MULT[gadgetMk(l)] * 10) / 10;
 }
 
 export function gadgetDesc(def: GadgetDef, level: number): string {
@@ -317,7 +350,7 @@ export function gadgetDesc(def: GadgetDef, level: number): string {
 
 /** custo para subir do nivel atual para o proximo */
 export function upgradeCost(def: GadgetDef, current: number): number {
-  return Math.round((def.price * 0.45 * Math.pow(current + 1, 1.35)) / 50) * 50;
+  return Math.round((def.price * 0.3 * Math.pow(current + 1, 1.12)) / 50) * 50;
 }
 
 export function gadgetArt(robotId: string): string {
@@ -330,4 +363,141 @@ export function aiGadgetLevel(robotId: string, robotLevel: number): number {
   const seed = [...robotId].reduce((a, c) => a + c.charCodeAt(0), 0);
   const base = Math.floor((robotLevel - GADGET_ROBOT_LEVEL) / 9) + 1;
   return Math.max(1, Math.min(GADGET_MAX_LEVEL, base + (seed % 2)));
+}
+
+// ------------------------------------------------------------------- chips
+// Chips sao modulos genericos do jogador: forjados com ouro + lingotes e
+// encaixados nos sockets do gadget de qualquer robo. 12 tipos x 4 tiers = 48.
+
+export interface ChipDef {
+  id: string;
+  name: string;
+  kind: GadgetKind;
+  /** 1..4 */
+  tier: number;
+  tierName: string;
+  /** bonus do chip no efeito correspondente */
+  value: number;
+  price: number;
+  /** lingotes exigidos na forja */
+  bars: number;
+  desc: string;
+}
+
+const CHIP_TIERS = [
+  { tier: 1, name: "BRUTO", mult: 1, price: 2500, bars: 4 },
+  { tier: 2, name: "REFINADO", mult: 2.1, price: 9000, bars: 12 },
+  { tier: 3, name: "OTIMIZADO", mult: 3.4, price: 26000, bars: 26 },
+  { tier: 4, name: "SINGULAR", mult: 5, price: 70000, bars: 55 },
+];
+
+const CHIP_BASE: Record<GadgetKind, { name: string; value: number }> = {
+  power: { name: "CHIP DE IMPACTO", value: 3.5 },
+  guard: { name: "CHIP DE ANTEPARO", value: 3.5 },
+  speed: { name: "CHIP DE GIRO", value: 3.2 },
+  vitality: { name: "CHIP DE FOLE", value: 4 },
+  reactor: { name: "CHIP DE CELULA", value: 5 },
+  leech: { name: "CHIP DE SIFAO", value: 2.6 },
+  thorns: { name: "CHIP DE REPULSA", value: 3.8 },
+  regen: { name: "CHIP DE SUTURA", value: 1.6 },
+  crit: { name: "CHIP DE MIRA", value: 2, },
+  phase: { name: "CHIP DE DESVIO", value: 1.6 },
+  amp: { name: "CHIP DE RESSONANCIA", value: 3 },
+  aegis: { name: "CHIP DE EGIDE", value: 2.2 },
+};
+
+const CHIP_KINDS = Object.keys(CHIP_BASE) as GadgetKind[];
+
+function chipEffectDesc(kind: GadgetKind, v: number): string {
+  switch (kind) {
+    case "power":
+      return `+${v}% de FORCA`;
+    case "guard":
+      return `+${v}% de DEFESA`;
+    case "speed":
+      return `+${v}% de AGILIDADE`;
+    case "vitality":
+      return `+${v}% de HP maximo`;
+    case "reactor":
+      return `+${v}% de MP maximo`;
+    case "leech":
+      return `+${v}% de dreno`;
+    case "thorns":
+      return `+${v}% de espinhos`;
+    case "regen":
+      return `+${v}% de reparo por turno`;
+    case "crit":
+      return `+${v}% de critico`;
+    case "phase":
+      return `+${v}% de esquiva`;
+    case "amp":
+      return `+${v}% de dano nas habilidades`;
+    case "aegis":
+      return `-${v}% de dano recebido`;
+  }
+}
+
+export const CHIPS: ChipDef[] = CHIP_KINDS.flatMap((kind) =>
+  CHIP_TIERS.map((t) => {
+    const value = Math.round(CHIP_BASE[kind].value * t.mult * 10) / 10;
+    return {
+      id: `${kind}_t${t.tier}`,
+      name: `${CHIP_BASE[kind].name} ${t.name}`,
+      kind,
+      tier: t.tier,
+      tierName: t.name,
+      value,
+      price: t.price,
+      bars: t.bars,
+      desc: `${chipEffectDesc(kind, value)}.`,
+    };
+  }),
+);
+
+export const CHIP_MAP: Record<string, ChipDef> = Object.fromEntries(
+  CHIPS.map((c) => [c.id, c]),
+);
+
+export const CHIP_TIER_COLOR = ["#c98a4b", "#cfd8e3", "#ffd24a", "#b06bff"];
+
+export function chipColor(def: ChipDef): string {
+  return CHIP_TIER_COLOR[Math.max(0, Math.min(3, def.tier - 1))];
+}
+
+/**
+ * Soma de todos os efeitos de um gadget: o efeito principal do proprio gadget
+ * mais os chips encaixados nos sockets liberados.
+ */
+export function gadgetTotals(
+  def: GadgetDef | undefined,
+  level: number,
+  chipIds: (string | null | undefined)[] = [],
+): Partial<Record<GadgetKind, number>> {
+  const out: Partial<Record<GadgetKind, number>> = {};
+  if (!def || level <= 0) return out;
+  const add = (kind: GadgetKind, v: number) => {
+    out[kind] = Math.round(((out[kind] ?? 0) + v) * 10) / 10;
+  };
+  add(def.kind, gadgetValue(def, level));
+  const sockets = gadgetSockets(level);
+  chipIds.slice(0, sockets).forEach((id) => {
+    const chip = id ? CHIP_MAP[id] : undefined;
+    if (chip) add(chip.kind, chip.value);
+  });
+  return out;
+}
+
+/** Chips que a IA encaixa, conforme o nivel do robo (deterministico). */
+export function aiChips(robotId: string, robotLevel: number): string[] {
+  const glevel = aiGadgetLevel(robotId, robotLevel);
+  const sockets = gadgetSockets(glevel);
+  if (sockets <= 0) return [];
+  const seed = [...robotId].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const tier = Math.max(1, Math.min(4, 1 + Math.floor((robotLevel - 20) / 20)));
+  const out: string[] = [];
+  for (let i = 0; i < sockets; i++) {
+    const kind = CHIP_KINDS[(seed + i * 5) % CHIP_KINDS.length];
+    out.push(`${kind}_t${tier}`);
+  }
+  return out;
 }

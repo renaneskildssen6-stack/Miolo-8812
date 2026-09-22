@@ -123,4 +123,35 @@
 - [x] styles.css: animações mk-petbob (flutuação do pet), mk-petin (entrada lateral na direção da seta) e mk-aura (aura pulsante na cor da raridade)
 - [x] typecheck --force OK, build OK, assets/e2e_pets_g1.py OK (setas de pet, setas de espécie, filtro, adoção, treino, evolução Lv6→7 cobrando lingotes, slots; 0 erros de console, 0 imagens quebradas)
 
-### Próxima fase: G2 — cards e gadgets 100x maiores
+
+
+## Fase G2 — Cards e gadgets 100x (concluída)
+
+### Cards (game/cards.ts, screens/cards.tsx)
+- [x] 30 cards base × **7 selos** (BRUTO, RUBRO, POLAR, VOLTAICO, UMBRAL, AUREO, PRISMA) = **210 cards**; cada selo multiplica os mods, adiciona bônus/tag próprios e sobe raridade, preço e nível exigido
+- [x] Selos recolorem a arte base por filtro CSS (cardFilter: sepia+saturate+hue-rotate+brightness) — **nenhuma arte nova gerada**, respeitando a ordem de não gerar personagem
+- [x] **Refino +0..+9** por card (CARD_MAX_REFINE 10): custo em ouro escalando e **lingotes da mina** nos marcos, multiplicando os mods (cardModsAt/refineMult)
+- [x] Slots de deck 3 → **5** (CARD_SLOT_LEVELS 1/1/1/20/45) e orçamento de energia crescendo com o nível (deckBudget)
+- [x] Sinergias em **3 camadas**: por tag, por selo e **17 combos nomeados**; nearSynergies sugere o que falta
+- [x] IA usa decks selados e refinados (aiDeck + aiRefineMap), escalando com o nível do adversário
+- [x] Tela refeita: lista agrupada por base com contador de selos possuídos (N/7), modal com grade dos 7 selos, mods somados, comprar/equipar/remover e **refinar**
+- [x] Correção de UI: clique dentro do modal não fecha mais o modal (o backdrop só fecha no toque fora)
+
+### Gadgets (game/gadgets.ts, screens/engineer.tsx)
+- [x] Nível máximo 10 → **30**, em 3 marcos **MK-I / MK-II / MK-III** (caps 10/20/30); cruzar marco cobra **lingotes**
+- [x] **3 sockets** por gadget, liberados em Lv5/15/25 (gadgetSockets)
+- [x] **48 chips** forjáveis (12 tipos × 4 tiers BRUTO/REFINADO/OTIMIZADO/SINGULAR), custando ouro + lingotes; gadgetTotals soma gadget + chips
+- [x] IA também equipa chips (aiChips) conforme o nível
+- [x] Tela com duas abas (GADGETS / FORJA DE CHIPS), etiqueta MK, fileira de sockets clicáveis, picker de chip e efeitos somados na ficha
+
+### Save e batalha
+- [x] save.ts: novos campos cardRefine / chips / gadgetChips com migração do save antigo; refineCard, buyChip, equipChip, gadgetChipsOf, cardSlotCount, gadgetBonusTable
+- [x] battle.ts: Fighter.gadget → **gadgetLevel + gadgetMk + gadgetMods** (gadget + chips somados); deck do jogador e da IA resolvidos já com refino
+
+### Verificação
+- [x] typecheck --force OK, build OK
+- [x] assets/e2e_cards_g2.py OK — 210 cards, 30 tiles, 7 miniaturas de selo com 7 filtros distintos, compra do bruto + do selado, equipar, refinar até +3 cobrando lingotes no marco, forja de chip, upgrade de gadget Lv10→11 virando MK-II com lingotes, chip encaixado no socket; 0 erros de console, 0 imagens quebradas, 0 HTTP>=400
+- [x] assets/e2e_battle_g2.py OK — gadget MK-II sozinho +49.8% de força, com 2 chips T4 vai a **+67.3%** e ganha +10% de crítico; card selado rubro sai de +12.5% para **+20.4%** de poder com refino +7; força do lutador 131 → 219
+- [x] assets/e2e_battle.py OK (partida real sem erros de console nem sprites quebrados)
+
+### Próxima fase: G3 — batalha 100x com 100 animações novas

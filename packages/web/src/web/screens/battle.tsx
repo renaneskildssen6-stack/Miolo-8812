@@ -20,12 +20,20 @@ import {
   type BattleEvent,
   type Side,
 } from "@/game/battle";
+import { animSpec, type AnimSpec } from "@/game/anim";
 import { ITEM_MAP } from "@/game/config";
 import type { RobotSave } from "@/game/engine";
 import { faceUrl, ROBOT_MAP } from "@/game/robots";
 
 type Clip = "idle" | "attack" | "damage" | "guard" | "enter";
 type Menu = "root" | "skills" | "items" | "swap";
+
+/** Fase G3: instancia viva de uma animacao do catalogo. */
+interface AnimInst {
+  key: number;
+  side: Side;
+  spec: AnimSpec;
+}
 
 interface Float {
   key: number;
@@ -87,7 +95,8 @@ export function BattleScreen({
   const [floats, setFloats] = useState<Float[]>([]);
   const [message, setMessage] = useState(`${label} — LUTAR!`);
   const [menu, setMenu] = useState<Menu>("root");
-  const [shakeSide, setShakeSide] = useState<Side | null>(null);
+  const [shake, setShake] = useState<{ side: Side; level: number; key: number } | null>(null);
+  const [anims, setAnims] = useState<AnimInst[]>([]);
   const keyRef = useRef(0);
 
   const busy = queue.length > 0;
@@ -111,6 +120,24 @@ export function BattleScreen({
     window.setTimeout(() => setFloats((f) => f.filter((x) => x.key !== key)), 900);
   }, []);
 
+  /* Fase G3: dispara uma animacao do catalogo. Varias podem viver ao mesmo
+   * tempo — cada camada (sprite/aura/burst/tela) desenha a sua. */
+  const fire = useCallback((side: Side, id: string) => {
+    const spec = animSpec(id);
+    if (!spec) return;
+    keyRef.current += 1;
+    const key = keyRef.current;
+    setAnims((a) => [...a.slice(-11), { key, side, spec }]);
+    window.setTimeout(() => setAnims((a) => a.filter((x) => x.key !== key)), spec.duration + 80);
+    if (spec.shake) {
+      setShake({ side, level: spec.shake, key });
+      window.setTimeout(
+        () => setShake((s) => (s && s.key === key ? null : s)),
+        220 + spec.shake * 90,
+      );
+    }
+  }, []);
+
   // playback dos eventos
   useEffect(() => {
     if (queue.length === 0) return;
@@ -126,8 +153,8 @@ export function BattleScreen({
     } else if (ev.t === "vfx") {
       keyRef.current += 1;
       setVfx({ side: ev.side, url: ev.url, key: keyRef.current });
-      setShakeSide(ev.side);
-      window.setTimeout(() => setShakeSide(null), 260);
+      setShake({ side: ev.side, level: 1, key: keyRef.current });
+      window.setTimeout(() => setShake(null), 260);
       delay = 360;
     } else if (ev.t === "float") {
       nextFloat(ev.side, ev.text, ev.tone);
@@ -135,6 +162,9 @@ export function BattleScreen({
     } else if (ev.t === "sync") {
       setBattle(ev.battle);
       delay = 60;
+    } else if (ev.t === "anim") {
+      fire(ev.side, ev.id);
+      delay = ev.hold ?? 0;
     } else if (ev.t === "faint") {
       delay = 620;
     } else if (ev.t === "end") {
@@ -142,7 +172,7 @@ export function BattleScreen({
     }
     const id = window.setTimeout(() => setQueue((q) => q.slice(1)), delay);
     return () => window.clearTimeout(id);
-  }, [queue, nextFloat]);
+  }, [queue, nextFloat, fire]);
 
   const act = useCallback(
     (action: BattleAction) => {
@@ -173,6 +203,9 @@ export function BattleScreen({
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
       <ArenaBackdrop arena={arena} round={round} />
+
+      {/* Fase G3: camada de tela cheia (flashes, vinheta, barras, faixas) */}
+      <ScreenFx anims={anims.filter((a) => a.spec.layer === "screen")} />
 
       {/* HUD superior */}
       <div style={{ position: "absolute", top: 8, left: 8, right: 8, display: "flex", gap: 8 }}>
@@ -222,9 +255,10 @@ export function BattleScreen({
           clip={clips.player}
           flip={false}
           dim={pActive.hp <= 0}
-          shake={shakeSide === "player"}
+          shake={shake?.side === "player" ? shake.level : 0}
           vfx={vfx?.side === "player" ? vfx : null}
           floats={floats.filter((f) => f.side === "player")}
+          anims={anims.filter((a) => a.side === "player")}
         />
         <Stage
           side="enemy"
@@ -232,9 +266,10 @@ export function BattleScreen({
           clip={clips.enemy}
           flip
           dim={eActive.hp <= 0}
-          shake={shakeSide === "enemy"}
+          shake={shake?.side === "enemy" ? shake.level : 0}
           vfx={vfx?.side === "enemy" ? vfx : null}
           floats={floats.filter((f) => f.side === "enemy")}
+          anims={anims.filter((a) => a.side === "enemy")}
         />
       </div>
 
@@ -408,6 +443,7 @@ export function BattleScreen({
 }
 
 function Stage({
+  side,
   robotId,
   clip,
   flip,
@@ -415,27 +451,61 @@ function Stage({
   shake,
   vfx,
   floats,
+  anims,
 }: {
   side: Side;
   robotId: string;
   clip: Clip;
   flip: boolean;
   dim: boolean;
-  shake: boolean;
+  shake: number;
   vfx: { url: string; key: number } | null;
   floats: Float[];
+  anims: AnimInst[];
 }) {
+  /* Direcao do lado: o jogador empurra para a direita, o inimigo para a
+   * esquerda. As animacoes leem isso via --mk-dir. */
+  const dir = side === "player" ? 1 : -1;
+  const sprite = anims.filter((a) => a.spec.layer === "sprite").at(-1) ?? null;
+  const auras = anims.filter((a) => a.spec.layer === "aura");
+  const bursts = anims.filter((a) => a.spec.layer === "burst");
+  const shakeCls = shake >= 3 ? "mk-shake-3" : shake === 2 ? "mk-shake-2" : shake === 1 ? "mk-shake" : "";
+
   return (
-    <div style={{ position: "relative" }} className={shake ? "mk-shake" : undefined}>
-      <RobotSprite
-        robotId={robotId}
-        clip={clip}
-        size={132}
-        flip={flip}
-        fps={clip === "idle" ? 4 : 8}
-        loop={clip === "idle"}
-        dim={dim}
-      />
+    <div
+      style={{ position: "relative", ["--mk-dir" as string]: String(dir) }}
+      className={shakeCls}
+    >
+      {/* auras ficam atras do robo */}
+      {auras.map((a) => (
+        <AnimVfx key={a.key} inst={a} size={188} offset={-28} />
+      ))}
+
+      <div
+        key={sprite?.key ?? "still"}
+        className={sprite ? `mk-a mk-a-${sprite.spec.keyframe}` : undefined}
+        style={
+          sprite
+            ? ({ ["--mk-d" as string]: `${sprite.spec.duration}ms` } as React.CSSProperties)
+            : undefined
+        }
+      >
+        <RobotSprite
+          robotId={robotId}
+          clip={clip}
+          size={132}
+          flip={flip}
+          fps={clip === "idle" ? 4 : 8}
+          loop={clip === "idle"}
+          dim={dim}
+        />
+      </div>
+
+      {/* bursts por cima */}
+      {bursts.map((a) => (
+        <AnimVfx key={a.key} inst={a} size={196} offset={-32} />
+      ))}
+
       {vfx && (
         <div key={vfx.key} style={{ position: "absolute", left: -14, top: -20 }}>
           <VfxSprite url={vfx.url} size={160} />
@@ -458,6 +528,64 @@ function Stage({
           {f.text}
         </div>
       ))}
+    </div>
+  );
+}
+
+/** Uma camada de VFX animada: sprite sheet existente + recoloracao + keyframe. */
+function AnimVfx({ inst, size, offset }: { inst: AnimInst; size: number; offset: number }) {
+  const { spec } = inst;
+  if (!spec.vfx) return null;
+  return (
+    <div
+      className={`mk-a mk-a-${spec.keyframe}`}
+      style={
+        {
+          position: "absolute",
+          left: offset,
+          top: offset,
+          pointerEvents: "none",
+          filter: spec.filter,
+          ["--mk-d"]: `${spec.duration}ms`,
+          ["--mk-s"]: String(spec.scale ?? 1),
+        } as React.CSSProperties
+      }
+    >
+      <VfxSprite url={spec.vfx} size={size} />
+    </div>
+  );
+}
+
+/** Camada de tela cheia: flashes, vinhetas, barras, linhas e faixas de texto. */
+function ScreenFx({ anims }: { anims: AnimInst[] }) {
+  if (anims.length === 0) return null;
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 5 }}>
+      {anims.map((a) => {
+        const banner = a.spec.keyframe === "banner" || a.spec.keyframe === "banner-big";
+        return (
+          <div
+            key={a.key}
+            className={`mk-a mk-a-${a.spec.keyframe} ${banner ? "mk-title" : ""}`}
+            style={
+              {
+                position: "absolute",
+                inset: 0,
+                display: banner ? "grid" : undefined,
+                placeItems: banner ? "center" : undefined,
+                fontSize: a.spec.keyframe === "banner-big" ? 26 : 16,
+                color: a.spec.color,
+                textShadow: "3px 3px 0 #000",
+                letterSpacing: 2,
+                ["--mk-d"]: `${a.spec.duration}ms`,
+                ["--mk-c"]: a.spec.color ?? "#fff",
+              } as React.CSSProperties
+            }
+          >
+            {banner ? a.spec.text : null}
+          </div>
+        );
+      })}
     </div>
   );
 }

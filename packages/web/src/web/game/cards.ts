@@ -41,7 +41,8 @@ export type CardTag =
 
 export type CardRarity = "bronze" | "prata" | "ouro" | "prisma";
 
-export interface CardDef {
+/** Carta base desenhada a mao (30 no total, uma arte cada). */
+export interface BaseCard {
   id: string;
   name: string;
   rarity: CardRarity;
@@ -56,18 +57,74 @@ export interface CardDef {
   mods: CardMods;
 }
 
+/** Selos de forja: cada carta base existe em 7 versoes seladas. */
+export type CardSealId =
+  | "bruto"
+  | "rubro"
+  | "polar"
+  | "voltaico"
+  | "umbral"
+  | "aureo"
+  | "prisma";
+
+export interface SealDef {
+  id: CardSealId;
+  name: string;
+  /** multiplicador aplicado aos mods da carta base */
+  mult: number;
+  /** energia extra no deck */
+  costDelta: number;
+  /** tag adicionada pelo selo (undefined no selo bruto) */
+  extraTag?: CardTag;
+  /** mods proprios do selo, somados depois do multiplicador */
+  bonus: CardMods;
+  priceMult: number;
+  /** degraus de raridade adicionados */
+  rarityUp: number;
+  /** niveis exigidos acima da carta base */
+  levelAdd: number;
+  /** recoloracao da arte base (filtro CSS) */
+  hue: number;
+  sat: number;
+  bright: number;
+  flavor: string;
+}
+
+export interface CardDef extends BaseCard {
+  /** id da carta base (arte compartilhada) */
+  base: string;
+  seal: CardSealId;
+  sealName: string;
+}
+
 export interface SynergyDef {
   id: string;
   name: string;
   desc: string;
   /** ativa quando o deck tem >= count cards com a tag */
   tag?: { tag: CardTag; count: number };
+  /** ativa quando o deck tem >= count cards do mesmo selo */
+  seal?: { seal: CardSealId; count: number };
   /** ativa quando todos esses cards estao equipados */
   cards?: string[];
   mods: CardMods;
 }
 
-export const MAX_CARDS = 3;
+/** Teto absoluto de cards equipados (o jogador libera slots por nivel). */
+export const MAX_CARDS = 5;
+/** Nivel do piloto que libera cada slot de deck. */
+export const CARD_SLOT_LEVELS = [1, 1, 1, 20, 45];
+/** Slots de deck liberados pelo nivel do piloto. */
+export function cardSlots(playerLevel: number): number {
+  return CARD_SLOT_LEVELS.filter((l) => playerLevel >= l).length;
+}
+
+/** Refino: cada card possuido sobe ate o nivel 10, ampliando seus mods. */
+export const CARD_MAX_REFINE = 10;
+export function refineMult(refine: number): number {
+  const r = Math.max(1, Math.min(CARD_MAX_REFINE, refine || 1));
+  return 1 + 0.09 * (r - 1);
+}
 
 export const CARD_STAT_LABEL: Record<CardStat, string> = {
   str: "FORCA",
@@ -113,10 +170,10 @@ export const CARD_RARITY_COLOR: Record<CardRarity, string> = {
 
 /** Orcamento de energia do deck, cresce com o nivel do piloto. */
 export function deckBudget(playerLevel: number): number {
-  return 6 + Math.min(6, Math.floor(playerLevel / 8));
+  return 6 + Math.min(16, Math.floor(playerLevel / 4));
 }
 
-export const CARDS: CardDef[] = [
+const BASE_CARDS: BaseCard[] = [
   // ---------------------------------------------------------------- bronze
   {
     id: "chama_viva",
@@ -516,112 +573,408 @@ export const CARDS: CardDef[] = [
   },
 ];
 
+export { BASE_CARDS };
+
+// ------------------------------------------------------------------ selos
+export const SEALS: SealDef[] = [
+  {
+    id: "bruto",
+    name: "BRUTO",
+    mult: 1,
+    costDelta: 0,
+    bonus: {},
+    priceMult: 1,
+    rarityUp: 0,
+    levelAdd: 0,
+    hue: 0,
+    sat: 1,
+    bright: 1,
+    flavor: "Forja original, sem selo aplicado.",
+  },
+  {
+    id: "rubro",
+    name: "RUBRO",
+    mult: 1.25,
+    costDelta: 1,
+    extraTag: "chama",
+    bonus: { rage: 8 },
+    priceMult: 3.2,
+    rarityUp: 1,
+    levelAdd: 4,
+    hue: -22,
+    sat: 1.5,
+    bright: 1.02,
+    flavor: "Selo rubro: a carta foi temperada na fornalha e nunca esfriou.",
+  },
+  {
+    id: "polar",
+    name: "POLAR",
+    mult: 1.25,
+    costDelta: 1,
+    extraTag: "gelo",
+    bonus: { aegis: 6 },
+    priceMult: 3.2,
+    rarityUp: 1,
+    levelAdd: 4,
+    hue: 150,
+    sat: 1.1,
+    bright: 1.14,
+    flavor: "Selo polar: cada linha do circuito respira frio absoluto.",
+  },
+  {
+    id: "voltaico",
+    name: "VOLTAICO",
+    mult: 1.35,
+    costDelta: 1,
+    extraTag: "trovao",
+    bonus: { crit: 6 },
+    priceMult: 4.5,
+    rarityUp: 1,
+    levelAdd: 9,
+    hue: 78,
+    sat: 1.7,
+    bright: 1.16,
+    flavor: "Selo voltaico: a carta zumbe na mao antes de ser jogada.",
+  },
+  {
+    id: "umbral",
+    name: "UMBRAL",
+    mult: 1.35,
+    costDelta: 1,
+    extraTag: "sombra",
+    bonus: { lifesteal: 8 },
+    priceMult: 4.5,
+    rarityUp: 1,
+    levelAdd: 9,
+    hue: 220,
+    sat: 1.2,
+    bright: 0.88,
+    flavor: "Selo umbral: o desenho muda quando ninguem esta olhando.",
+  },
+  {
+    id: "aureo",
+    name: "AUREO",
+    mult: 1.5,
+    costDelta: 2,
+    extraTag: "protocolo",
+    bonus: { gold: 18, xp: 18 },
+    priceMult: 6,
+    rarityUp: 2,
+    levelAdd: 16,
+    hue: 12,
+    sat: 1.9,
+    bright: 1.2,
+    flavor: "Selo aureo: emitido pela propria Liga, em folha de ouro.",
+  },
+  {
+    id: "prisma",
+    name: "PRISMA",
+    mult: 1.8,
+    costDelta: 2,
+    extraTag: "arcano",
+    bonus: { amp: 10, resist: 10 },
+    priceMult: 9,
+    rarityUp: 2,
+    levelAdd: 24,
+    hue: 265,
+    sat: 1.8,
+    bright: 1.08,
+    flavor: "Selo prisma: refrata a realidade em sete versoes do mesmo golpe.",
+  },
+];
+
+export const CARD_SEAL_MAP: Record<string, SealDef> = Object.fromEntries(
+  SEALS.map((s) => [s.id, s]),
+);
+
+const RARITY_ORDER: CardRarity[] = ["bronze", "prata", "ouro", "prisma"];
+
+/** Descricao automatica a partir dos mods (usada nas versoes seladas). */
+export function modsDesc(mods: CardMods): string {
+  const parts = (Object.entries(mods) as [CardStat, number][])
+    .filter(([, v]) => v !== 0)
+    .map(([k, v]) => `${v > 0 ? "+" : ""}${v}${k === "mpregen" ? "" : "%"} de ${CARD_STAT_LABEL[k]}`);
+  return `${parts.join(", ")}.`;
+}
+
+function buildCard(base: BaseCard, seal: SealDef): CardDef {
+  const mods: CardMods = {};
+  for (const [k, v] of Object.entries(base.mods) as [CardStat, number][]) {
+    mods[k] = Math.round(v * seal.mult * 10) / 10;
+  }
+  for (const [k, v] of Object.entries(seal.bonus) as [CardStat, number][]) {
+    mods[k] = Math.round(((mods[k] ?? 0) + v) * 10) / 10;
+  }
+  const tags =
+    seal.extraTag && !base.tags.includes(seal.extraTag)
+      ? [...base.tags, seal.extraTag]
+      : [...base.tags];
+  const rIdx = Math.min(
+    RARITY_ORDER.length - 1,
+    RARITY_ORDER.indexOf(base.rarity) + seal.rarityUp,
+  );
+  return {
+    ...base,
+    id: seal.id === "bruto" ? base.id : `${base.id}_${seal.id}`,
+    base: base.id,
+    seal: seal.id,
+    sealName: seal.name,
+    name: seal.id === "bruto" ? base.name : `${base.name} ${seal.name}`,
+    rarity: RARITY_ORDER[rIdx],
+    cost: base.cost + seal.costDelta,
+    tags,
+    price: Math.round((base.price * seal.priceMult) / 50) * 50,
+    requiredLevel: Math.min(70, base.requiredLevel + seal.levelAdd),
+    desc: seal.id === "bruto" ? base.desc : modsDesc(mods),
+    flavor: seal.id === "bruto" ? base.flavor : seal.flavor,
+    mods,
+  };
+}
+
+/** 30 cartas base x 7 selos = 210 cards jogaveis. */
+export const CARDS: CardDef[] = BASE_CARDS.flatMap((b) => SEALS.map((s) => buildCard(b, s)));
+
 export const CARD_MAP: Record<string, CardDef> = Object.fromEntries(
   CARDS.map((c) => [c.id, c]),
 );
 
-export const SYNERGIES: SynergyDef[] = [
-  // --- por tag
-  {
-    id: "s_chama",
-    name: "COMBUSTAO EM CADEIA",
-    desc: "2 cards CHAMA: +15% de poder e +10% de furia.",
-    tag: { tag: "chama", count: 2 },
-    mods: { amp: 15, rage: 10 },
+export const BASE_CARD_MAP: Record<string, BaseCard> = Object.fromEntries(
+  BASE_CARDS.map((c) => [c.id, c]),
+);
+
+/** Todas as versoes seladas de uma carta base, na ordem dos selos. */
+export function sealedVariants(baseId: string): CardDef[] {
+  return SEALS.map((s) => CARD_MAP[s.id === "bruto" ? baseId : `${baseId}_${s.id}`]).filter(
+    (c): c is CardDef => Boolean(c),
+  );
+}
+
+/** Filtro CSS que recolore a arte base conforme o selo. */
+export function cardFilter(def: CardDef): string | undefined {
+  const s = CARD_SEAL_MAP[def.seal];
+  if (!s || s.id === "bruto") return undefined;
+  return `sepia(0.62) saturate(${(s.sat * 2.4).toFixed(2)}) hue-rotate(${s.hue - 38}deg) brightness(${s.bright})`;
+}
+
+/** Mods efetivos de um card no nivel de refino informado. */
+export function cardModsAt(def: CardDef, refine = 1): CardMods {
+  const m = refineMult(refine);
+  const out: CardMods = {};
+  for (const [k, v] of Object.entries(def.mods) as [CardStat, number][]) {
+    out[k] = Math.round(v * m * 10) / 10;
+  }
+  return out;
+}
+
+/** Custo em ouro para subir um nivel de refino. */
+export function refineCost(def: CardDef, current: number): number {
+  const cur = Math.max(1, current);
+  return Math.round((def.price * 0.3 * Math.pow(cur, 1.25)) / 50) * 50;
+}
+
+/** Lingotes exigidos nos marcos de refino (4 e 8). */
+export function refineBars(def: CardDef, current: number): number {
+  const next = Math.max(1, current) + 1;
+  const tier = RARITY_ORDER.indexOf(def.rarity);
+  if (next === 4) return 6 + tier * 3;
+  if (next === 8) return 14 + tier * 4;
+  return 0;
+}
+
+/** Poder relativo de um card, usado para ordenar listas. */
+export function cardPower(def: CardDef, refine = 1): number {
+  return Object.values(cardModsAt(def, refine)).reduce((a, b) => a + b, 0);
+}
+
+// ------------------------------------------------------------- sinergias
+// Tres camadas: por TAG (2/3/4 cards), por SELO (2/3 cards) e COMBOS nomeados.
+
+interface TagSynRow {
+  n2: string;
+  m2: CardMods;
+  n3: string;
+  m3: CardMods;
+  n4: string;
+  m4: CardMods;
+}
+
+const TAG_SYN: Record<CardTag, TagSynRow> = {
+  chama: {
+    n2: "COMBUSTAO EM CADEIA",
+    m2: { amp: 15, rage: 10 },
+    n3: "INFERNO TOTAL",
+    m3: { amp: 25, str: 15 },
+    n4: "NOVA DE FORJA",
+    m4: { amp: 40, str: 25, rage: 20 },
   },
-  {
-    id: "s_gelo",
-    name: "ZERO ABSOLUTO",
-    desc: "2 cards GELO: +20% de poder dos efeitos e +8% de couraca.",
-    tag: { tag: "gelo", count: 2 },
-    mods: { venom: 20, aegis: 8 },
+  gelo: {
+    n2: "ZERO ABSOLUTO",
+    m2: { venom: 20, aegis: 8 },
+    n3: "INVERNO PERPETUO",
+    m3: { venom: 35, aegis: 16, def: 12 },
+    n4: "ERA GLACIAL",
+    m4: { venom: 55, aegis: 26, def: 20, resist: 20 },
   },
-  {
-    id: "s_trovao",
-    name: "SOBRECARGA",
-    desc: "2 cards TROVAO: +8% de critico e +3 de MP por turno.",
-    tag: { tag: "trovao", count: 2 },
-    mods: { crit: 8, mpregen: 3 },
+  trovao: {
+    n2: "SOBRECARGA",
+    m2: { crit: 8, mpregen: 3 },
+    n3: "ARCO ETERNO",
+    m3: { crit: 16, mpregen: 5, agl: 12 },
+    n4: "TEMPESTADE SINGULAR",
+    m4: { crit: 26, mpregen: 8, agl: 20, amp: 15 },
   },
-  {
-    id: "s_sombra",
-    name: "PREDADOR NOTURNO",
-    desc: "2 cards SOMBRA: +10% de dreno e +6% de esquiva.",
-    tag: { tag: "sombra", count: 2 },
-    mods: { lifesteal: 10, evade: 6 },
+  sombra: {
+    n2: "PREDADOR NOTURNO",
+    m2: { lifesteal: 10, evade: 6 },
+    n3: "VEU SEM FUNDO",
+    m3: { lifesteal: 20, evade: 12, venom: 15 },
+    n4: "ECLIPSE TOTAL",
+    m4: { lifesteal: 32, evade: 18, venom: 25, amp: 15 },
   },
-  {
-    id: "s_ferro",
-    name: "LINHA DE BLINDAGEM",
-    desc: "2 cards FERRO: +12% de DEFESA e +10% de espinhos.",
-    tag: { tag: "ferro", count: 2 },
-    mods: { def: 12, thorns: 10 },
+  ferro: {
+    n2: "LINHA DE BLINDAGEM",
+    m2: { def: 12, thorns: 10 },
+    n3: "BASTIAO ABSOLUTO",
+    m3: { aegis: 20, hp: 15 },
+    n4: "CIDADELA DE ACO",
+    m4: { aegis: 30, hp: 25, thorns: 20, def: 18 },
   },
-  {
-    id: "s_nano",
-    name: "COLONIA ATIVA",
-    desc: "2 cards NANO: +5% de regeneracao por turno.",
-    tag: { tag: "nano", count: 2 },
-    mods: { regen: 5 },
+  nano: {
+    n2: "COLONIA ATIVA",
+    m2: { regen: 5 },
+    n3: "ENXAME EXPONENCIAL",
+    m3: { regen: 10, hp: 12 },
+    n4: "BIOMASSA TOTAL",
+    m4: { regen: 16, hp: 20, aegis: 15 },
   },
-  {
-    id: "s_arcano",
-    name: "CIRCUITO RUNICO",
-    desc: "2 cards ARCANO: +15% de MP maximo e +10% de poder.",
-    tag: { tag: "arcano", count: 2 },
-    mods: { mp: 15, amp: 10 },
+  arcano: {
+    n2: "CIRCUITO RUNICO",
+    m2: { mp: 15, amp: 10 },
+    n3: "CONVERGENCIA ARCANA",
+    m3: { amp: 20, mpregen: 5 },
+    n4: "GRIMORIO VIVO",
+    m4: { amp: 35, mp: 30, mpregen: 8 },
   },
-  {
-    id: "s_fera",
-    name: "MATILHA",
-    desc: "2 cards FERA: +12% de AGILIDADE e +15% de abertura.",
-    tag: { tag: "fera", count: 2 },
-    mods: { agl: 12, opening: 15 },
+  fera: {
+    n2: "MATILHA",
+    m2: { agl: 12, opening: 15 },
+    n3: "INSTINTO ALFA",
+    m3: { agl: 20, opening: 25, crit: 10 },
+    n4: "REVOADA SELVAGEM",
+    m4: { agl: 30, opening: 40, crit: 18, str: 15 },
   },
-  {
-    id: "s_protocolo",
-    name: "REDE DE COMANDO",
-    desc: "2 cards PROTOCOLO: +20% de resistencia e +8% de DEFESA.",
-    tag: { tag: "protocolo", count: 2 },
-    mods: { resist: 20, def: 8 },
+  protocolo: {
+    n2: "REDE DE COMANDO",
+    m2: { resist: 20, def: 8 },
+    n3: "KERNEL BLINDADO",
+    m3: { resist: 35, def: 16, aegis: 12 },
+    n4: "DIRETRIZ TOTAL",
+    m4: { resist: 55, def: 24, aegis: 20, hp: 15 },
   },
-  {
-    id: "s_caos",
-    name: "ENTROPIA",
-    desc: "2 cards CAOS: +12% de FORCA e +12% de furia.",
-    tag: { tag: "caos", count: 2 },
-    mods: { str: 12, rage: 12 },
+  caos: {
+    n2: "ENTROPIA",
+    m2: { str: 12, rage: 12 },
+    n3: "COLAPSO",
+    m3: { crit: 20, rage: 20 },
+    n4: "FIM DE CICLO",
+    m4: { crit: 30, rage: 35, str: 25 },
   },
-  // --- triplas por tag
-  {
-    id: "s_chama3",
-    name: "INFERNO TOTAL",
-    desc: "3 cards CHAMA: +25% de poder e +15% de FORCA.",
-    tag: { tag: "chama", count: 3 },
-    mods: { amp: 25, str: 15 },
+};
+
+const TAG_SYNERGIES: SynergyDef[] = (Object.keys(TAG_SYN) as CardTag[]).flatMap((tag) => {
+  const row = TAG_SYN[tag];
+  const label = CARD_TAG_LABEL[tag];
+  return [
+    {
+      id: `s_${tag}2`,
+      name: row.n2,
+      desc: `2 cards ${label}: ${modsDesc(row.m2)}`,
+      tag: { tag, count: 2 },
+      mods: row.m2,
+    },
+    {
+      id: `s_${tag}3`,
+      name: row.n3,
+      desc: `3 cards ${label}: ${modsDesc(row.m3)}`,
+      tag: { tag, count: 3 },
+      mods: row.m3,
+    },
+    {
+      id: `s_${tag}4`,
+      name: row.n4,
+      desc: `4 cards ${label}: ${modsDesc(row.m4)}`,
+      tag: { tag, count: 4 },
+      mods: row.m4,
+    },
+  ];
+});
+
+const SEAL_SYN: Record<CardSealId, { n2: string; m2: CardMods; n3: string; m3: CardMods }> = {
+  bruto: {
+    n2: "FORJA CRUA",
+    m2: { str: 8, def: 8 },
+    n3: "OFICIO DO MARTELO",
+    m3: { str: 16, def: 16, hp: 10 },
   },
-  {
-    id: "s_ferro3",
-    name: "BASTIAO ABSOLUTO",
-    desc: "3 cards FERRO: +20% de couraca e +15% de HP maximo.",
-    tag: { tag: "ferro", count: 3 },
-    mods: { aegis: 20, hp: 15 },
+  rubro: {
+    n2: "BRASA GEMEA",
+    m2: { rage: 15, amp: 10 },
+    n3: "TRIPLICE FORNALHA",
+    m3: { rage: 30, amp: 20, str: 15 },
   },
-  {
-    id: "s_arcano3",
-    name: "CONVERGENCIA ARCANA",
-    desc: "3 cards ARCANO: +20% de poder e +5 de MP por turno.",
-    tag: { tag: "arcano", count: 3 },
-    mods: { amp: 20, mpregen: 5 },
+  polar: {
+    n2: "SOPRO GEMEO",
+    m2: { aegis: 12, resist: 15 },
+    n3: "TRIPLICE INVERNO",
+    m3: { aegis: 24, resist: 30, def: 15 },
   },
-  {
-    id: "s_caos3",
-    name: "COLAPSO",
-    desc: "3 cards CAOS: +20% de critico e +20% de furia.",
-    tag: { tag: "caos", count: 3 },
-    mods: { crit: 20, rage: 20 },
+  voltaico: {
+    n2: "ARCO GEMEO",
+    m2: { crit: 10, agl: 10 },
+    n3: "TRIPLICE DESCARGA",
+    m3: { crit: 22, agl: 20, mpregen: 5 },
   },
-  // --- combos nomeados
+  umbral: {
+    n2: "SOMBRA GEMEA",
+    m2: { lifesteal: 14, evade: 8 },
+    n3: "TRIPLICE VEU",
+    m3: { lifesteal: 28, evade: 16, venom: 20 },
+  },
+  aureo: {
+    n2: "SELO DA LIGA",
+    m2: { gold: 30, xp: 30 },
+    n3: "TESOURO DA LIGA",
+    m3: { gold: 60, xp: 60, amp: 15 },
+  },
+  prisma: {
+    n2: "REFRACAO DUPLA",
+    m2: { amp: 20, resist: 20 },
+    n3: "PRISMA PERFEITO",
+    m3: { amp: 40, resist: 40, aegis: 20, crit: 15 },
+  },
+};
+
+const SEAL_SYNERGIES: SynergyDef[] = (Object.keys(SEAL_SYN) as CardSealId[]).flatMap((seal) => {
+  const row = SEAL_SYN[seal];
+  return [
+    {
+      id: `sl_${seal}2`,
+      name: row.n2,
+      desc: `2 cards do selo ${seal.toUpperCase()}: ${modsDesc(row.m2)}`,
+      seal: { seal, count: 2 },
+      mods: row.m2,
+    },
+    {
+      id: `sl_${seal}3`,
+      name: row.n3,
+      desc: `3 cards do selo ${seal.toUpperCase()}: ${modsDesc(row.m3)}`,
+      seal: { seal, count: 3 },
+      mods: row.m3,
+    },
+  ];
+});
+
+const COMBOS: SynergyDef[] = [
   {
     id: "c_vulcao",
     name: "COMBO: VULCAO DE ACO",
@@ -678,7 +1031,79 @@ export const SYNERGIES: SynergyDef[] = [
     cards: ["nucleo_arcano", "coroa_incandescente"],
     mods: { amp: 20, mp: 20 },
   },
+  {
+    id: "c_muralha",
+    name: "COMBO: LINHA CONGELADA",
+    desc: "MURALHA POLAR + PRESA GELADA: +20% de couraca e +25% de toxina.",
+    cards: ["muralha_polar", "presa_gelada"],
+    mods: { aegis: 20, venom: 25 },
+  },
+  {
+    id: "c_juizo",
+    name: "COMBO: TRIBUNAL DE GELO",
+    desc: "JUIZO CONGELANTE + FORTALEZA PRISMA: +20% de DEFESA e +20% de resistencia.",
+    cards: ["juizo_congelante", "fortaleza_prisma"],
+    mods: { def: 20, resist: 20 },
+  },
+  {
+    id: "c_enxame",
+    name: "COMBO: OFICINA VIVA",
+    desc: "ENXAME NANO + NANOREPARO: +8% de reparo por turno e +15% de HP maximo.",
+    cards: ["enxame_nano", "nanoreparo"],
+    mods: { regen: 8, hp: 15 },
+  },
+  {
+    id: "c_espinho",
+    name: "COMBO: CAMPO REATIVO",
+    desc: "ESPINHO REATIVO + TITA DE ACO: +25% de espinhos e +15% de DEFESA.",
+    cards: ["espinho_reativo", "titan_de_aco"],
+    mods: { thorns: 25, def: 15 },
+  },
+  {
+    id: "c_supernova",
+    name: "COMBO: DETONACAO PRIVADA",
+    desc: "SUPERNOVA PRIVADA + COROA INCANDESCENTE: +30% de poder e +20% de furia.",
+    cards: ["supernova_privada", "coroa_incandescente"],
+    mods: { amp: 30, rage: 20 },
+  },
+  {
+    id: "c_omega",
+    name: "COMBO: ULTIMA ROTINA",
+    desc: "PROTOCOLO OMEGA + DIRETRIZ ZERO: +30% de resistencia e +10% de reparo.",
+    cards: ["protocolo_omega", "diretriz_zero"],
+    mods: { resist: 30, regen: 10 },
+  },
+  {
+    id: "c_tempestade",
+    name: "COMBO: OLHO DO CICLONE",
+    desc: "CORACAO DA TEMPESTADE + CAPACITOR LEVE: +6 de MP por turno e +15% de AGILIDADE.",
+    cards: ["coracao_da_tempestade", "capacitor_leve"],
+    mods: { mpregen: 6, agl: 15 },
+  },
+  {
+    id: "c_passo",
+    name: "COMBO: DANCA CURTA",
+    desc: "PASSO CURTO + MANTO SOMBRIO: +12% de esquiva e +20% de abertura.",
+    cards: ["passo_curto", "manto_sombrio"],
+    mods: { evade: 12, opening: 20 },
+  },
+  {
+    id: "c_chama",
+    name: "COMBO: PRIMEIRA FAISCA",
+    desc: "CHAMA VIVA + FORJA FURIOSA: +20% de poder e +12% de FORCA.",
+    cards: ["chama_viva", "forja_furiosa"],
+    mods: { amp: 20, str: 12 },
+  },
+  {
+    id: "c_caca",
+    name: "COMBO: TRILHA DE SANGUE",
+    desc: "CACADOR SELVAGEM + DEVORADOR DE LUZ: +18% de dreno e +15% de critico.",
+    cards: ["cacador_selvagem", "devorador_de_luz"],
+    mods: { lifesteal: 18, crit: 15 },
+  },
 ];
+
+export const SYNERGIES: SynergyDef[] = [...TAG_SYNERGIES, ...SEAL_SYNERGIES, ...COMBOS];
 
 export interface DeckResult {
   ids: string[];
@@ -689,12 +1114,15 @@ export interface DeckResult {
 
 function addMods(target: CardMods, src: CardMods) {
   for (const [k, v] of Object.entries(src) as [CardStat, number][]) {
-    target[k] = (target[k] ?? 0) + v;
+    target[k] = Math.round(((target[k] ?? 0) + v) * 10) / 10;
   }
 }
 
-/** Agrega os modificadores de um deck (cards + sinergias ativas). */
-export function resolveDeck(ids: string[]): DeckResult {
+/**
+ * Agrega os modificadores de um deck: mods de cada card ja escalados pelo
+ * refino, mais todas as sinergias ativas (tag, selo e combo).
+ */
+export function resolveDeck(ids: string[], refine: Record<string, number> = {}): DeckResult {
   const defs = ids
     .map((id) => CARD_MAP[id])
     .filter((c): c is CardDef => Boolean(c))
@@ -702,19 +1130,24 @@ export function resolveDeck(ids: string[]): DeckResult {
   const mods: CardMods = {};
   let cost = 0;
   for (const c of defs) {
-    addMods(mods, c.mods);
+    addMods(mods, cardModsAt(c, refine[c.id] ?? 1));
     cost += c.cost;
   }
   const owned = new Set(defs.map((c) => c.id));
+  const bases = new Set(defs.map((c) => c.base));
   const tagCount = new Map<CardTag, number>();
+  const sealCount = new Map<CardSealId, number>();
   for (const c of defs) {
     for (const t of c.tags) tagCount.set(t, (tagCount.get(t) ?? 0) + 1);
+    sealCount.set(c.seal, (sealCount.get(c.seal) ?? 0) + 1);
   }
   const synergies: SynergyDef[] = [];
   for (const s of SYNERGIES) {
     const byTag = s.tag ? (tagCount.get(s.tag.tag) ?? 0) >= s.tag.count : false;
-    const byCards = s.cards ? s.cards.every((id) => owned.has(id)) : false;
-    if (byTag || byCards) {
+    const bySeal = s.seal ? (sealCount.get(s.seal.seal) ?? 0) >= s.seal.count : false;
+    // combos valem para qualquer selo da carta base.
+    const byCards = s.cards ? s.cards.every((id) => owned.has(id) || bases.has(id)) : false;
+    if (byTag || bySeal || byCards) {
       synergies.push(s);
       addMods(mods, s.mods);
     }
@@ -723,21 +1156,25 @@ export function resolveDeck(ids: string[]): DeckResult {
 }
 
 /** Sinergias que ainda nao estao ativas mas ficariam a 1 card de distancia. */
-export function nearSynergies(ids: string[]): SynergyDef[] {
+export function nearSynergies(ids: string[], slots = MAX_CARDS): SynergyDef[] {
   const active = new Set(resolveDeck(ids).synergies.map((s) => s.id));
-  const owned = new Set(ids);
+  const defs = ids.map((id) => CARD_MAP[id]).filter((c): c is CardDef => Boolean(c));
+  const owned = new Set(defs.map((c) => c.id));
+  const bases = new Set(defs.map((c) => c.base));
   const tagCount = new Map<CardTag, number>();
-  for (const id of ids) {
-    const c = CARD_MAP[id];
-    if (!c) continue;
+  const sealCount = new Map<CardSealId, number>();
+  for (const c of defs) {
     for (const t of c.tags) tagCount.set(t, (tagCount.get(t) ?? 0) + 1);
+    sealCount.set(c.seal, (sealCount.get(c.seal) ?? 0) + 1);
   }
+  if (ids.length >= slots) return [];
   return SYNERGIES.filter((s) => {
     if (active.has(s.id)) return false;
     if (s.tag) return (tagCount.get(s.tag.tag) ?? 0) === s.tag.count - 1;
+    if (s.seal) return (sealCount.get(s.seal.seal) ?? 0) === s.seal.count - 1;
     if (s.cards) {
-      const missing = s.cards.filter((id) => !owned.has(id)).length;
-      return missing === 1 && ids.length < MAX_CARDS;
+      const missing = s.cards.filter((id) => !owned.has(id) && !bases.has(id)).length;
+      return missing === 1;
     }
     return false;
   });
@@ -745,6 +1182,11 @@ export function nearSynergies(ids: string[]): SynergyDef[] {
 
 export function cardMod(mods: CardMods, stat: CardStat): number {
   return mods[stat] ?? 0;
+}
+
+/** Refino medio que a IA usa nos cards, conforme o nivel do robo. */
+export function aiRefine(level: number): number {
+  return Math.max(1, Math.min(CARD_MAX_REFINE, 1 + Math.floor(level / 9)));
 }
 
 /** Deck deterministico para robos controlados pela IA. */
@@ -755,8 +1197,9 @@ export function aiDeck(robotId: string, level: number): string[] {
     seed = (seed * 48271) % 2147483647;
     return seed / 2147483647;
   };
-  // inimigos ganham cards conforme o nivel: 1 card a partir do 5, 2 do 15, 3 do 25.
-  const slots = level >= 25 ? 3 : level >= 15 ? 2 : level >= 5 ? 1 : 0;
+  // inimigos ganham cards conforme o nivel: 1 no 5, 2 no 15, 3 no 25, 4 no 40, 5 no 60.
+  const slots =
+    level >= 60 ? 5 : level >= 40 ? 4 : level >= 25 ? 3 : level >= 15 ? 2 : level >= 5 ? 1 : 0;
   if (slots === 0) return [];
   const pool = CARDS.filter((c) => c.requiredLevel <= Math.max(1, level));
   if (pool.length === 0) return [];
@@ -775,7 +1218,14 @@ export function aiDeck(robotId: string, level: number): string[] {
   return out;
 }
 
-/** Caminho da arte pixel art do card. */
+/** Mapa de refino que a IA aplica ao proprio deck. */
+export function aiRefineMap(ids: string[], level: number): Record<string, number> {
+  const r = aiRefine(level);
+  return Object.fromEntries(ids.map((id) => [id, r]));
+}
+
+/** Caminho da arte pixel art do card (compartilhada entre os selos). */
 export function cardArt(id: string): string {
-  return `/cards/${id}.png`;
+  const def = CARD_MAP[id];
+  return `/cards/${def ? def.base : id}.png`;
 }

@@ -1,19 +1,37 @@
 import { useMemo, useState } from "react";
 import { Panel, PixelButton } from "@/components/pixel";
 import {
-  CARDS,
+  BASE_CARDS,
+  CARD_MAP,
+  CARD_MAX_REFINE,
   CARD_RARITY_COLOR,
   CARD_STAT_LABEL,
   CARD_TAG_LABEL,
   MAX_CARDS,
+  SEALS,
   cardArt,
+  cardFilter,
+  cardModsAt,
+  cardSlots,
   deckBudget,
   nearSynergies,
+  refineBars,
+  refineCost,
   resolveDeck,
+  sealedVariants,
+  type BaseCard,
   type CardDef,
   type CardStat,
 } from "@/game/cards";
-import { buyCard, clearDeck, toggleCard, useGame } from "@/game/save";
+import {
+  buyCard,
+  cardRefineOf,
+  clearDeck,
+  refineCard,
+  toggleCard,
+  totalBars,
+  useGame,
+} from "@/game/save";
 import { TopBar } from "@/screens/roster";
 
 type Tab = "todos" | "deck" | "meus" | "loja";
@@ -31,24 +49,72 @@ function modLine(stat: CardStat, value: number): string {
   return `${CARD_STAT_LABEL[stat]} ${sign}${value}${suffix}`;
 }
 
-/** Salao de Cards: colecao, compra, deck de 3 slots e sinergias ativas. */
+/** Arte do card com o tom do selo aplicado. */
+function CardArt({
+  def,
+  width,
+  dim,
+}: {
+  def: CardDef;
+  width?: number;
+  dim?: boolean;
+}) {
+  const tint = cardFilter(def);
+  // um card nao possuido continua com o tom do selo, so mais apagado
+  const filter = dim ? `${tint ? `${tint} ` : ""}grayscale(0.3) brightness(0.62)` : tint;
+  return (
+    <img
+      src={cardArt(def.id)}
+      alt={def.name}
+      width={width}
+      style={{
+        width: width ? undefined : "100%",
+        maxWidth: "none",
+        imageRendering: "pixelated",
+        filter,
+      }}
+    />
+  );
+}
+
+/** Salao de Cards: 30 bases x 7 selos, refino ate +10 e deck de ate 5 slots. */
 export function CardsScreen({ onBack }: { onBack: () => void }) {
   const g = useGame();
   const [tab, setTab] = useState<Tab>("deck");
   const [msg, setMsg] = useState("");
-  const [detail, setDetail] = useState<CardDef | null>(null);
+  const [detail, setDetail] = useState<BaseCard | null>(null);
+  const [sealIdx, setSealIdx] = useState(0);
 
-  const deck = useMemo(() => resolveDeck(g.deck), [g.deck]);
-  const near = useMemo(() => nearSynergies(g.deck), [g.deck]);
+  const deck = useMemo(() => resolveDeck(g.deck, g.cardRefine), [g.deck, g.cardRefine]);
+  const slots = cardSlots(g.playerLevel);
+  const near = useMemo(() => nearSynergies(g.deck, slots), [g.deck, slots]);
   const budget = deckBudget(g.playerLevel);
   const owned = new Set(g.cards);
+  const bars = totalBars(g);
 
-  const list = CARDS.filter((c) => {
-    if (tab === "deck") return g.deck.includes(c.id);
-    if (tab === "meus") return owned.has(c.id);
-    if (tab === "loja") return !owned.has(c.id);
+  const rows = BASE_CARDS.map((base) => {
+    const variants = sealedVariants(base.id);
+    const mine = variants.filter((v) => owned.has(v.id));
+    const inDeck = variants.filter((v) => g.deck.includes(v.id));
+    const show = inDeck[0] ?? mine[mine.length - 1] ?? variants[0];
+    return { base, variants, mine, inDeck, show };
+  }).filter((r) => {
+    if (tab === "deck") return r.inDeck.length > 0;
+    if (tab === "meus") return r.mine.length > 0;
+    if (tab === "loja") return r.mine.length < r.variants.length;
     return true;
-  }).sort((a, b) => a.requiredLevel - b.requiredLevel || a.cost - b.cost);
+  });
+
+  const sel = detail ? sealedVariants(detail.id)[sealIdx] : null;
+  const selRefine = sel ? cardRefineOf(g, sel.id) : 1;
+  const selMods = sel ? cardModsAt(sel, selRefine) : {};
+  const rCost = sel ? refineCost(sel, selRefine) : 0;
+  const rBars = sel ? refineBars(sel, selRefine) : 0;
+
+  const openDetail = (base: BaseCard, idx: number) => {
+    setDetail(base);
+    setSealIdx(idx);
+  };
 
   return (
     <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
@@ -66,21 +132,34 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
           className="mk-title"
           style={{ fontSize: 7, display: "flex", justifyContent: "space-between" }}
         >
-          <span>DECK {g.deck.length}/{MAX_CARDS}</span>
+          <span>
+            DECK {g.deck.length}/{slots}
+            {slots < MAX_CARDS ? ` (MAX ${MAX_CARDS})` : ""}
+          </span>
           <span style={{ color: deck.cost > budget ? "#ff6b6b" : "var(--mk-accent2)" }}>
             ENERGIA {deck.cost}/{budget}
           </span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5, marginTop: 5 }}>
-          {Array.from({ length: MAX_CARDS }).map((_, i) => {
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${Math.max(3, slots)}, 1fr)`,
+            gap: 5,
+            marginTop: 5,
+          }}
+        >
+          {Array.from({ length: Math.max(3, slots) }).map((_, i) => {
             const id = g.deck[i];
-            const def = id ? CARDS.find((c) => c.id === id) : undefined;
+            const def = id ? CARD_MAP[id] : undefined;
+            const locked = i >= slots;
+            const ref = def ? cardRefineOf(g, def.id) : 1;
             return (
               <button
                 key={`slot${i}`}
                 type="button"
                 onClick={() => def && toggleCard(def.id)}
                 style={{
+                  position: "relative",
                   aspectRatio: "3 / 4",
                   background: "rgba(4,10,20,0.9)",
                   border: `2px solid ${def ? CARD_RARITY_COLOR[def.rarity] : "rgba(90,110,140,0.5)"}`,
@@ -89,21 +168,32 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
                   placeItems: "center",
                   cursor: def ? "pointer" : "default",
                   overflow: "hidden",
+                  opacity: locked ? 0.45 : 1,
                 }}
               >
                 {def ? (
-                  <img
-                    src={cardArt(def.id)}
-                    alt={def.name}
-                    style={{
-                      width: "100%",
-                      maxWidth: "none",
-                      imageRendering: "pixelated",
-                    }}
-                  />
+                  <>
+                    <CardArt def={def} />
+                    {ref > 1 && (
+                      <span
+                        className="mk-title"
+                        style={{
+                          position: "absolute",
+                          bottom: 1,
+                          right: 1,
+                          fontSize: 5,
+                          padding: "1px 2px",
+                          background: "rgba(2,6,12,0.9)",
+                          color: "#ffd24a",
+                        }}
+                      >
+                        +{ref - 1}
+                      </span>
+                    )}
+                  </>
                 ) : (
                   <span className="mk-title" style={{ fontSize: 6, color: "var(--mk-muted)" }}>
-                    VAZIO
+                    {locked ? `Lv${[1, 1, 1, 20, 45][i] ?? 99}` : "VAZIO"}
                   </span>
                 )}
               </button>
@@ -194,6 +284,19 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
         ))}
       </div>
 
+      <div
+        className="mk-title"
+        style={{
+          fontSize: 6,
+          color: "var(--mk-muted)",
+          padding: "3px 8px",
+          background: "rgba(4,10,20,0.9)",
+        }}
+      >
+        {BASE_CARDS.length} BASES x {SEALS.length} SELOS = {BASE_CARDS.length * SEALS.length} CARDS
+        · LINGOTES: {bars}
+      </div>
+
       {msg && (
         <div
           className="mk-title"
@@ -215,15 +318,17 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
         }}
       >
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-          {list.map((def) => {
+          {rows.map((row) => {
+            const def = row.show;
             const has = owned.has(def.id);
-            const equipped = g.deck.includes(def.id);
-            const locked = g.playerLevel < def.requiredLevel;
+            const equipped = row.inDeck.length > 0;
+            const locked = g.playerLevel < row.variants[0].requiredLevel;
+            const idx = Math.max(0, sealedVariants(row.base.id).indexOf(def));
             return (
               <button
-                key={def.id}
+                key={row.base.id}
                 type="button"
-                onClick={() => setDetail(def)}
+                onClick={() => openDetail(row.base, idx)}
                 style={{
                   background: "rgba(6,13,24,0.92)",
                   border: `2px solid ${equipped ? "var(--mk-accent)" : CARD_RARITY_COLOR[def.rarity]}`,
@@ -234,16 +339,7 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
                 }}
               >
                 <div style={{ position: "relative" }}>
-                  <img
-                    src={cardArt(def.id)}
-                    alt={def.name}
-                    style={{
-                      width: "100%",
-                      maxWidth: "none",
-                      imageRendering: "pixelated",
-                      filter: has ? undefined : "grayscale(1) brightness(0.5)",
-                    }}
-                  />
+                  <CardArt def={def} dim={row.mine.length === 0} />
                   <span
                     className="mk-title"
                     style={{
@@ -258,6 +354,20 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
                     }}
                   >
                     {def.cost}
+                  </span>
+                  <span
+                    className="mk-title"
+                    style={{
+                      position: "absolute",
+                      top: 2,
+                      left: 2,
+                      fontSize: 5,
+                      padding: "2px 3px",
+                      background: "rgba(2,6,12,0.85)",
+                      color: row.mine.length > 0 ? "#ffd24a" : "var(--mk-muted)",
+                    }}
+                  >
+                    {row.mine.length}/{row.variants.length}
                   </span>
                   {equipped && (
                     <span
@@ -280,22 +390,28 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
                   className="mk-title"
                   style={{ fontSize: 6, color: CARD_RARITY_COLOR[def.rarity] }}
                 >
-                  {def.name}
+                  {row.base.name}
                 </div>
                 <div style={{ fontSize: 8, color: "var(--mk-muted)", lineHeight: 1.35 }}>
-                  {def.desc}
+                  {row.base.desc}
                 </div>
                 <div className="mk-title" style={{ fontSize: 5, color: "rgba(150,170,195,0.75)" }}>
-                  {def.tags.map((t) => CARD_TAG_LABEL[t]).join(" · ")}
+                  {row.base.tags.map((t) => CARD_TAG_LABEL[t]).join(" · ")}
                 </div>
                 <div className="mk-title" style={{ fontSize: 6, color: "var(--mk-accent2)" }}>
-                  {has ? (equipped ? "EQUIPADO" : "NA COLECAO") : locked ? `Lv ${def.requiredLevel}` : `${def.price} G`}
+                  {has
+                    ? equipped
+                      ? "EQUIPADO"
+                      : "NA COLECAO"
+                    : locked
+                      ? `Lv ${row.variants[0].requiredLevel}`
+                      : `${row.variants[0].price} G`}
                 </div>
               </button>
             );
           })}
         </div>
-        {list.length === 0 && (
+        {rows.length === 0 && (
           <div
             className="mk-title"
             style={{ fontSize: 7, color: "var(--mk-muted)", textAlign: "center", marginTop: 24 }}
@@ -311,7 +427,7 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
         <div style={{ height: 40 }} />
       </div>
 
-      {detail && (
+      {detail && sel && (
         <div
           style={{
             position: "absolute",
@@ -322,38 +438,90 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
             padding: 12,
             zIndex: 5,
           }}
-          onClick={() => setDetail(null)}
+          onClick={(e) => {
+            // fecha so no toque fora do painel; cliques internos (comprar/refinar) nao fecham
+            if (e.target === e.currentTarget) setDetail(null);
+          }}
         >
           <Panel
             style={{
               padding: 8,
               width: "100%",
               maxWidth: 320,
-              border: `2px solid ${CARD_RARITY_COLOR[detail.rarity]}`,
+              maxHeight: "92%",
+              overflowY: "auto",
+              border: `2px solid ${CARD_RARITY_COLOR[sel.rarity]}`,
             }}
           >
             <div style={{ display: "flex", gap: 8 }}>
-              <img
-                src={cardArt(detail.id)}
-                alt=""
-                width={96}
-                style={{ imageRendering: "pixelated", maxWidth: "none" }}
-              />
+              <CardArt def={sel} width={96} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="mk-title" style={{ fontSize: 7, color: CARD_RARITY_COLOR[detail.rarity] }}>
-                  {detail.name}
+                <div className="mk-title" style={{ fontSize: 7, color: CARD_RARITY_COLOR[sel.rarity] }}>
+                  {sel.name}
                 </div>
                 <div className="mk-title" style={{ fontSize: 6, color: "var(--mk-accent2)", marginTop: 3 }}>
-                  {detail.rarity.toUpperCase()} · {detail.element} · ENERGIA {detail.cost}
+                  {sel.rarity.toUpperCase()} · {sel.element} · ENERGIA {sel.cost}
                 </div>
-                <div style={{ fontSize: 9, color: "var(--mk-muted)", marginTop: 4 }}>{detail.desc}</div>
+                <div className="mk-title" style={{ fontSize: 6, color: "#ffd24a", marginTop: 3 }}>
+                  SELO {sel.sealName} · REFINO +{selRefine - 1}/{CARD_MAX_REFINE - 1}
+                </div>
+                <div style={{ fontSize: 9, color: "var(--mk-muted)", marginTop: 4 }}>{sel.desc}</div>
                 <div style={{ fontSize: 9, color: "rgba(150,170,195,0.7)", marginTop: 3 }}>
-                  {detail.flavor}
+                  {sel.flavor}
                 </div>
               </div>
             </div>
+
+            {/* selos */}
+            <div
+              className="mk-title"
+              style={{ fontSize: 6, color: "var(--mk-muted)", marginTop: 7 }}
+            >
+              SELOS
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${SEALS.length}, 1fr)`,
+                gap: 3,
+                marginTop: 3,
+              }}
+            >
+              {sealedVariants(detail.id).map((v, i) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSealIdx(i);
+                  }}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "3 / 4",
+                    background: "rgba(4,10,20,0.9)",
+                    border: `2px solid ${i === sealIdx ? "var(--mk-accent)" : CARD_RARITY_COLOR[v.rarity]}`,
+                    padding: 1,
+                    overflow: "hidden",
+                    display: "grid",
+                    placeItems: "center",
+                  }}
+                >
+                  <CardArt def={v} dim={!owned.has(v.id)} />
+                  {g.deck.includes(v.id) && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        border: "2px solid rgba(53,226,240,0.9)",
+                      }}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+
             <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginTop: 6 }}>
-              {(Object.entries(detail.mods) as [CardStat, number][]).map(([k, v]) => (
+              {(Object.entries(selMods) as [CardStat, number][]).map(([k, v]) => (
                 <span
                   key={k}
                   className="mk-title"
@@ -368,34 +536,56 @@ export function CardsScreen({ onBack }: { onBack: () => void }) {
                 </span>
               ))}
             </div>
+
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 8 }}>
               <PixelButton
-                disabled={owned.has(detail.id) || g.playerLevel < detail.requiredLevel || g.gold < detail.price}
+                disabled={owned.has(sel.id) || g.playerLevel < sel.requiredLevel || g.gold < sel.price}
                 onClick={() => {
-                  const ok = buyCard(detail.id);
-                  setMsg(ok ? `${detail.name} adquirido!` : "Ouro insuficiente ou nivel baixo.");
+                  const ok = buyCard(sel.id);
+                  setMsg(ok ? `${sel.name} adquirido!` : "Ouro insuficiente ou nivel baixo.");
                 }}
               >
-                {owned.has(detail.id)
+                {owned.has(sel.id)
                   ? "JA POSSUI"
-                  : g.playerLevel < detail.requiredLevel
-                    ? `NIVEL ${detail.requiredLevel}`
-                    : `COMPRAR · ${detail.price}`}
+                  : g.playerLevel < sel.requiredLevel
+                    ? `NIVEL ${sel.requiredLevel}`
+                    : `COMPRAR · ${sel.price}`}
               </PixelButton>
               <PixelButton
-                disabled={!owned.has(detail.id)}
+                disabled={!owned.has(sel.id)}
                 onClick={() => {
-                  const ok = toggleCard(detail.id);
+                  const wasIn = g.deck.includes(sel.id);
+                  const ok = toggleCard(sel.id);
                   setMsg(
                     ok
-                      ? g.deck.includes(detail.id)
-                        ? `${detail.name} removido do deck.`
-                        : `${detail.name} equipado.`
+                      ? wasIn
+                        ? `${sel.name} removido do deck.`
+                        : `${sel.name} equipado.`
                       : "Sem slot ou energia suficiente.",
                   );
                 }}
               >
-                {g.deck.includes(detail.id) ? "REMOVER" : "EQUIPAR"}
+                {g.deck.includes(sel.id) ? "REMOVER" : "EQUIPAR"}
+              </PixelButton>
+            </div>
+
+            {/* refino */}
+            <div style={{ marginTop: 6 }}>
+              <PixelButton
+                disabled={
+                  !owned.has(sel.id) ||
+                  selRefine >= CARD_MAX_REFINE ||
+                  g.gold < rCost ||
+                  (rBars > 0 && bars < rBars)
+                }
+                onClick={() => {
+                  const ok = refineCard(sel.id);
+                  setMsg(ok ? `${sel.name} refinado para +${selRefine}.` : "Recursos insuficientes.");
+                }}
+              >
+                {selRefine >= CARD_MAX_REFINE
+                  ? `REFINO MAXIMO +${CARD_MAX_REFINE - 1}`
+                  : `REFINAR +${selRefine} · ${rCost} G${rBars > 0 ? ` + ${rBars} LINGOTES` : ""}`}
               </PixelButton>
             </div>
             <div style={{ marginTop: 6 }}>
