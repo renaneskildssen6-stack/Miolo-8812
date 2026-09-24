@@ -265,6 +265,11 @@ export function Frame({
   );
 }
 
+/** Fundos de arena: todos os frames vivem num unico spritesheet vertical. */
+const ARENA_W = 480;
+const ARENA_H = 272;
+const ARENA_FRAMES = 4;
+
 export function ArenaBackdrop({
   arena,
   round,
@@ -274,9 +279,12 @@ export function ArenaBackdrop({
   round?: number;
   children?: React.ReactNode;
 }) {
-  const [f, setF] = useState(1);
+  const [f, setF] = useState(0);
   useEffect(() => {
-    const id = window.setInterval(() => setF((p) => (p % 4) + 1), 250);
+    const id = window.setInterval(
+      () => setF((p) => (p + 1) % ARENA_FRAMES),
+      250,
+    );
     return () => window.clearInterval(id);
   }, []);
   const videoSrc = round === undefined ? null : `/videos/round${(round % 5) + 1}.mp4`;
@@ -285,12 +293,27 @@ export function ArenaBackdrop({
       style={{
         position: "absolute",
         inset: 0,
-        backgroundImage: `url(/arenas/${arena}_f${f}.png)`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        imageRendering: "pixelated",
+        overflow: "hidden",
+        background: "#050910",
       }}
     >
+      {/* spritesheet unico: 480 x (272*4), um frame por faixa.
+          O bloco interno tem 400% da altura do palco, entao cada frame
+          cobre exatamente o palco (cover) e o translateY troca o frame. */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: "50%",
+          height: `${ARENA_FRAMES * 100}%`,
+          aspectRatio: `${ARENA_W} / ${ARENA_H * ARENA_FRAMES}`,
+          backgroundImage: `url(/arenas/${arena}_sheet.png)`,
+          backgroundSize: "100% 100%",
+          backgroundRepeat: "no-repeat",
+          transform: `translateX(-50%) translateY(-${(f * 100) / ARENA_FRAMES}%)`,
+          imageRendering: "pixelated",
+        }}
+      />
       {videoSrc && (
         <video
           key={videoSrc}
