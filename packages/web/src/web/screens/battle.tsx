@@ -315,7 +315,15 @@ export function BattleScreen({
             )}
             {menu === "skills" && (
               <Panel>
-                <div style={{ display: "grid", gap: 4 }}>
+                {/* lista rolavel: mantem o palco (e as animacoes) a vista */}
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 4,
+                    maxHeight: 148,
+                    overflowY: "auto",
+                  }}
+                >
                   {pSkills.map((s) => (
                     <PixelButton
                       key={s.id}

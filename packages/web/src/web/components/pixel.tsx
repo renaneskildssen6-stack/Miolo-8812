@@ -270,6 +270,15 @@ const ARENA_W = 480;
 const ARENA_H = 272;
 const ARENA_FRAMES = 4;
 
+function strHash(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i += 1) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
+
 export function ArenaBackdrop({
   arena,
   round,
@@ -287,7 +296,16 @@ export function ArenaBackdrop({
     );
     return () => window.clearInterval(id);
   }, []);
-  const videoSrc = round === undefined ? null : `/videos/round${(round % 5) + 1}.mp4`;
+  /* O video de round e apenas uma CAMADA ATMOSFERICA por cima da arena.
+     Antes ele vinha opaco com objectFit:cover e cobria o spritesheet inteiro,
+     entao so os videos apareciam — e como a maioria das lutas dura poucos
+     rounds, `round % 5` caia quase sempre nos dois primeiros arquivos.
+     Agora: a escolha mistura arena + round (todos os 5 entram em rotacao) e
+     ele entra em `screen` com opacidade baixa, deixando a arena dominar. */
+  const videoSrc =
+    round === undefined
+      ? null
+      : `/videos/round${(strHash(arena) + Math.max(0, round)) % 5 + 1}.mp4`;
   return (
     <div
       style={{
@@ -307,6 +325,7 @@ export function ArenaBackdrop({
           left: "50%",
           height: `${ARENA_FRAMES * 100}%`,
           aspectRatio: `${ARENA_W} / ${ARENA_H * ARENA_FRAMES}`,
+          minWidth: "100%",
           backgroundImage: `url(/arenas/${arena}_sheet.png)`,
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
@@ -329,19 +348,32 @@ export function ArenaBackdrop({
             height: "100%",
             objectFit: "cover",
             imageRendering: "pixelated",
+            opacity: 0.22,
+            mixBlendMode: "screen",
+            pointerEvents: "none",
           }}
         />
       )}
-      {videoSrc && (
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(rgba(4,9,18,0.35), rgba(4,9,18,0.15) 45%, rgba(4,9,18,0.6))",
-          }}
-        />
-      )}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          background:
+            "linear-gradient(rgba(4,9,18,0.28), rgba(4,9,18,0.05) 45%, rgba(4,9,18,0.55))",
+        }}
+      />
+      {/* scanlines finas: dao textura de CRT sem esconder a arte da arena */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          opacity: 0.18,
+          backgroundImage:
+            "repeating-linear-gradient(rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.55) 3px)",
+        }}
+      />
       <div style={{ position: "relative", height: "100%" }}>{children}</div>
     </div>
   );

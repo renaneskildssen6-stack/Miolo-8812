@@ -1,3 +1,5 @@
+import { matchKeyword } from "./arenas";
+
 // Kit completo de habilidades: 10 ataques + 5 defesas por robô.
 // Tudo é derivado de forma determinística do id/elemento do robô, então cada
 // chassi recebe nomes, efeitos e números diferentes dos demais.
@@ -51,7 +53,67 @@ export const VFX = {
   levelup: "/vfx/levelup.png",
   void: "/vfx/void.png",
   thunder: "/vfx/thunder.png",
+  // Fase G3: 20 efeitos novos, mesmo pipeline (tira de 4 frames 96x96).
+  frost: "/vfx/frost.png",
+  toxic: "/vfx/toxic.png",
+  cyclone: "/vfx/cyclone.png",
+  quake: "/vfx/quake.png",
+  torrent: "/vfx/torrent.png",
+  prism: "/vfx/prism.png",
+  plasma: "/vfx/plasma.png",
+  clang: "/vfx/clang.png",
+  bloom: "/vfx/bloom.png",
+  cosmos: "/vfx/cosmos.png",
+  sonic: "/vfx/sonic.png",
+  chrono: "/vfx/chrono.png",
+  siphon: "/vfx/siphon.png",
+  ward: "/vfx/ward.png",
+  laser: "/vfx/laser.png",
+  meteor: "/vfx/meteor.png",
+  inferno: "/vfx/inferno.png",
+  shockwave: "/vfx/shockwave.png",
+  buffup: "/vfx/buffup.png",
+  curse: "/vfx/curse.png",
 } as const;
+
+/** Elemento do chassi -> efeito visual do golpe. */
+const ELEMENT_VFX: [string[], string][] = [
+  [["FOGO", "CHAMA", "MAGMA", "LAVA", "SOLAR", "INFERN", "BRASA"], VFX.inferno],
+  [["GELO", "NEVE", "CRIO", "POLAR", "FRIO"], VFX.frost],
+  [["TROVAO", "RAIO", "ELETR", "TESLA", "CHOQUE"], VFX.thunder],
+  [["TERRA", "ROCHA", "PEDRA", "AREIA", "MONTANHA"], VFX.quake],
+  [["VENTO", "AR", "FURACAO", "TEMPEST", "CICLONE", "TORNADO"], VFX.cyclone],
+  [["AGUA", "MAR", "OCEANO", "CHUVA", "ONDA", "ABISSO"], VFX.torrent],
+  [["VENENO", "TOXI", "ACIDO", "PRAGA", "PESTE"], VFX.toxic],
+  [["CRISTAL", "GEMA", "DIAMANTE", "PRISMA", "VIDRO"], VFX.prism],
+  [["PLASMA", "FUSAO", "REATOR", "ENERGIA"], VFX.plasma],
+  [["FERRO", "METAL", "ACO", "AÇO", "TITANIO", "CROMO", "MECAN"], VFX.clang],
+  [["BIO", "PLANTA", "FLORA", "SELVA", "VERDE", "SEIVA"], VFX.bloom],
+  [["COSMIC", "ESTELAR", "ASTRO", "GALAX", "ORBITA", "NEBUL"], VFX.cosmos],
+  [["SOM", "SONOR", "SONIC", "ECO", "GRITO", "RUIDO", "CANTO", "SILENCIO"], VFX.sonic],
+  [["TEMPO", "CRONO", "RELOGIO", "ETERNO"], VFX.chrono],
+  [["SANGUE", "VITAL", "CARNE", "VAMPIR"], VFX.siphon],
+  [["FORTALEZA", "ESCUDO", "MURALHA", "GUARDA", "BASTIAO"], VFX.ward],
+  [["LUZ", "LASER", "FOTON", "BRILHO", "AURORA", "SANTO"], VFX.laser],
+  [["METEORO", "IMPACTO", "GRAVIDADE", "QUEDA"], VFX.meteor],
+  [["SOMBRA", "ESCURO", "NOITE", "MALDI", "CAOS", "ESPECTR"], VFX.curse],
+  [["VAZIO", "NADA", "VOID", "BURACO", "ANTI"], VFX.void],
+  [["LAMINA", "CORTE", "ESPADA", "GARRA", "SERRA"], VFX.slash],
+];
+
+/** Escolhe o VFX de ataque a partir do elemento (fallback deterministico). */
+export function vfxForElement(element: string): string {
+  const up = (element || "").toUpperCase();
+  for (const [words, url] of ELEMENT_VFX) {
+    if (words.some((w) => matchKeyword(up, w))) return url;
+  }
+  let h = 2166136261;
+  for (let i = 0; i < up.length; i++) {
+    h = ((h ^ up.charCodeAt(i)) * 16777619) >>> 0;
+  }
+  const pool = ELEMENT_VFX.map(([, u]) => u);
+  return pool[h % pool.length];
+}
 
 export const EFFECT_LABEL: Record<EffectType, string> = {
   burn: "queimadura",
@@ -186,20 +248,23 @@ export function buildKit(input: KitInput): Skill[] {
   );
   const effects: EffectType[] = [input.effect.type, ...pool].slice(0, 6);
 
+  // Fase G3: o golpe elemental manda no visual. Os 20 efeitos novos entram
+  // aqui por elemento, e o vfx do blueprint fica como segunda assinatura.
+  const elVfx = vfxForElement(el);
   const strongVfx = input.vfxStrong;
   const specialVfx = input.vfxSpecial;
 
   const tiers: AtkTier[] = [
     { key: "basic", power: 4, mp: 0, vfx: VFX.impact, role: "raw" },
-    { key: "strong", power: 7, mp: 7, vfx: strongVfx, role: "raw" },
+    { key: "strong", power: 7, mp: 7, vfx: elVfx, role: "raw" },
     { key: "special", power: 5.5, mp: 12, vfx: specialVfx, role: "effect" },
     { key: "quick", power: 3.2, mp: 0, vfx: VFX.slash, role: "raw" },
     { key: "heavy", power: 8.4, mp: 17, vfx: strongVfx, role: "effect" },
-    { key: "elemental", power: 6.1, mp: 13, vfx: specialVfx, role: "effect" },
-    { key: "pierce", power: 6.7, mp: 15, vfx: VFX.slash, role: "effect" },
-    { key: "siphon", power: 5.2, mp: 11, vfx: VFX.void, role: "drain" },
-    { key: "overdrive", power: 4.8, mp: 10, vfx: VFX.levelup, role: "buff" },
-    { key: "ultimate", power: 10.6, mp: 28, vfx: VFX.explosion, role: "ultimate" },
+    { key: "elemental", power: 6.1, mp: 13, vfx: elVfx, role: "effect" },
+    { key: "pierce", power: 6.7, mp: 15, vfx: VFX.laser, role: "effect" },
+    { key: "siphon", power: 5.2, mp: 11, vfx: VFX.siphon, role: "drain" },
+    { key: "overdrive", power: 4.8, mp: 10, vfx: VFX.buffup, role: "buff" },
+    { key: "ultimate", power: 10.6, mp: 28, vfx: VFX.meteor, role: "ultimate" },
   ];
 
   const skills: Skill[] = [];

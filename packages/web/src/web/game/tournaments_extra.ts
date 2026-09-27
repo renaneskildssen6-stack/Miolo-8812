@@ -1,7 +1,8 @@
+import { arenaForElement } from "./arenas";
 import type { TournamentDef } from "./tournaments";
 
 // Gerado por assets/gen_tournaments.py — 1 torneio por robo novo.
-export const EXTRA_TOURNAMENTS: TournamentDef[] = [
+const RAW_EXTRA_TOURNAMENTS: TournamentDef[] = [
   {
     id: "t_dunecrawler",
     name: "COPA DUNE CRAWLER",
@@ -17715,3 +17716,11 @@ export const EXTRA_TOURNAMENTS: TournamentDef[] = [
   },
   // --- FIM TORNEIOS 220 ---
 ];
+
+/**
+ * A arena de cada torneio passa a sair do elemento do torneio, para que as
+ * 11 arenas animadas apareçam no mapa em vez de repetir "dojo" o tempo todo.
+ */
+export const EXTRA_TOURNAMENTS: TournamentDef[] = RAW_EXTRA_TOURNAMENTS.map(
+  (t) => ({ ...t, arena: arenaForElement(t.element, t.id) }),
+);

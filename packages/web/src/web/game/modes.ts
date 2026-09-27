@@ -1,3 +1,4 @@
+import { ARENA_IDS } from "./arenas";
 import type { RobotSave } from "./engine";
 import { ROBOTS, ROBOT_MAP } from "./robots";
 
@@ -239,7 +240,7 @@ export interface StageSetup {
   boss?: boolean;
 }
 
-const ARENAS = ["dojo", "volcano", "orbital", "sky", "frozen"];
+const ARENAS: string[] = ARENA_IDS;
 
 /** Configura o andar N da Torre de Babel. */
 export function babelStage(floor: number, teamLevel: number): StageSetup {

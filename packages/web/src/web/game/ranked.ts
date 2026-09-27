@@ -1,3 +1,4 @@
+import { ARENA_IDS } from "./arenas";
 import type { RobotSave } from "./engine";
 import { randomEnemyTeam, type StageSetup } from "./modes";
 import { ROBOT_MAP, ROBOTS } from "./robots";
@@ -267,7 +268,7 @@ export interface RankedOpponent {
   robot: string;
 }
 
-const RANKED_ARENAS = ["dojo", "orbital", "sky", "frozen", "volcano"];
+const RANKED_ARENAS: string[] = ARENA_IDS;
 
 function rarityFor(index: number): "gold" | "silver" | undefined {
   if (index >= 21) return "gold";
