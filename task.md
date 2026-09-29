@@ -155,3 +155,37 @@
 - [x] assets/e2e_battle.py OK (partida real sem erros de console nem sprites quebrados)
 
 ### Próxima fase: G3 — batalha 100x com 100 animações novas
+
+## Fase G3 — Batalha 100x, 100 animações, novos VFX e arenas animadas (concluída)
+
+### Catálogo de animações (game/anim.ts — novo)
+- [x] **100 AnimSpec** nomeadas em 5 camadas (`sprite`, `aura`, `burst`, `screen`, `float`), cada uma com keyframe, duração, VFX, filtro de cor, escala e nível de tremor
+- [x] **20 famílias elementais de impacto** (`burst_fogo`, `burst_gelo`, `burst_luz`, …) resolvidas a partir do elemento do chassi — os 157 elementos dos robôs caem em 20 bursts distintos, sem nenhum id inválido
+- [x] Resolvedores determinísticos: `burstAnimFor` (elemento), `hitAnimFor` (dano relativo + crítico → 5 faixas: leve/médio/pesado/crit/mega), `windupAnimFor` (preparo por skill, 6 gestos + carga de MP alto)
+- [x] 64 novos `@keyframes mk-a-*` em styles.css + classes base `.mk-a`/`.mk-a-smooth` e `mk-shake-2`/`mk-shake-3`
+
+### Instrumentação do combate (game/battle.ts)
+- [x] Nova variante de evento `{ t: "anim"; side; id; hold }` — `hold 0` empilha animações em paralelo, permitindo sprite + aura + burst + tela simultâneos
+- [x] **70 pontos de disparo** cobrindo `doAttack`, `doDefense`, `doItem`, `doSwap`, `runAction`, `tickEffects`, `handleFaints`, `checkEnd`, `resolveTurn`, `applyForcedSwap`
+- [x] battle.tsx: `AnimInst`, fila com `hold`, `Stage` reescrito, novos componentes `AnimVfx` (por lutador) e `ScreenFx` (tela cheia), tremor de tela em 3 níveis
+- [x] Menu de golpes virou lista rolável (máx. 148px) para não cobrir o palco durante as animações
+
+### Novos VFX de ataque (20 novos, 28 no total)
+- [x] 5 folhas 4×4 geradas em fundo magenta e processadas por `assets/process_vfx_g3.py` (chroma-key → alpha, tiras de 4 frames 96×96, padrão idêntico aos 8 originais): frost, toxic, cyclone, quake, torrent, prism, plasma, clang, bloom, cosmos, sonic, chrono, siphon, ward, laser, meteor, inferno, shockwave, buffup, curse
+- [x] Chroma-key endurecido (`r>180 & b>180 & g<95 & |r-b|<70`) — o limiar antigo comia os roxos legítimos de toxic/cosmos/curse/prism/chrono/siphon
+- [x] skills.ts: `ELEMENT_VFX` com 21 grupos de palavras-chave PT-BR + `vfxForElement` (fallback por hash) — os tiers `pierce/siphon/overdrive/ultimate` passaram a usar laser/siphon/buffup/meteor
+- [x] `matchKeyword` compartilhado: palavras de até 4 letras só casam palavra inteira, então "SOM" não captura mais "SOMBRA" nem "AR" captura "AREIA"
+
+### Arenas animadas em spritesheet único (11 no total)
+- [x] 6 arenas novas geradas (neodojo, sunken, canyon, foundry, crystal, storm) + as 5 antigas migradas — **todos os 4 frames numa única imagem** `{arena}_sheet.png` (480×1088)
+- [x] `ArenaBackdrop` reescrito: rola o sheet no eixo Y por `translateY` a cada 250ms, em vez de trocar 4 arquivos separados; os 20 PNGs `_f1..\_f4` foram removidos (10MB → 7.1MB) e o manifesto de carregamento foi atualizado
+- [x] `game/arenas.ts` (novo): `ARENA_IDS`, `ARENA_NAMES`, `arenaForElement` (11 grupos temáticos) e `arenaForKey` (hash estável)
+- [x] As 11 arenas entraram em rotação de verdade: `ARENAS` (modos), `RANKED_ARENAS` (ranqueada) e os **220 torneios** agora derivam a arena do elemento do torneio, em vez de 88 deles ficarem fixos em "dojo"
+- [x] **Correção do bug relatado**: o vídeo de round era desenhado opaco por cima da arena com `objectFit: cover`, então só 2 fundos apareciam (`round % 5` quase sempre caía em round1/round2 nas lutas curtas). Agora ele é uma camada atmosférica (`opacity 0.22`, `mixBlendMode: screen`), a escolha mistura arena + round (todos os 5 entram em rotação) e há scanlines de CRT sobre tudo
+
+### Verificação
+- [x] typecheck --force OK (3/3), build OK
+- [x] `assets/e2e_battle_g3.py` OK — 100 animações sem id duplicado, 157 elementos resolvidos em 20 bursts, 5 faixas de impacto distintas, 28 VFX todos 200/384×96, 11 sheets todos 200/480×1088, 60 turnos simulados gerando **893 eventos de animação / 31 ids distintos e nenhum fora do catálogo**; 0 erro de console, 0 pageerror, 0 imagem quebrada, 0 HTTP>=400
+- [x] `assets/e2e_battle.py` OK (regressão: partida real sem erros nem sprites quebrados)
+
+### Próxima fase: G4 — torneios como mundo explorável
