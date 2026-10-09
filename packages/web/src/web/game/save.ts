@@ -1,7 +1,10 @@
 import { useSyncExternalStore } from "react";
+import { freshTutorial, normalizeTutorial, type TutorialProgress } from "./progression";
+import { initialExpansion, normalizeExpansion, cityBonus, type ExpansionState } from "./expansion";
 import { GENERAL } from "./config";
-import { playerMaxXP, type RobotSave } from "./engine";
-import { ROBOT_MAP, ROBOTS, STARTER_ROBOTS } from "./robots";
+import { playerMaxXP, statHooks, type RobotSave } from "./engine";
+import { initialMeta, normalizeMeta, masteryBonus, equipStats, TOURNAMENT_DIAMONDS, type MetaState } from "./meta";
+import { ROBOT_MAP, ROBOTS } from "./robots";
 import {
   applyMatch,
   claimMission,
@@ -14,7 +17,8 @@ import {
   type RankedOutcome,
   type RankedState,
 } from "./ranked";
-import { defaultLoadout, MAX_LOADOUT } from "./skills";
+import { defaultLoadout, normalizeLoadout } from "./skills";
+import { skillsOf } from "./kits";
 import {
   BAR_COST,
   DEPTHS,
@@ -40,6 +44,8 @@ import {
 } from "./mining";
 import {
   LAB_MAX,
+  CORE_MAP,
+  SLOT_OPTIONS,
   activateCustom,
   buildCost,
   deactivateCustom,
@@ -85,7 +91,9 @@ import {
   type DeckResult,
 } from "./cards";
 
-export interface GameState {
+export interface GameState extends MetaState {
+  tutorial: TutorialProgress;
+  expansion: ExpansionState;
   version: number;
   gold: number;
   playerLevel: number;
@@ -137,23 +145,21 @@ export interface GameState {
 }
 
 const KEY = "campeoes-mecha-save-v1";
-const VERSION = 2;
+const VERSION = 3;
 
 function initialState(): GameState {
   return {
     version: VERSION,
-    gold: 500,
+    tutorial: freshTutorial(),
+    expansion: initialExpansion(),
+    gold: 0,
     playerLevel: 1,
     playerXP: 0,
-    robots: STARTER_ROBOTS.map((id) => ({
-      id,
-      level: 1,
-      xp: 0,
-      trained: { str: 0, def: 0, agl: 0 },
-    })),
-    team: [...STARTER_ROBOTS],
-    items: { repair_kit: 2, energy_cell: 1 },
+    robots: [],
+    team: [],
+    items: {},
     wonTournaments: [],
+    ...initialMeta(),
     battlesWon: 0,
     loadouts: {},
     gadgets: {},
@@ -246,7 +252,7 @@ function read(): GameState {
     const raw = localStorage.getItem(KEY);
     if (!raw) return initialState();
     const parsed = JSON.parse(raw) as GameState;
-    if (!parsed.robots?.length) return initialState();
+    if (!Array.isArray(parsed.robots)) return initialState();
     const base = initialState();
     // Fase F: registra os robôs do laboratório antes de qualquer tela montar.
     const customs = normalizeCustoms(parsed.customs);
@@ -257,6 +263,7 @@ function read(): GameState {
       ...base,
       ...parsed,
       version: VERSION,
+      tutorial: normalizeTutorial(parsed.tutorial, parsed.robots.length),
       loadouts: parsed.loadouts ?? {},
       gadgets: parsed.gadgets ?? {},
       pets: parsed.pets ?? {},
@@ -279,6 +286,8 @@ function read(): GameState {
       mining: normalizeMining(parsed.mining),
       customs,
       modes: { ...base.modes, ...(parsed.modes ?? {}) },
+      ...normalizeMeta(parsed),
+      expansion: normalizeExpansion(parsed.expansion),
     };
   } catch {
     return initialState();
@@ -343,10 +352,10 @@ export function addPlayerXP(amount: number) {
 }
 
 export function unlockRobot(id: string): boolean {
-  if (state.robots.some((r) => r.id === id)) return false;
+  if (!ROBOT_MAP[id] || state.robots.some((r) => r.id === id)) return false;
   const avgLevel = Math.max(
     1,
-    Math.round(state.robots.reduce((a, r) => a + r.level, 0) / state.robots.length) - 1,
+    state.robots.length ? Math.round(state.robots.reduce((a, r) => a + r.level, 0) / state.robots.length) - 1 : 1,
   );
   setState((s) => ({
     ...s,
@@ -382,7 +391,11 @@ export function setExplorer(id: string) {
 }
 
 export function setTeam(team: string[]) {
-  setState((s) => ({ ...s, team: team.slice(0, 4) }));
+  setState((s) => {
+    const owned=new Set(s.robots.map(r=>r.id));
+    const valid=[...new Set(team)].filter(id=>owned.has(id)).slice(0,4);
+    return {...s,team:valid.length?valid:s.robots.length?[s.team.find(id=>owned.has(id))??s.robots[0].id]:[]};
+  });
 }
 
 export function updateRobots(robots: RobotSave[]) {
@@ -390,11 +403,37 @@ export function updateRobots(robots: RobotSave[]) {
 }
 
 export function markTournamentWon(id: string) {
-  setState((s) => ({
-    ...s,
-    wonTournaments: s.wonTournaments.includes(id) ? s.wonTournaments : [...s.wonTournaments, id],
-  }));
+  setState((s) => {
+    if (s.wonTournaments.includes(id)) return s;
+    return {
+      ...s,
+      wonTournaments: [...s.wonTournaments, id],
+      diamonds: s.diamonds + TOURNAMENT_DIAMONDS,
+      diamondsEarned: s.diamondsEarned + TOURNAMENT_DIAMONDS,
+    };
+  });
 }
+
+// bonus de maestria + equipamentos entram em totalStats (so robos do jogador).
+statHooks.bonus = (robotId: string) => {
+  const g = state;
+  const out = { hp: 0, mp: 0, str: 0, def: 0, agl: 0 };
+  const add = (b: Partial<typeof out>) => {
+    out.hp += b.hp ?? 0;
+    out.mp += b.mp ?? 0;
+    out.str += b.str ?? 0;
+    out.def += b.def ?? 0;
+    out.agl += b.agl ?? 0;
+  };
+  const m = g.mastery[robotId];
+  if (g.robots.some((r) => r.id === robotId)) add(cityBonus(g, robotId));
+  if (m) add(masteryBonus(m.pts));
+  for (const uid of g.equipped[robotId] ?? []) {
+    const it = g.equipment.find((e) => e.uid === uid);
+    if (it) add(equipStats(it));
+  }
+  return out;
+};
 
 export function incBattlesWon() {
   setState((s) => ({ ...s, battlesWon: s.battlesWon + 1 }));
@@ -411,29 +450,21 @@ export function teamSaves(s: GameState): RobotSave[] {
 export function loadoutOf(s: GameState, robotId: string): string[] {
   const def = ROBOT_MAP[robotId];
   if (!def) return [];
-  const valid = new Set(def.skills.map((k) => k.id));
-  const saved = [...new Set((s.loadouts[robotId] ?? []).filter((id) => valid.has(id)))].slice(
-    0,
-    MAX_LOADOUT,
-  );
-  if (saved.length === MAX_LOADOUT) return saved;
-  // kit incompleto: completa com o padrão mantendo a ordem escolhida
-  const fill = defaultLoadout(def.skills).filter((id) => !saved.includes(id));
-  return [...saved, ...fill].slice(0, MAX_LOADOUT);
+  return normalizeLoadout(skillsOf(robotId),s.loadouts[robotId] ?? []);
 }
 
 export function setLoadout(robotId: string, skillIds: string[]) {
   const def = ROBOT_MAP[robotId];
-  const valid = new Set((def?.skills ?? []).map((k) => k.id));
-  const clean = [...new Set(skillIds.filter((id) => valid.has(id)))].slice(0, MAX_LOADOUT);
-  setState((st) => ({ ...st, loadouts: { ...st.loadouts, [robotId]: clean } }));
+  if (!def) return;
+  const clean=normalizeLoadout(skillsOf(robotId),skillIds);
+  setState(st=>({...st,loadouts:{...st.loadouts,[robotId]:clean}}));
 }
 
 /** Reseta o kit de um robô para o padrão do chassi. */
 export function resetLoadout(robotId: string) {
   const def = ROBOT_MAP[robotId];
   if (!def) return;
-  setLoadout(robotId, defaultLoadout(def.skills));
+  setLoadout(robotId, defaultLoadout(skillsOf(robotId)));
 }
 
 // ------------------------------------------------------------- ranqueado
@@ -497,7 +528,7 @@ export function buyGadget(robotId: string): boolean {
 /** Sobe um nivel do gadget. Marcos de MK cobram lingotes. */
 export function upgradeGadget(robotId: string): boolean {
   const def = GADGET_MAP[robotId];
-  if (!def) return false;
+  if (!def || !state.robots.some(r => r.id === robotId)) return false;
   const cur = state.gadgets[robotId] ?? 0;
   if (cur <= 0 || cur >= GADGET_MAX_LEVEL) return false;
   const cost = upgradeCost(def, cur);
@@ -555,7 +586,7 @@ export function buyChip(chipId: string): boolean {
 
 /** Encaixa (ou remove, com chipId null) um chip num socket do gadget. */
 export function equipChip(robotId: string, slot: number, chipId: string | null): boolean {
-  if (!GADGET_MAP[robotId]) return false;
+  if (!GADGET_MAP[robotId] || !state.robots.some(r => r.id === robotId) || !Number.isInteger(slot)) return false;
   const max = gadgetSocketCount(state, robotId);
   if (slot < 0 || slot >= max) return false;
   if (chipId !== null) {
@@ -797,6 +828,7 @@ export function siloRoom(m: MiningState): number {
  * com teto de 8h). Devolve quanto foi ganho para a UI avisar o jogador.
  */
 export function miningTick(now = Date.now()): { gained: number; ms: number } {
+  if (!Number.isFinite(now) || now < state.mining.lastTick) return { gained: 0, ms: 0 };
   const res = collectProduction(state.mining, now);
   setState((s) => {
     const ores = { ...s.mining.ores };
@@ -808,8 +840,9 @@ export function miningTick(now = Date.now()): { gained: number; ms: number } {
 
 /** Minério arrancado de um veio pelo robô. Respeita a capacidade do silo. */
 export function mineOre(oreId: string, qty: number): number {
+  if (!ORE_MAP[oreId] || !Number.isFinite(qty) || qty <= 0) return 0;
   const room = siloRoom(state.mining);
-  const got = Math.max(0, Math.min(room, qty));
+  const got = Math.max(0, Math.min(room, Math.floor(qty)));
   if (got <= 0) return 0;
   setState((s) =>
     withMining(s, {
@@ -849,7 +882,7 @@ export function upgradeRefinery(): boolean {
 
 export function upgradeDrill(depth: number): boolean {
   const m = state.mining;
-  if (depth > m.depth) return false;
+  if (!Number.isInteger(depth) || depth < 1 || depth > MAX_DEPTH || depth > m.depth) return false;
   const lvl = m.drills[String(depth)] ?? 0;
   if (lvl >= DRILL_MAX) return false;
   const cost = drillCost(depth, lvl);
@@ -876,6 +909,7 @@ export function descendMine(): boolean {
 /** Manda um lote de minério bruto para a refinaria (leva tempo real). */
 export function startRefine(oreId: string, bars: number): boolean {
   const m = state.mining;
+  if (!ORE_MAP[oreId] || !Number.isInteger(bars) || bars <= 0) return false;
   if (m.job) return false;
   const max = Math.min(refineBatch(m.refinery), Math.floor((m.ores[oreId] ?? 0) / BAR_COST));
   const n = Math.max(0, Math.min(bars, max));
@@ -893,7 +927,7 @@ export function startRefine(oreId: string, bars: number): boolean {
 /** Retira os lingotes prontos da refinaria. */
 export function collectRefine(now = Date.now()): number {
   const job = state.mining.job;
-  if (!job || now < job.endsAt) return 0;
+  if (!Number.isFinite(now) || !job || now < job.endsAt) return 0;
   setState((s) =>
     withMining(s, {
       bars: { ...s.mining.bars, [job.ore]: (s.mining.bars[job.ore] ?? 0) + job.bars },
@@ -943,6 +977,11 @@ function spendBars(bars: Record<string, number>, n: number): Record<string, numb
 /** Constrói um robô customizado. Devolve o id criado ou null. */
 export function buildCustom(draft: LabDraft): string | null {
   const s = state;
+  if (!draft || typeof draft.name !== "string" || !CORE_MAP[draft.core] ||
+      !Number.isFinite(draft.hue) || draft.hue < 0 || draft.hue >= 360 ||
+      !SLOT_OPTIONS.head.includes(draft.head) || !SLOT_OPTIONS.torso.includes(draft.torso) ||
+      !SLOT_OPTIONS.arm.includes(draft.arm) || !SLOT_OPTIONS.leg.includes(draft.leg) ||
+      (draft.deco !== null && !SLOT_OPTIONS.deco.includes(draft.deco))) return null;
   if (s.customs.length >= LAB_MAX) return null;
   const cost = buildCost(draft);
   if (s.gold < cost.gold || totalBars(s) < cost.bars) return null;
@@ -971,6 +1010,7 @@ export function buildCustom(draft: LabDraft): string | null {
 }
 
 export function renameCustom(id: string, name: string): boolean {
+  if (typeof name !== "string") return false;
   if (!state.customs.some((c) => c.id === id)) return false;
   const clean = (name || "PROTOTIPO").slice(0, 14).toUpperCase();
   setState((s) => {
@@ -992,8 +1032,11 @@ export function scrapCustom(id: string): number {
     gold: s.gold + gold,
     customs: s.customs.filter((x) => x.id !== id),
     robots: s.robots.filter((r) => r.id !== id),
-    team: s.team.filter((t) => t !== id),
+    team: s.team.some(t => t !== id) ? s.team.filter(t => t !== id) : s.robots.filter(r => r.id !== id).slice(0, 1).map(r => r.id),
     explorer: s.explorer === id ? null : s.explorer,
+    gadgets: Object.fromEntries(Object.entries(s.gadgets).filter(([key]) => key !== id)),
+    gadgetChips: Object.fromEntries(Object.entries(s.gadgetChips).filter(([key]) => key !== id)),
+    equipped: Object.fromEntries(Object.entries(s.equipped).filter(([key]) => key !== id)),
   }));
   deactivateCustom(id);
   return gold;

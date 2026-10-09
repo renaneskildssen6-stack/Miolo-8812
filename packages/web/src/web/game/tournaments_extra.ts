@@ -17722,5 +17722,5 @@ const RAW_EXTRA_TOURNAMENTS: TournamentDef[] = [
  * 11 arenas animadas apareçam no mapa em vez de repetir "dojo" o tempo todo.
  */
 export const EXTRA_TOURNAMENTS: TournamentDef[] = RAW_EXTRA_TOURNAMENTS.map(
-  (t) => ({ ...t, arena: arenaForElement(t.element, t.id) }),
+  (t) => ({ ...t, arena: arenaForElement(t.element ?? "", t.id) }),
 );

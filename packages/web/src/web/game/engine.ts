@@ -1,5 +1,6 @@
 import { AI_STATS_REDUCTION, GENERAL, ROBOT_STATS } from "./config";
 import type { Ratios, RobotDef, Skill } from "./robots";
+import type { BattleRules } from "./expansion";
 
 export interface TrainedStats {
   str: number;
@@ -16,6 +17,11 @@ export interface RobotSave {
   loadout?: string[];
   /** nivel do gadget equipado (0 = sem gadget). */
   gadgetLevel?: number;
+  /** Temporary dimensional loadout; never written to the collection. */
+  borrowed?: boolean;
+  runBonus?: Partial<FullStats>;
+  statScale?: number;
+  battleRules?: BattleRules;
 }
 
 export interface FullStats {
@@ -34,6 +40,9 @@ export function robotMaxXP(level: number): number {
 export function playerMaxXP(level: number): number {
   return Math.trunc(0.8 * (level + 1) ** 3) * 3;
 }
+
+/** Gancho de bonus (maestria/equipamentos) registrado pelo save. */
+export const statHooks: { bonus: (robotId: string) => FullStats | null } = { bonus: () => null };
 
 // STATS ----------------------------------------------------------------------
 function statValue(base: number, delta: number, level: number, ratio: number): number {
@@ -69,6 +78,12 @@ export function totalStats(def: RobotDef, save: RobotSave, aiControlled = false)
     def: base.def + save.trained.def,
     agl: base.agl + save.trained.agl,
   };
+  if (!aiControlled && !save.borrowed) {
+    const b = statHooks.bonus(def.id);
+    if (b) {
+      out = { hp: out.hp + b.hp, mp: out.mp + b.mp, str: out.str + b.str, def: out.def + b.def, agl: out.agl + b.agl };
+    }
+  }
   if (aiControlled) {
     const band =
       AI_STATS_REDUCTION.find((b) => save.level <= b.upToLevel) ??
@@ -81,6 +96,9 @@ export function totalStats(def: RobotDef, save: RobotSave, aiControlled = false)
       def: Math.max(1, Math.trunc(out.def * k)),
       agl: Math.max(1, Math.trunc(out.agl * k)),
     };
+  }
+  for (const stat of ["hp", "mp", "str", "def", "agl"] as const) {
+    out[stat] = Math.max(1, Math.round((out[stat] + (save.runBonus?.[stat] ?? 0)) * (save.statScale ?? 1)));
   }
   return out;
 }

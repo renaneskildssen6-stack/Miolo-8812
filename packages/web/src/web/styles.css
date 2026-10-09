@@ -893,3 +893,67 @@ img {
   75% { transform: translate(6px, -3px) rotate(0.5deg); }
 }
 .mk-shake-3 { animation: mk-shake-3 420ms steps(6) 1; }
+
+
+/* ---------------------------------------- H2: decalque, projetil, rastro */
+@keyframes mk-a-decal {
+  0% { transform: scaleY(0.5) scaleX(0.4); opacity: 0; }
+  15% { transform: scaleY(0.5) scaleX(1.05); opacity: 1; }
+  70% { transform: scaleY(0.5) scaleX(1); opacity: 0.85; }
+  100% { transform: scaleY(0.5) scaleX(1); opacity: 0; }
+}
+.mk-a-decal { animation-name: mk-a-decal; }
+
+@keyframes mk-a-proj {
+  0% { transform: translateX(0) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateX(calc(var(--mk-dir, 1) * 250px)) scale(1); opacity: 0; }
+}
+.mk-a-proj { animation-name: mk-a-proj; animation-timing-function: ease-in; }
+
+@keyframes mk-a-trail {
+  0% { transform: translateX(calc(var(--mk-dir, 1) * -10px)) scaleX(0.4); opacity: 0; }
+  30% { transform: translateX(calc(var(--mk-dir, 1) * 30px)) scaleX(1.2); opacity: 1; }
+  100% { transform: translateX(calc(var(--mk-dir, 1) * 90px)) scaleX(1.5); opacity: 0; }
+}
+.mk-a-trail { animation-name: mk-a-trail; }
+
+/* ---- tela de pre-batalha (VS) ---- */
+@keyframes mk-vs-in-top { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+@keyframes mk-vs-in-bottom { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes mk-vs-pop {
+  0% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+  60% { transform: translate(-50%, -50%) scale(0.9); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+.mk-vs-top { animation: mk-vs-in-top 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+.mk-vs-bottom { animation: mk-vs-in-bottom 0.45s 0.12s cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+.mk-vs-badge { animation: mk-vs-pop 0.5s 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) both; transform: translate(-50%, -50%); }
+
+/* Expansao: tela cinematica, interferencia e alerta de HP. */
+@keyframes mk-distort { 0%,100% { opacity:0; transform:translateX(0); } 20% { opacity:.65; transform:translateX(-8px) skewX(3deg); } 45% { opacity:.3; transform:translateX(8px); } 65% { opacity:.55; transform:translateX(-4px); } }
+@keyframes mk-cinematic { 0% { opacity:0; transform:scale(.8); } 20%,65% { opacity:1; transform:scale(1); } 100% { opacity:0; transform:scale(1.12); } }
+@keyframes mk-danger { 0%,100% { opacity:.3; } 50% { opacity:.7; } }
+.mk-a-distort { animation-name:mk-distort; }
+.mk-a-cinematic { animation-name:mk-cinematic; background:linear-gradient(transparent 10%,rgba(0,0,0,.75) 10% 20%,transparent 20% 80%,rgba(0,0,0,.75) 80% 90%,transparent 90%); }
+.mk-danger { animation:mk-danger 1.5s ease-in-out infinite; }
+.mk-exp-body { flex:1; min-height:0; padding:10px; display:flex; flex-direction:column; gap:10px; }
+.mk-exp-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.mk-exp-copy { font-size:11px; line-height:1.7; color:var(--mk-muted); }
+.mk-exp-title { font-size:9px; line-height:1.8; color:var(--mk-accent); }
+.mk-exp-tabs { display:flex; overflow-x:auto; gap:6px; flex-shrink:0; padding:4px 0; }
+.mk-exp-tabs button { white-space:nowrap; font-size:9px; padding:8px; color:var(--mk-text); background:var(--mk-bg); border:2px solid var(--mk-panel); }
+.mk-exp-tabs button[aria-pressed=true] { color:var(--mk-accent2); border-color:var(--mk-accent2); }
+.mk-exp-progress { height:6px; background:#070b14; margin:6px 0; }
+.mk-exp-progress > div { height:100%; background:var(--mk-accent); }
+@media (prefers-reduced-motion:reduce) { .mk-a-distort,.mk-a-cinematic,.mk-danger { animation:none!important; opacity:.35; } }
+
+/* Painel de recuperação: falha de render nunca vira tela preta. */
+.mc-crash{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:28px 22px;background:linear-gradient(160deg,#101c28,#05090f 70%);color:#dbeef8;font-family:Poppins,system-ui,sans-serif}
+.mc-crash-kicker{font:7px 'Press Start 2P',monospace;letter-spacing:2px;color:#ffb43a;margin:0}
+.mc-crash h2{font:11px/1.6 'Press Start 2P',monospace;margin:0;color:#fff}
+.mc-crash p{margin:0;font-size:12px;color:#9db6c6;line-height:1.5}
+.mc-crash code{font-size:10px;color:#ff9c92;background:#1a0c0c;border-left:3px solid #e2453a;padding:8px;overflow-wrap:anywhere}
+.mc-crash div{display:flex;gap:8px;margin-top:6px}
+.mc-crash button{flex:1;min-height:44px;font:7px 'Press Start 2P',monospace;border:1px solid #35e2f0;background:#0a1d29;color:#bff7ff;cursor:pointer}
+.mc-crash button+button{border-color:#ffb43a;color:#ffd994;background:#1d1608}

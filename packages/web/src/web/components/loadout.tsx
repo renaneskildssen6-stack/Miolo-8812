@@ -1,12 +1,16 @@
 import { useMemo, useState } from "react";
 import { Icon, PixelButton } from "@/components/pixel";
-import { ROBOT_MAP } from "@/game/robots";
 import { loadoutOf, resetLoadout, setLoadout, useGame } from "@/game/save";
-import { EFFECT_LABEL, MAX_LOADOUT, type Skill } from "@/game/skills";
+import { MAX_LOADOUT, exclusiveUltimate, type Skill } from "@/game/skills";
+import { effectLabel } from "@/game/combat";
+import { kitMechs, kitOf } from "@/game/kits";
+import { RESOURCES } from "@/game/kits/types";
+import { mechDef } from "@/game/mechanics";
+import { ELEMENT_MAP } from "@/game/elements";
 
 type Filter = "all" | "attack" | "defense";
 
-const SLOT_LABEL = ["SLOT 1", "SLOT 2", "SLOT 3", "SLOT 4"];
+const SLOT_LABEL = Array.from({ length: MAX_LOADOUT }, (_, i) => i < 4 ? `ATAQUE ${i + 1}` : `DEFESA ${i - 3}`);
 
 function tierOf(s: Skill): string {
   if (s.kind === "defense") return "DEFESA";
@@ -31,17 +35,19 @@ function tierColor(s: Skill): string {
  */
 export function LoadoutEditor({ robotId }: { robotId: string }) {
   const g = useGame();
-  const def = ROBOT_MAP[robotId];
+  const dossier = kitOf(robotId);
+  const skills = dossier.skills;
   const equipped = loadoutOf(g, robotId);
   const [slot, setSlot] = useState(0);
   const [filter, setFilter] = useState<Filter>("all");
 
   const byId = useMemo(
-    () => Object.fromEntries(def.skills.map((s) => [s.id, s])) as Record<string, Skill>,
-    [def.skills],
+    () => Object.fromEntries(skills.map((s) => [s.id, s])) as Record<string, Skill>,
+    [skills],
   );
 
-  const list = def.skills.filter((s) =>
+  const ultimate = exclusiveUltimate(skills)!;
+  const list = skills.filter(s=>s.id!==ultimate.id).filter((s) =>
     filter === "all" ? true : filter === "defense" ? s.kind === "defense" : s.kind !== "defense",
   );
 
@@ -53,8 +59,13 @@ export function LoadoutEditor({ robotId }: { robotId: string }) {
     : 0;
   const avgMp = kit.length ? Math.round(kit.reduce((a, s) => a + s.mp, 0) / kit.length) : 0;
   const freeCost = kit.filter((s) => s.mp === 0).length;
+  const mechs = kitMechs(dossier);
+  const elDef = ELEMENT_MAP[dossier.element as keyof typeof ELEMENT_MAP] ?? null;
+  const resDef = dossier.resource ? RESOURCES[dossier.resource] : null;
 
   function equip(id: string) {
+    const chosen = byId[id];
+    if (!chosen || chosen.id === ultimate.id || chosen.kind !== (slot < 4 ? "attack" : "defense")) return;
     const already = equipped.indexOf(id);
     const next = [...equipped];
     if (already >= 0) {
@@ -70,24 +81,10 @@ export function LoadoutEditor({ robotId }: { robotId: string }) {
   }
 
   function preset(kind: "offense" | "balanced" | "defense") {
-    const atk = def.skills
-      .filter((s) => s.kind !== "defense")
-      .slice()
-      .sort((a, b) => b.power - a.power);
-    const dfs = def.skills.filter((s) => s.kind === "defense");
-    const cheap = def.skills
-      .filter((s) => s.kind !== "defense")
-      .slice()
-      .sort((a, b) => a.mp - b.mp);
-    let ids: string[] = [];
-    if (kind === "offense") ids = atk.slice(0, 4).map((s) => s.id);
-    if (kind === "balanced")
-      ids = [atk[0]!.id, atk[1]!.id, cheap[0]!.id, dfs[0]!.id].filter(
-        (v, i, a) => a.indexOf(v) === i,
-      );
-    if (kind === "defense") ids = [atk[0]!.id, cheap[0]!.id, dfs[0]!.id, dfs[1]!.id];
-    const fill = def.skills.map((s) => s.id).filter((id) => !ids.includes(id));
-    setLoadout(robotId, [...ids, ...fill].slice(0, MAX_LOADOUT));
+    const ordinary=skills.filter(s=>s.id!==ultimate.id);
+    const atk=ordinary.filter(s=>s.kind==="attack").sort((a,b)=>kind==="offense"?b.power-a.power:a.mp-b.mp);
+    const dfs=ordinary.filter(s=>s.kind==="defense").sort((a,b)=>kind==="defense"?b.power-a.power:a.mp-b.mp);
+    setLoadout(robotId,[...atk.slice(0,4),...dfs.slice(0,2)].map(s=>s.id));
     setSlot(0);
   }
 
@@ -99,12 +96,19 @@ export function LoadoutEditor({ robotId }: { robotId: string }) {
       >
         <span>KIT DE COMBATE</span>
         <span style={{ color: "var(--mk-accent)" }}>
-          {MAX_LOADOUT}/{MAX_LOADOUT} · {def.skills.length} DISPONIVEIS
+          {MAX_LOADOUT}/{MAX_LOADOUT} · {skills.length-1} DISPONÍVEIS + ULTIMATE
         </span>
       </div>
 
       {/* SLOTS */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, marginTop: 6 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 4,
+          marginTop: 6,
+        }}
+      >
         {Array.from({ length: MAX_LOADOUT }).map((_, i) => {
           const s = byId[equipped[i] ?? ""];
           const active = slot === i;
@@ -143,6 +147,11 @@ export function LoadoutEditor({ robotId }: { robotId: string }) {
         })}
       </div>
 
+      <div style={{marginTop:6,padding:8,border:"1px solid #ffcc68",background:"#241906"}}>
+        <strong className="mk-title" style={{fontSize:7,color:"#ffe39a"}}>ULTIMATE EXCLUSIVO · {ultimate.name}</strong>
+        <p style={{fontSize:11,lineHeight:1.4,margin:"6px 0"}}>{ultimate.desc}</p>
+        <small>Separado dos 4 ataques e 2 defesas · 100% de carga · sem MP.</small>
+      </div>
       {/* RESUMO */}
       <div
         className="mk-title"
@@ -184,6 +193,91 @@ export function LoadoutEditor({ robotId }: { robotId: string }) {
           AVISO: TODOS OS GOLPES CUSTAM MP — VOCE PODE FICAR SEM ENERGIA.
         </div>
       )}
+
+      {/* DOSSIE DO CHASSI: elemento, recurso, talento, passivas e mecanicas */}
+      <div
+        style={{
+          marginTop: 8,
+          padding: "5px 6px",
+          border: `2px solid ${elDef?.color ?? "rgba(53,226,240,0.3)"}`,
+          background: "rgba(6,14,26,0.72)",
+        }}
+      >
+        <div
+          className="mk-title"
+          style={{ fontSize: 6, display: "flex", justifyContent: "space-between", gap: 6 }}
+        >
+          <span style={{ color: "var(--mk-accent)" }}>SISTEMAS DO CHASSI</span>
+          <span style={{ color: elDef?.color ?? "var(--mk-accent2)" }}>
+            {elDef?.label ?? dossier.element} · {dossier.talent.kind.toUpperCase()}
+          </span>
+        </div>
+        <div className="mk-title" style={{ fontSize: 6, marginTop: 4, color: "var(--mk-accent2)" }}>
+          TALENTO: {dossier.talent.name}
+        </div>
+        <div style={{ fontSize: 10, color: "var(--mk-muted)", lineHeight: 1.35 }}>
+          {dossier.talent.desc}
+        </div>
+        {resDef && (
+          <>
+            <div
+              className="mk-title"
+              style={{ fontSize: 6, marginTop: 4, color: resDef.color }}
+            >
+              RECURSO: {resDef.label} (0-{resDef.max})
+            </div>
+            <div style={{ fontSize: 10, color: "var(--mk-muted)", lineHeight: 1.35 }}>
+              {resDef.desc}
+            </div>
+          </>
+        )}
+        <div className="mk-title" style={{ fontSize: 6, marginTop: 5, color: "#57d76a" }}>
+          PASSIVAS ({dossier.passives.length})
+        </div>
+        {dossier.passives.map((pv) => (
+          <div key={pv.id} style={{ marginTop: 2 }}>
+            <span className="mk-title" style={{ fontSize: 6, color: "#57d76a" }}>
+              {pv.name}
+            </span>
+            <span className="mk-title" style={{ fontSize: 5, color: "var(--mk-muted)" }}>
+              {" "}
+              [{pv.hook}]
+            </span>
+            <div style={{ fontSize: 10, color: "var(--mk-muted)", lineHeight: 1.3 }}>{pv.desc}</div>
+          </div>
+        ))}
+        <div className="mk-title" style={{ fontSize: 6, marginTop: 5, color: "#ff5ea8" }}>
+          MECANICAS EXCLUSIVAS ({mechs.length})
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginTop: 3 }}>
+          {mechs.map((id) => {
+            const md = mechDef(id);
+            return (
+              <span
+                key={id}
+                title={md?.desc}
+                style={{
+                  fontSize: 9,
+                  padding: "1px 4px",
+                  border: "1px solid #ff5ea8",
+                  color: "#ff5ea8",
+                  background: "rgba(255,94,168,0.10)",
+                }}
+              >
+                {md?.label ?? id}
+              </span>
+            );
+          })}
+        </div>
+        {elDef && (
+          <div style={{ fontSize: 10, color: "var(--mk-muted)", marginTop: 4, lineHeight: 1.3 }}>
+            <span className="mk-title" style={{ fontSize: 6, color: elDef.color }}>
+              {elDef.label}
+            </span>{" "}
+            {elDef.identity}
+          </div>
+        )}
+      </div>
 
       {/* PRESETS + FILTROS */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, marginTop: 6 }}>
@@ -232,6 +326,7 @@ export function LoadoutEditor({ robotId }: { robotId: string }) {
           <button
             key={s.id}
             type="button"
+            disabled={s.kind !== (slot < 4 ? "attack" : "defense")}
             onClick={() => equip(s.id)}
             style={{
               display: "block",
@@ -260,7 +355,7 @@ export function LoadoutEditor({ robotId }: { robotId: string }) {
               style={{ fontSize: 5, color: tierColor(s), margin: "2px 0" }}
             >
               {tierOf(s)} · POTENCIA {s.power}
-              {s.effect ? ` · ${EFFECT_LABEL[s.effect.type].toUpperCase()}` : ""}
+              {s.effect ? ` · ${effectLabel(s.effect.type).toUpperCase()}` : ""}
               {s.effect ? ` ${Math.round(s.effect.chance * 100)}%` : ""}
             </div>
             <div style={{ fontSize: 10, color: "var(--mk-muted)" }}>{s.desc}</div>

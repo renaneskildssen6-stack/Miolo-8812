@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Icon, Panel, PixelButton, RobotSprite, StatBar } from "@/components/pixel";
-import { fightReward, grantXP, robotMaxXP, type RobotSave } from "@/game/engine";
+import { fightReward, grantXP, robotMaxXP } from "@/game/engine";
 import {
   babelStage,
   bossStage,
@@ -23,6 +23,7 @@ import { faceUrl, ROBOT_MAP } from "@/game/robots";
 import {
   addGold,
   addPlayerXP,
+  applyPetRewards,
   incBattlesWon,
   setModeProgress,
   spendItem,

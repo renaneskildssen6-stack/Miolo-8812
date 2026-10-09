@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon, Panel, PixelButton } from "@/components/pixel";
 import { faceUrl, ROBOT_MAP } from "@/game/robots";
 import { teamAverageLevel } from "@/game/modes";
@@ -42,6 +42,7 @@ export function RankedScreen({ onBack }: { onBack: () => void }) {
   const [opp, setOpp] = useState<RankedOpponent | null>(null);
   const [outcome, setOutcome] = useState<RankedOutcome | null>(null);
   const [rerolls, setRerolls] = useState(0);
+  const paidMatch = useRef<number | null>(null);
 
   const team = teamSaves(g);
   const r = g.ranked;
@@ -63,9 +64,10 @@ export function RankedScreen({ onBack }: { onBack: () => void }) {
   }
 
   function finishFight(result: "win" | "lose", snapshot?: Record<string, { hp: number; mp: number }>) {
-    if (!opp) return;
+    if (!opp || paidMatch.current === r.matches) return;
+    paidMatch.current = r.matches;
     const survivors = snapshot
-      ? Object.values(snapshot).filter((v) => v.hp > 0).length
+      ? team.filter(robot => (snapshot[robot.id]?.hp ?? 0) > 0).length
       : result === "win"
         ? 1
         : 0;

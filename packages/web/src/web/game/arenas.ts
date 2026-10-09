@@ -17,7 +17,37 @@ export type ArenaId =
   | "sky"
   | "storm"
   | "sunken"
-  | "canyon";
+  | "canyon"
+  | "necroforge"
+  | "biodome"
+  | "necropolis"
+  | "spire"
+  | "trench"
+  | "throne"
+  | "archive"
+  | "aurora"
+  | "crown"
+  | "forge"
+  | "genesis"
+  | "graveyard"
+  | "hangar"
+  | "orbit"
+  | "reactor"
+  | "rift"
+  | "skyfall"
+  | "swarm"
+  | "tundra"
+  | "undercity"
+  | "m_draft"
+  | "m_caravan"
+  | "m_rift"
+  | "m_mirror"
+  | "m_siege"
+  | "m_hunt"
+  | "m_reactors"
+  | "m_mono"
+  | "m_stakes"
+  | "m_maze";
 
 /** Todas as arenas jogaveis, na ordem de rotacao padrao. */
 export const ARENA_IDS: ArenaId[] = [
@@ -32,6 +62,36 @@ export const ARENA_IDS: ArenaId[] = [
   "foundry",
   "crystal",
   "storm",
+  "necroforge",
+  "biodome",
+  "necropolis",
+  "spire",
+  "trench",
+  "throne",
+  "archive",
+  "aurora",
+  "crown",
+  "forge",
+  "genesis",
+  "graveyard",
+  "hangar",
+  "orbit",
+  "reactor",
+  "rift",
+  "skyfall",
+  "swarm",
+  "tundra",
+  "undercity",
+  "m_draft",
+  "m_caravan",
+  "m_rift",
+  "m_mirror",
+  "m_siege",
+  "m_hunt",
+  "m_reactors",
+  "m_mono",
+  "m_stakes",
+  "m_maze",
 ];
 
 /** Nome exibido de cada arena. */
@@ -47,6 +107,37 @@ export const ARENA_NAMES: Record<ArenaId, string> = {
   storm: "COLISEU DA TEMPESTADE",
   sunken: "TEMPLO SUBMERSO",
   canyon: "CANION DAS ESTATUAS",
+  necroforge: "NECROFORJA",
+  biodome: "BIODOMO ESTUFA",
+  necropolis: "NECROPOLE",
+  spire: "PINACULO SAGRADO",
+  trench: "FOSSA ABISSAL",
+  throne: "SALAO DO TRONO",
+  archive: "ARQUIVO VIVO",
+  aurora: "SANTUARIO DA AURORA",
+  crown: "COROA CELESTE",
+  forge: "FORJA TITANICA",
+  genesis: "JARDIM GENESIS",
+  graveyard: "CEMITERIO MECANICO",
+  hangar: "HANGAR DE GUERRA",
+  orbit: "ANEL ORBITAL",
+  reactor: "REATORE CENTRAL",
+  rift: "FENDA COSMICA",
+  skyfall: "QUEDA CELESTE",
+  swarm: "COLMEIA MECANICA",
+  tundra: "TUNDRA ETERNA",
+  undercity: "SUBCIDADE",
+  m_draft: "FERRO-VELHO DO DRAFT",
+  m_caravan: "TRILHA DA CARAVANA",
+  m_rift: "FENDA ROGUELIKE",
+  m_mirror: "SALAO DOS ESPELHOS",
+  m_siege: "FORTALEZA SOB CERCO",
+  m_hunt: "DISTRITO DA CACADA",
+  m_reactors: "CORRIDA DOS REATORES",
+  m_mono: "TEMPLO DOS ELEMENTOS",
+  m_stakes: "ARENA DO DESTINO",
+  m_maze: "LABIRINTO PERDIDO",
+
 };
 
 export function arenaSheetUrl(arena: string): string {
@@ -68,6 +159,12 @@ export function matchKeyword(text: string, word: string): boolean {
 
 /** Palavras-chave de elemento -> arena tematica. */
 const ELEMENT_ARENA: [string[], ArenaId][] = [
+  [["NECRO", "CEMITERIO", "REQUIEM"], "necropolis"],
+  [["ESTUFA", "SEIVA", "ORQUIDEA", "FLORESTA"], "biodome"],
+  [["CATEDRAL", "SERAFIM", "HALO", "DIVINO"], "spire"],
+  [["ABISSAL", "FOSSA", "TRINCHEIRA", "PROFUNDO"], "trench"],
+  [["TRONO", "COROA", "IMPERIO", "REAL"], "throne"],
+  [["ECTO", "ALMAFORJA"], "necroforge"],
   [
     ["FOGO", "CHAMA", "MAGMA", "VULCAO", "BRASA", "INFERNO", "PIRA", "CINZAS", "FAISCA", "SOL", "FATUO"],
     "volcano",

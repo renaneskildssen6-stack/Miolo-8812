@@ -2,9 +2,14 @@ import { useState } from "react";
 import { Frame, Panel, PixelButton, RobotSprite, StatBar } from "@/components/pixel";
 import { Icon } from "@/components/pixel";
 import { LoadoutEditor } from "@/components/loadout";
+import { EquipPanel } from "@/screens/meta";
+import { skinOfRobot } from "@/game/meta";
 import { TRAIN_COST_PER_POINT } from "@/game/config";
 import { baseStats, maxTrained, robotMaxXP, type RobotSave } from "@/game/engine";
-import { addGold, setTeam, updateRobots, useGame } from "@/game/save";
+import { setTeam, useGame } from "@/game/save";
+import { trainRobotStat } from "@/game/economy-actions";
+import { TeamWorkbench } from "@/components/team-workbench";
+import { ScreenBoundary } from "@/components/screen-boundary";
 import { isCustom } from "@/game/lab";
 import { faceUrl, ROBOT_MAP, ROBOTS } from "@/game/robots";
 
@@ -82,7 +87,7 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
-      <TopBar title="HEROIS MECHA" gold={g.gold} onBack={onBack} />
+      <TopBar title="HANGAR MECHA" gold={g.gold} onBack={onBack} />
 
       {/* PALCO — estilo seleção de brawlers */}
       <div
@@ -252,6 +257,7 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
 
       {/* GRADE DE HEROIS */}
       <div className="mk-scroll" style={{ flex: 1, padding: 8 }}>
+        <TeamWorkbench onInspect={id=>{setFocus(id);setDetail(id);}}/>
         <div
           className="mk-title"
           style={{
@@ -370,28 +376,27 @@ export function RosterScreen({ onBack }: { onBack: () => void }) {
       </div>
 
       {detail && owned.some((r) => r.id === detail) && (
-        <RobotDetail save={owned.find((r) => r.id === detail)!} onClose={() => setDetail(null)} />
+        <ScreenBoundary key={detail} exitLabel="VOLTAR AO HANGAR" onExit={() => setDetail(null)}>
+          <RobotDetail save={owned.find((r) => r.id === detail)!} onClose={() => setDetail(null)} />
+        </ScreenBoundary>
       )}
     </div>
   );
 }
 
-function RobotDetail({ save, onClose }: { save: RobotSave; onClose: () => void }) {
+export function RobotDetail({ save, onClose }: { save: RobotSave; onClose: () => void }) {
   const g = useGame();
   const def = ROBOT_MAP[save.id];
   const base = baseStats(def.ratios, save.level);
   const cap = maxTrained(def.ratios, save.level);
   const cost = TRAIN_COST_PER_POINT * save.level;
   const inTeam = g.team.includes(save.id);
+  const [page, setPage] = useState<"status" | "equip">("status");
+  const [note,setNote]=useState("");
 
   function train(stat: "str" | "def" | "agl") {
-    if (g.gold < cost || save.trained[stat] >= cap[stat]) return;
-    addGold(-cost);
-    updateRobots(
-      g.robots.map((r) =>
-        r.id === save.id ? { ...r, trained: { ...r.trained, [stat]: r.trained[stat] + 1 } } : r,
-      ),
-    );
+    const result=trainRobotStat(save.id,stat);
+    setNote(result.ok?`+1 ${stat.toUpperCase()} integrado · −${result.cost} ouro`:result.reason);
   }
 
   function toggleTeam() {
@@ -419,7 +424,7 @@ function RobotDetail({ save, onClose }: { save: RobotSave; onClose: () => void }
       <Panel style={{ width: "min(94vw, 420px)", maxHeight: "88vh", overflow: "hidden" }}>
         <div className="mk-scroll" style={{ maxHeight: "76vh", paddingRight: 4 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <RobotSprite robotId={save.id} clip="idle" size={104} fps={4} />
+            <RobotSprite robotId={save.id} clip="idle" size={104} fps={4} skin={skinOfRobot(g, save.id)} />
             <div style={{ flex: 1 }}>
               <div className="mk-title" style={{ fontSize: 11 }}>
                 {def.name}
@@ -433,6 +438,30 @@ function RobotDetail({ save, onClose }: { save: RobotSave; onClose: () => void }
             </div>
           </div>
 
+          <div style={{ display: "flex", gap: 4, margin: "8px 0" }}>
+            {(["status", "equip"] as const).map((p) => (
+              <button
+                key={p}
+                type="button"
+                className="mk-title"
+                onClick={() => setPage(p)}
+                style={{
+                  flex: 1,
+                  fontSize: 7,
+                  padding: 6,
+                  cursor: "pointer",
+                  color: page === p ? "#06121f" : "#dff6ff",
+                  background: page === p ? "var(--mk-accent)" : "rgba(6,14,26,0.9)",
+                  border: "2px solid rgba(53,226,240,0.5)",
+                }}
+              >
+                {p === "status" ? "STATUS" : "EQUIPAMENTOS"}
+              </button>
+            ))}
+          </div>
+          {page === "equip" && <EquipPanel robotId={save.id} />}
+          {page === "status" && (
+            <>
           <div style={{ fontSize: 10, color: "var(--mk-muted)", margin: "8px 0" }}>{def.bio}</div>
 
           <div className="mk-title" style={{ fontSize: 8, marginBottom: 4 }}>
@@ -469,6 +498,9 @@ function RobotDetail({ save, onClose }: { save: RobotSave; onClose: () => void }
           />
 
           <LoadoutEditor robotId={save.id} />
+          {note&&<p className="mc-workbench-note" role="status">{note}</p>}
+            </>
+          )}
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginTop: 8 }}>
             <PixelButton onClick={toggleTeam}>{inTeam ? "TIRAR DA EQUIPE" : "ESCALAR"}</PixelButton>

@@ -358,6 +358,12 @@ export function customToDef(c: CustomRobot): RobotDef {
     rarity: draftRarity(d),
     ratios,
     bio: CHASSIS_BIO[hashId(c.id) % CHASSIS_BIO.length],
+    names: [
+      `GOLPE ${core.element}`,
+      `IMPACTO ${core.element}`,
+      `SENTENCA ${core.element}`,
+      `NUCLEO ${core.element}`,
+    ],
     skills: buildKit({
       id: c.id,
       element: core.element,

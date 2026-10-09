@@ -12,6 +12,7 @@ export function RobotSprite({
   loop = true,
   onDone,
   dim = false,
+  skin = null,
 }: {
   robotId: string;
   clip?: Clip;
@@ -21,6 +22,7 @@ export function RobotSprite({
   loop?: boolean;
   onDone?: () => void;
   dim?: boolean;
+  skin?: { filter: string; aura?: string } | null;
 }) {
   const frames = ANIM[clip];
   const [i, setI] = useState(0);
@@ -55,7 +57,11 @@ export function RobotSprite({
         overflow: "hidden",
         position: "relative",
         transform: flip ? "scaleX(-1)" : undefined,
-        filter: dim ? "grayscale(1) brightness(0.5)" : undefined,
+        filter: dim
+          ? "grayscale(1) brightness(0.5)"
+          : skin
+            ? `${skin.filter}${skin.aura ? ` drop-shadow(0 0 5px ${skin.aura}) drop-shadow(0 0 10px ${skin.aura})` : ""}`
+            : undefined,
       }}
     >
       <img

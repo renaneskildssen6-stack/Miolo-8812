@@ -15,7 +15,17 @@ export type Screen =
   | "pets"
   | "cards"
   | "mine"
-  | "lab";
+  | "lab"
+  | "profile"
+  | "mastery"
+  | "skins"
+  | "observatory"
+  | "academy"
+  | "contracts"
+  | "power"
+  | "museum"
+  | "portal"
+  | "online";
 
 export function MenuScreen({ onGo }: { onGo: (s: Screen) => void }) {
   const g = useGame();

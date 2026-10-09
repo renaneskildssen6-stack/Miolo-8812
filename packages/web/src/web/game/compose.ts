@@ -23,14 +23,19 @@ const imgs = new Map<string, HTMLImageElement>();
 let ready = false;
 let loading: Promise<void> | null = null;
 
+export function partLoadFailures():string[] {return ALL_PARTS.filter(src=>!imgs.has(src));}
+
 function load(src: string): Promise<void> {
   return new Promise((resolve) => {
+    if(imgs.has(src)){resolve();return;}
     const img = new Image();
+    const timer=window.setTimeout(()=>{img.onload=null;img.onerror=null;img.src="";resolve();},12000);
     img.onload = () => {
+      clearTimeout(timer);
       imgs.set(src, img);
       resolve();
     };
-    img.onerror = () => resolve();
+    img.onerror = () => {clearTimeout(timer);resolve();};
     img.src = src;
   });
 }
@@ -38,8 +43,10 @@ function load(src: string): Promise<void> {
 /** Pre-carrega as 56 pecas. Chamado pela tela de carregamento. */
 export function preloadParts(): Promise<void> {
   if (loading) return loading;
-  loading = Promise.all(ALL_PARTS.map(load)).then(() => {
+  loading = Promise.all(partLoadFailures().map(load)).then(() => {
     ready = true;
+    stripCache.clear();faceCache.clear();
+    loading = null;
   });
   return loading;
 }

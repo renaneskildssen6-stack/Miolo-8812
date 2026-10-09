@@ -1,9 +1,12 @@
+import { SystemDock } from "./system-dock";
+import { systemUnlocked } from "@/game/progression";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Screen } from "@/screens/menu";
 import { useGate } from "@/components/gate";
 import { HERO_CLIPS, HERO_FRAME, clipFrame, heroFace, heroSheet, type HeroClip } from "@/game/hero";
 import { ROBOT_MAP } from "@/game/robots";
 import { explorerId, setExplorer, useGame } from "@/game/save";
+import { SKY_SHEET, TRAFFIC_ATLAS, drawSearchlights, drawSky, drawTraffic, type BackdropCam } from "./city-backdrop";
 
 /* ---------------------------------------------------------------------------
  * Hub da cidade — plataforma 2D em canvas com física real.
@@ -12,7 +15,7 @@ import { explorerId, setExplorer, useGame } from "@/game/save";
  * partículas, parallax em 3 camadas e câmera suave.
  * ------------------------------------------------------------------------- */
 
-const WORLD_W = 5400;
+const WORLD_W = 8600;
 const GROUND_Y = 620; // y do chão em coordenadas de mundo
 const SKY_TOP = -260; // topo do mundo
 
@@ -29,7 +32,6 @@ const COYOTE = 0.11;
 const BUFFER = 0.13;
 
 const SPR = 112; // tamanho desenhado do robô
-const HALF_W = 22; // meia largura de colisão
 
 type Building = {
   id: Exclude<Screen, "menu">;
@@ -51,6 +53,12 @@ const BUILDINGS: Building[] = [
   { id: "cards", label: "SALAO DE CARDS", art: "/city/b_cards.png", x: 3800, w: 300, h: 372 },
   { id: "mine", label: "MINA PROFUNDA", art: "/city/b_mine.png", x: 4320, w: 340, h: 372 },
   { id: "lab", label: "LABORATORIO", art: "/city/b_lab.png", x: 4840, w: 320, h: 384 },
+  { id: "observatory", label: "OBSERVATORIO", art: "/city/b_observatory.png", x: 5370, w: 330, h: 380 },
+  { id: "academy", label: "ACADEMIA", art: "/city/b_academy.png", x: 5890, w: 330, h: 360 },
+  { id: "contracts", label: "CENTRAL DE CONTRATOS", art: "/city/b_contracts.png", x: 6410, w: 310, h: 350 },
+  { id: "power", label: "USINA", art: "/city/b_power.png", x: 6930, w: 340, h: 370 },
+  { id: "museum", label: "MUSEU", art: "/city/b_museum.png", x: 7470, w: 340, h: 360 },
+  { id: "portal", label: "PORTAL DIMENSIONAL", art: "/city/b_portal.png", x: 8020, w: 350, h: 390 },
 ];
 
 type Platform = { x: number; y: number; w: number; range?: number; speed?: number };
@@ -70,6 +78,12 @@ const PLATFORMS: Platform[] = [
   { x: 2960, y: 430, w: 130 },
   { x: 3620, y: 460, w: 150 },
   { x: 4120, y: 380, w: 140, range: 120, speed: 0.6 },
+  { x: 5220, y: 440, w: 150 },
+  { x: 5740, y: 360, w: 140, range: 100, speed: .6 },
+  { x: 6240, y: 450, w: 140 },
+  { x: 6770, y: 340, w: 140, range: 90, speed: .8 },
+  { x: 7310, y: 430, w: 150 },
+  { x: 7850, y: 370, w: 150, range: 80, speed: .65 },
 ];
 
 type Core = { x: number; y: number; taken: number };
@@ -92,13 +106,19 @@ type Layer = {
   anchor: number;
   alpha: number;
   bob?: number;
+  /** parallax vertical (1 = sobe/desce junto com o mundo). */
+  fy?: number;
+  /** cor da base da imagem: preenche ate o fim da tela quando a camada sobe. */
+  base?: string;
 };
+/* O ceu nao e mais uma camada: e desenhado preso a tela (city-backdrop) e cobre
+ * sempre a tela inteira. As camadas abaixo tem o topo transparente, entao subir
+ * revela mais ceu em vez de uma borda reta. */
 const LAYERS: Layer[] = [
-  { src: "/city/pl_sky.png", speed: 0.04, scale: 1.15, anchor: 250, alpha: 1 },
-  { src: "/city/pl_mountains.png", speed: 0.12, scale: 0.5, anchor: 96, alpha: 0.75 },
-  { src: "/city/pl_skyline.png", speed: 0.24, scale: 0.72, anchor: 70, alpha: 0.85 },
-  { src: "/loading/city_f4.png", speed: 0.36, scale: 0.56, anchor: 54, alpha: 0.45 },
-  { src: "/city/bg.png", speed: 0.52, scale: 0.9, anchor: 30, alpha: 0.8 },
+  { src: "/city/pl_mountains.png", speed: 0.12, scale: 0.5, anchor: 96, alpha: 0.75, fy: 0.55, base: "#111347" },
+  { src: "/city/pl_skyline.png", speed: 0.24, scale: 0.72, anchor: 70, alpha: 0.85, fy: 0.68, base: "#011043" },
+  { src: "/city/pl_far_city.png", speed: 0.36, scale: 0.56, anchor: 54, alpha: 0.5, fy: 0.8, base: "#040919" },
+  { src: "/city/pl_near_city.png", speed: 0.52, scale: 0.9, anchor: 30, alpha: 0.8, fy: 0.92, base: "#000307" },
   { src: "/city/pl_mid.png", speed: 0.7, scale: 0.62, anchor: 8, alpha: 0.9 },
 ];
 /** camada desenhada na frente de tudo, colada no chao. */
@@ -156,11 +176,12 @@ const DECOR: Decor[] = (() => {
 
 type Particle = { x: number; y: number; vx: number; vy: number; life: number; max: number; c: string };
 
-export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => void }) {
+export function HubCity({ onEnter, enabled=true }: { onEnter: (s: Exclude<Screen, "menu">) => void; enabled?:boolean }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const { transition, busy } = useGate();
   const st = useGame();
+  const stateRef=useRef(st);stateRef.current=st;
   const hero = explorerId(st);
   const heroRef = useRef(hero);
   heroRef.current = hero;
@@ -179,7 +200,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
   onEnterRef.current = onEnter;
   const nearRef = useRef<Building | null>(null);
   const busyRef = useRef(busy);
-  busyRef.current = busy;
+  busyRef.current = busy || !enabled || picker;
   const transitionRef = useRef(transition);
   transitionRef.current = transition;
 
@@ -217,13 +238,14 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
   };
 
   const doJump = useCallback(() => {
+    if(busyRef.current)return;
     jumpBuf.current = BUFFER;
     input.current.jumpHeld = true;
   }, []);
 
   const enter = useCallback(() => {
     const b = nearRef.current;
-    if (!b || busyRef.current) return;
+    if (!b || busyRef.current || !systemUnlocked(stateRef.current,b.id)) return;
     actRef.current = { clip: "interact", until: performance.now() + 420 };
     transitionRef.current(() => onEnterRef.current(b.id));
   }, []);
@@ -231,6 +253,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
   /* --------------------------- teclado --------------------------- */
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      if(busyRef.current)return;
       const k = e.key.toLowerCase();
       if (k === "arrowleft" || k === "a") input.current.left = true;
       else if (k === "arrowright" || k === "d") input.current.right = true;
@@ -277,6 +300,8 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
     [
       heroSheet(heroRef.current),
       ...LAYERS.map((l) => l.src),
+      SKY_SHEET,
+      TRAFFIC_ATLAS,
       FG_LAYER.src,
       ...DECOR_SRC,
       ...BUILDINGS.map((b) => b.art),
@@ -300,6 +325,11 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
     const ro = new ResizeObserver(resize);
     ro.observe(wrap);
 
+    const motionQ = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    let still = !!motionQ?.matches;
+    const onMotion = (e: MediaQueryListEvent) => { still = e.matches; };
+    motionQ?.addEventListener?.("change", onMotion);
+
     let raf = 0;
     let last = performance.now();
     let t = 0;
@@ -313,6 +343,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
     const tick = (now: number) => {
       const dt = Math.min(0.033, (now - last) / 1000);
       last = now;
+      if(busyRef.current){input.current={left:false,right:false,run:false,jumpHeld:false};raf=requestAnimationFrame(tick);return;}
       t += dt;
       const P = player.current;
       const acting = actRef.current && actRef.current.until > now ? actRef.current.clip : null;
@@ -398,7 +429,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
       }
 
       /* ---------------- prédio próximo ---------------- */
-      const b = BUILDINGS.find((bb) => Math.abs(bb.x - P.x) < bb.w * 0.45 && P.y >= GROUND_Y - 4) ?? null;
+      const b = BUILDINGS.find((bb) => systemUnlocked(stateRef.current,bb.id) && Math.abs(bb.x - P.x) < bb.w * 0.45 && P.y >= GROUND_Y - 4) ?? null;
       if ((b?.id ?? null) !== lastNearId) {
         lastNearId = b?.id ?? null;
         nearRef.current = b;
@@ -447,12 +478,15 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
       const cy = cam.current.y;
       ctx.clearRect(0, 0, w, h);
 
-      const sky = ctx.createLinearGradient(0, 0, 0, h);
-      sky.addColorStop(0, "#0a1030");
-      sky.addColorStop(0.55, "#13214d");
-      sky.addColorStop(1, "#2a1140");
-      ctx.fillStyle = sky;
-      ctx.fillRect(0, 0, w, h);
+      // câmera "no chão" e no topo: referência do parallax vertical
+      const cyGround = GROUND_Y + 120 - h;
+      const lift = cyGround - cy; // > 0 quando a câmera sobe
+      const bcam: BackdropCam = { w, h, cx, cy, cyGround, cyTop: SKY_TOP, t, still };
+
+      // céu animado (50 quadros) preso à tela — nunca acaba ao subir
+      drawSky(ctx, imgs[SKY_SHEET], bcam);
+      const atlas = imgs[TRAFFIC_ATLAS];
+      drawTraffic(ctx, atlas, "far", bcam);
 
       // parallax multicamadas (Fase B)
       const drawLayer = (l: Layer) => {
@@ -461,14 +495,28 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
         const lh = h * l.scale;
         const lw = lh * (im.naturalWidth / im.naturalHeight);
         const off = -(((cx * l.speed) % lw) + lw) % lw;
-        const y = GROUND_Y - cy - lh + l.anchor;
+        const fy = l.fy ?? 1;
+        const y = GROUND_Y - cyGround - lh + l.anchor + lift * fy;
         ctx.globalAlpha = l.alpha;
         for (let i = 0; i < Math.ceil(w / lw) + 2; i++) {
           ctx.drawImage(im, off + i * lw, y, lw, lh);
         }
+        // a camada subiu em relação ao chão: continua a base dela até o fim da tela
+        const bottom = y + lh - 1;
+        if (l.base && bottom < h) {
+          ctx.fillStyle = l.base;
+          ctx.fillRect(0, bottom, w, h - bottom);
+        }
         ctx.globalAlpha = 1;
       };
-      for (const l of LAYERS) drawLayer(l);
+      drawLayer(LAYERS[0]);
+      drawSearchlights(ctx, bcam, GROUND_Y - cy);
+      drawLayer(LAYERS[1]);
+      drawTraffic(ctx, atlas, "mid", bcam);
+      drawLayer(LAYERS[2]);
+      drawLayer(LAYERS[3]);
+      drawTraffic(ctx, atlas, "near", bcam);
+      drawLayer(LAYERS[4]);
 
       // decoracoes atras dos predios
       for (const d of DECOR) {
@@ -492,7 +540,8 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
 
       // prédios
       for (const bd of BUILDINGS) {
-        const im = imgs[bd.art];
+        if(!systemUnlocked(stateRef.current,bd.id))continue;
+        const im = get(bd.art);
         const dx = bd.x - bd.w / 2 - cx;
         const dy = GROUND_Y + 14 - bd.h - cy;
         if (dx > w || dx + bd.w < 0) continue;
@@ -628,6 +677,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      motionQ?.removeEventListener?.("change", onMotion);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -651,41 +701,13 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
           zIndex: 6,
         }}
       >
-        ⬢ {score}
-        {combo > 1 && <span style={{ color: "#ff5fd0" }}> x{combo}</span>}
+        PILOTO NV {st.playerLevel}
+        <div style={{fontSize:5,color:"#86b0c5",marginTop:5}}>NÚCLEOS {score}{combo>1?` ×${combo}`:""}</div>
       </div>
 
-      {/* Atalhos rápidos */}
-      <div
-        style={{
-          position: "absolute",
-          top: 8,
-          left: 8,
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-          zIndex: 6,
-        }}
-      >
-        {BUILDINGS.map((b) => (
-          <button
-            key={b.id}
-            className="mk-title"
-            onClick={() => !busy && transition(() => onEnter(b.id))}
-            style={{
-              fontSize: 6,
-              padding: "5px 6px",
-              textAlign: "left",
-              color: "#dff6ff",
-              background: "rgba(6,14,26,0.75)",
-              border: "2px solid rgba(53,226,240,0.25)",
-              cursor: "pointer",
-            }}
-          >
-            {b.label}
-          </button>
-        ))}
-      </div>
+      <SystemDock disabled={busy||!enabled} onEnter={id=>{
+        if(systemUnlocked(stateRef.current,id))transition(()=>onEnter(id));
+      }}/>
 
       {/* Trocar robô de exploração (Fase C) */}
       <button
@@ -693,7 +715,7 @@ export function HubCity({ onEnter }: { onEnter: (s: Exclude<Screen, "menu">) => 
         onClick={() => setPicker(true)}
         style={{
           position: "absolute",
-          top: 40,
+          top: 60,
           right: 8,
           zIndex: 6,
           display: "flex",

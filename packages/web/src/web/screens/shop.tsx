@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Frame, Panel, PixelButton, RobotSprite } from "@/components/pixel";
 import { ITEMS } from "@/game/config";
-import { addGold, addItem, lockedRobotIds, unlockRobot, useGame } from "@/game/save";
+import { lockedRobotIds, useGame } from "@/game/save";
+import { purchaseSupplies } from "@/game/economy-actions";
 import { faceUrl, ROBOT_MAP } from "@/game/robots";
 import { TopBar } from "@/screens/roster";
 
@@ -9,33 +10,20 @@ export function ShopScreen({ onBack }: { onBack: () => void }) {
   const g = useGame();
   const [unlocked, setUnlocked] = useState<string | null>(null);
   const [msg, setMsg] = useState("");
+  const [quantity,setQuantity]=useState(1);
 
-  function buy(id: string, price: number) {
-    if (g.gold < price) {
-      setMsg("OURO INSUFICIENTE");
-      return;
-    }
-    if (id === "capsule") {
-      const locked = lockedRobotIds();
-      if (locked.length === 0) {
-        setMsg("VOCE JA TEM TODOS OS 20 ROBOS");
-        return;
-      }
-      const pick = locked[Math.floor(Math.random() * locked.length)];
-      addGold(-price);
-      unlockRobot(pick);
-      setUnlocked(pick);
-      return;
-    }
-    addGold(-price);
-    addItem(id, 1);
-    setMsg("COMPRADO!");
+  function buy(id: string) {
+    const result=purchaseSupplies(id,id==="capsule"?1:quantity);
+    if(!result.ok){setMsg(result.reason);return;}
+    setMsg(`COMPRA CONFIRMADA · ${result.quantity} UN. · −${result.cost} OURO`);
+    if(result.robotId)setUnlocked(result.robotId);
   }
 
   return (
     <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
       <TopBar title="LOJA MECHA" gold={g.gold} onBack={onBack} />
       <div className="mk-scroll" style={{ flex: 1, padding: 8 }}>
+        <div className="mc-supply-toolbar"><div><small>BANCADA DE SUPRIMENTOS</small><strong>Prepare. Repare. Recrute.</strong><p>Saldo {g.gold} ouro · compras sem gasto de turno.</p></div><div aria-label="Quantidade de suprimentos">{[1,5].map(n=><button key={n} aria-pressed={quantity===n} onClick={()=>setQuantity(n)}>×{n}</button>)}</div></div>
         {msg && (
           <div className="mk-title" style={{ fontSize: 7, color: "var(--mk-accent)", marginBottom: 6 }}>
             {msg}
@@ -61,15 +49,17 @@ export function ShopScreen({ onBack }: { onBack: () => void }) {
                   <span style={{ color: "var(--mk-muted)" }}>x{g.items[item.id] ?? 0}</span>
                 </div>
                 <div style={{ fontSize: 10, color: "var(--mk-muted)" }}>{item.desc}</div>
+                <small className="mc-supply-cost">{item.id==="capsule"?`${lockedRobotIds().length} chassis ausentes · sem duplicatas`:`${item.price} ouro/un. · receber ${quantity} · saldo após compra ${Math.max(0,g.gold-item.price*quantity)}`}</small>
               </div>
               <button
                 type="button"
                 className="mk-btn mk-btn-sq"
-                disabled={g.gold < item.price}
-                onClick={() => buy(item.id, item.price)}
+                disabled={g.gold < item.price*(item.id==="capsule"?1:quantity)||(item.id==="capsule"&&!lockedRobotIds().length)}
+                onClick={() => buy(item.id)}
+                aria-label={`Comprar ${item.id==="capsule"?1:quantity} ${item.name} por ${item.price*(item.id==="capsule"?1:quantity)} ouro`}
                 style={{ fontSize: 7, padding: 0, minWidth: 62 }}
               >
-                {item.price}
+                {item.price*(item.id==="capsule"?1:quantity)}
               </button>
             </div>
           ))}

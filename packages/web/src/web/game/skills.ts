@@ -42,6 +42,8 @@ export interface Skill {
   desc: string;
   effect?: SkillEffect;
   defense?: DefenseSpec;
+  /** Marcadores do kit H1 (ex.: `["ultimate"]`). */
+  tags?: string[];
 }
 
 export const VFX = {
@@ -385,11 +387,19 @@ export function buildKit(input: KitInput): Skill[] {
   return skills;
 }
 
-/** Os 4 slots padrão de um robô (usados quando o jogador ainda não montou o kit). */
-export function defaultLoadout(skills: Skill[]): string[] {
-  const atk = skills.filter((s) => s.kind === "attack");
-  const def = skills.filter((s) => s.kind === "defense");
-  return [atk[0].id, atk[1].id, atk[2].id, def[0].id];
+/** Ultimate is always outside the six ordinary slots. */
+export function exclusiveUltimate<T extends Skill>(skills: T[]): T | undefined {
+ const a=skills.filter(s=>s.kind==="attack");
+ return a.find(s=>s.tags?.includes("ultimate")) ?? [...a].sort((x,y)=>y.power-x.power)[0];
 }
+export function normalizeLoadout(skills: Skill[], selected: string[]=[]): string[] {
+ const ult=exclusiveUltimate(skills)?.id;
+ const ordinary=skills.filter(s=>s.id!==ult);
+ const chosen=[...new Set(selected)].map(id=>ordinary.find(s=>s.id===id)).filter((s):s is Skill=>!!s);
+ const pick=(kind:Skill["kind"],n:number)=>[...new Set([...chosen,...ordinary].filter(s=>s.kind===kind).map(s=>s.id))].slice(0,n);
+ return [...pick("attack",4),...pick("defense",2)];
+}
+export function defaultLoadout(skills: Skill[]): string[] { return normalizeLoadout(skills); }
 
-export const MAX_LOADOUT = 4;
+/** Slots de um kit de combate (H1: 6 habilidades por robô). */
+export const MAX_LOADOUT = 6;

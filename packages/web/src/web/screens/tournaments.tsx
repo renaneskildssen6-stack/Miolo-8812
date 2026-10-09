@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Icon, Panel, PixelButton, RobotSprite, StatBar } from "@/components/pixel";
 import { TournamentMap } from "@/components/tourmap";
 import { fightReward, grantXP, robotMaxXP, type RobotSave } from "@/game/engine";
@@ -40,6 +40,7 @@ export function TournamentsScreen({ onBack }: { onBack: () => void }) {
   const [fightIndex, setFightIndex] = useState(0);
   const [accum, setAccum] = useState({ gold: 0, xp: 0 });
   const [report, setReport] = useState<Report | null>(null);
+  const paidFights = useRef(new Set<number>());
 
   const team = teamSaves(g);
 
@@ -53,6 +54,7 @@ export function TournamentsScreen({ onBack }: { onBack: () => void }) {
   }
 
   function start(t: TournamentDef) {
+    paidFights.current.clear();
     setTour(t);
     setFightIndex(0);
     setAccum({ gold: 0, xp: 0 });
@@ -77,7 +79,8 @@ export function TournamentsScreen({ onBack }: { onBack: () => void }) {
   }
 
   function finishFight(result: "win" | "lose") {
-    if (!tour) return;
+    if (!tour || paidFights.current.has(fightIndex)) return;
+    paidFights.current.add(fightIndex);
     const enemies = enemyTeamFor(tour, fightIndex);
     const earned = applyPetRewards(
       enemies.reduce(

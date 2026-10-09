@@ -1,191 +1,145 @@
-# CAMPEOES MECHA — progresso
+# CAMPEÕES MECHA — progresso
 
-## Feito
-- Assets pixel art IA processados em packages/web/public: robots (20 strips 16f + faces), ui (47), vfx (8), arenas (20 frames), mp4 4fps em assets/
-- design.md preenchido
-- game/config.ts, game/robots.ts (20 robos + skills), game/engine.ts (formulas originais), game/battle.ts (state machine + IA), game/tournaments.ts (5 copas), game/save.ts (store localStorage)
-- styles.css: fontes pixel, paleta, border-image de paineis/botoes, animacoes
+## Novo escopo aprovado — PvP online real e conclusão das pendências
+- Aprovado: fila pública + salas privadas por código; equipe de até quatro robôs; turnos de 60 segundos; reconexão; ações/tempo/resultado validados no servidor, nunca adversários IA disfarçados de players.
+- Competitivo normalizado: todos os 256 robôs disponíveis; nível padronizado; sem equipamentos/pets/cards ou bônus oriundos de saves offline editáveis. Saves offline preservados e separados do competitivo.
+- Remover AUTO em TODAS as batalhas, inclusive no motor/API; IA continua exclusivamente como adversário dos modos offline.
+- Login só para PvP: Google gerenciado + e-mail/senha, tela única com abas, retorno ao lobby depois de autenticar. Jogar offline não exige conta.
+- Implementação prevista em packages/web: auth/middleware e tabelas Drizzle de contas/salas/fila/partidas/ações/resultados; procedimentos oRPC para lobby/equipe/salas/fila/estado/ações/desistência; consultas tipadas e novas telas de acesso/lobby/batalha online. Servidor reutiliza regras compartilhadas sem executar decisões de IA no PvP. Atomicidade e idempotência obrigatórias.
+- Pendências offline mantidas: auditoria completa de status/passivas/talentos, balanceamento, objetivos obrigatórios do tutorial, sequências exclusivas IA restantes. Sem locução, conforme confirmação; abertura/tutorial continuam sem voz. Sem E2E/Playwright/gameplay em navegador.
+- BLOQUEIO constatado antes da implementação online: não existe .env no projeto e não há DATABASE_URL/DATABASE_AUTH_TOKEN/APPLICATION_ID/issuer no ambiente. Backend atual tem só ping e nenhuma autenticação. Credenciais reais de banco necessárias, sem placeholders. Não declarar PvP conectado ou concluído.
 
-## Fazendo
-- components/pixel.tsx (Sprite animado, Panel, Button, Bar, Icon)
-- screens: menu, roster/detail, train, shop, tournaments, battle, result
-- pages/index.tsx (router de telas)
+## Checkpoint atual — terreno, clima e absorção elemental
+- [x] Climas filtram golpes de área/contundentes e elementos corretamente; ar rarefeito afeta todo dano, eclipse penaliza LUZ/beneficia SOMBRA, branco absoluto reduz crítico. Arenas derivadas herdam as regras.
+- [x] Zonas de cura/MP/perigo aplicam efeitos por round; terrainMaster duplica benefícios reais e hazardWalker evita apenas dano de zona/converte em 6 MP. Vácuo bloqueia cura de terreno, não reparos; zonas void ampliam dano recebido sem bloquear cura. Sem ataques automáticos novos da reserva.
+- [x] Buff de força da zona deixa de ser contado novamente no poder do golpe. marked/maldição/vulnerabilidade ampliam dano em vez de reduzi-lo. Clima/status drain retiram porcentagem do MP máximo; healIn modifica cura recebida, não produz cura espontânea.
+- [x] Afinidade zero cura o alvo e não produz dano mínimo/status hostil/carga por dano recebido. Projeção de dano usa strike em cópias isoladas, incluindo multihit each, barreira/escudo/parry/passivas/clima; projeções probabilísticas são sinalizadas e não garantem todos os resultados de RNG.
+- [x] IDs de golpe inválidos não viram ataque básico nem consomem turno pronto. Troca forçada só aceita fase forced_swap e índice inteiro vivo.
+- [x] Tutorial orienta pelos painéis atuais de ataques/defesas/ultimate/SUPRIMENTOS, sem esferas obsoletas. Objetivos pedagógicos obrigatórios ainda NÃO implementados.
+- [x] Dez suites passaram, TypeScript/build e validação de arte/HTTP passaram. Simulações das cinco missões: vitória em 3/4/8/6/4 rounds. Saves legado/vazio preservados. Sem E2E, Playwright ou gameplay em navegador; avisos conhecidos de Bun/Node/chunk permanecem.
+- [ ] Ainda pendentes: auditoria exaustiva de status/talentos/passivas (incluindo thornMine e outras condições de terreno), balanceamento completo, objetivos pedagógicos obrigatórios, demais sequências exclusivas e plano de locução aprovado. Não declarar refinamento completo.
 
-## Depois
-- bun run lint / typecheck / build; dev server; deliver website
-- oferecer build mobile (Expo)
+## Checkpoint atual — passivas, segurança e interface anime mecha
+- [x] Holograma/orbs removidos da batalha; quatro ataques e duas defesas sempre renderizados com nomes/custos, informação separada, ultimate em painel próprio, retratos/HUD maiores, deck inferior responsivo e molduras pixel existentes. Estrutura verificada por renderização React no servidor; não verificada visualmente em navegador, conforme restrição.
+- [x] Hooks de início/fim de turno, erro, dano recebido, crítico e pós-ataque conectados; reações diretas não acionam recursivamente outras reações. Reserva não produz dano de passiva de abertura de round. Bônus escopados limitados, reiniciados por round.
+- [x] Núcleos fênix/imortal e segundo fôlego com consumo único; reviver antes de conceder abate. Primeiro abate do portador cura uma vez; onFaint duplicado removido. Predador usa HP do alvo, guarda completa anula golpe e prisma reflete em vez de aumentar dano recebido.
+- [x] onAllyFaint/cura coletiva, onMpSpend, onPurge e onStatusApply conectados; statusWeaver/pyromaniac ajustam duração/potência, purgeAura remove um negativo e battleRhythm responde à alternância ataque/defesa.
+- [x] Mineração rejeita NaN/Infinity/minérios desconhecidos/profundidades inválidas/tempo regressivo; quantidades discretas. Refinaria/venda têm consumo único. Sockets inteiros e proprietário obrigatório; laboratório valida peças/núcleo/hue antes de gastar e desmontagem conserva equipe válida.
+- [x] Callbacks finais de ranked/torneios protegidos contra repetição local; ranked conta sobreviventes só da equipe real, não entradas auxiliares do snapshot.
+- [x] Nove suites passaram (seis anteriores + passive-lifecycle, economy-safety e battle-command-layout). Tutorial simulado 3/4/8/6/4 rounds, legado e vazio preservados. TypeScript/build passaram; avisos conhecidos de chunk >500kB e Node permanecem.
+- [x] HTTP 200 da prévia; 26 assets de entrada/especiais e 15 referências de imagem da interface com MIME/hash corretos. Sem E2E, Playwright ou gameplay em navegador.
+- [ ] Ainda pendentes: paridade exaustiva de todas as descrições/passivas/terreno/talentos, equilíbrio, objetivos pedagógicos obrigatórios do tutorial, demais sequências exclusivas dos robôs atuais e aprovação de plano de locução. Este checkpoint NÃO conclui todos os itens restantes.
 
-## Sessão final (balanceamento + polish)
-- Fix sprite: maxWidth none (RobotSprite/VfxSprite) — OK
-- Menu: padding inferior 34px pro badge
-- Batalha: HUD de torneio movido pra top 96 (não cobre mais os HUDs)
-- Report do torneio: fundo pixel art bg_menu com gradiente
-- XP creditado luta por luta (não só no fim do torneio)
-- fightReward xp: /7+1 -> /3+2 ; replay bonus xp /3 -> /1.6
-- requiredLevel dos 5 torneios: 1/6/12/20/30; níveis dos inimigos reescalados por luta (base=req+índice, boss +1)
-- Simulação /tmp/sim2.ts: progressão completa 1->5 torneios sem travar (grind razoável)
-- E2E Playwright: 0 erros de console em menu/roster/treino/loja/batalha/report
-- Limitação: bun run lint bloqueado (template packages/mobile/app/_layout.tsx + panic do oxlint no sandbox)
+## Escopo atual e checkpoint verificado
+- Expansão de novos robôs CANCELADA pelo usuário. Manter 256 recrutáveis + oito NPCs, sem produzir/cadastrar mc_257…mc_500. Manifestos antigos ficam como histórico, não trabalho ativo.
+- Nenhum E2E, Playwright ou gameplay no navegador. Não executar scripts de reconstrução antigos.
+- [x] Remulu Games: logo IA sobre preto com fade, pular, timeout/fallback e sem voz.
+- [x] Novo carregamento: 50 frames, três fundos, progresso real de imagens, falhas explícitas e tentativa novamente; peças modulares também reportam falhas e permitem nova tentativa.
+- [x] Ultimate dentro da arena: ator/alvo reais, HUD preservado; dez pares exclusivos recortados, demais usam sprite e VFX existentes. Timeout de arte evita bloqueio. Não declarar todas as sequências exclusivas concluídas.
+- [x] Compras e treino com saldo atual; equipe única de até quatro, equipe não vazia quando há robôs; briefing de todos os sistemas e rota por nível.
+- [x] Golpes carregados pagam MP/recurso uma vez, respeitam multihit, não duplicam carga e limpam preparação na queda. UI distingue preparo/liberação e bloqueia golpes silenciados/impagáveis.
+- [x] Cura coletiva de teamPlayer e disparo onUltReady de ultimateBattery; descrições atualizadas. COBRIR explícito protege aliado, sem ataques automáticos da reserva.
+- [x] Dimensões: draft exige exatamente quatro únicos; campanha válida; carry HP/MP finito em 0–1 e núcleo em 0–100; fases e recompensas idempotentes testadas.
+- [x] Usina/capacitor, expedição/pesquisa, cargas da academia/talentos, ressonância do museu, resgates encadeados/marcos dos contratos testados. Inputs inválidos da expedição e história não alteram save.
+- [x] Equipamentos/skins exigem robô e skin possuídos; venda repetida não duplica ouro. Tutorial não paga antes de iniciar.
+- [x] Seis suites estáticas passaram: combat-refinement, city-refinement, polish, overhaul, legacy, empty. Cinco missões simuladas vencidas em 3/3/7/6/4 rounds; saves legado e vazio preservados nos testes.
+- [x] TypeScript e build passaram (204 módulos). Avisos: chunk >500 kB e depreciação Node; sem erro de build.
+- [x] Validação pós-build: 26 imagens HTTP 200 com MIME de imagem e hash idêntico ao arquivo, 50 células de loader distintas e 20 strips transparentes com dez células distintas. Preview HTTP 200.
+- [ ] Refinamento profundo restante: auditar todas as passivas/hooks/status/talentos, mineração/cards/pets/laboratório/ranked/torneios e equilíbrio completo. Briefing não substitui mecânica auditada.
+- [ ] Sequências IA exclusivas de ultimate/VFX dos demais robôs atuais. Nenhuma nova identidade pendente.
+- [ ] Locução do tutorial somente após aprovação de plano de voz/custo/duração. Abertura permanece sem voz.
 
-## Sessão 120 robôs / 105 torneios
-- [x] 100 sprite sheets gerados (ids 21-120) + processados (240 arquivos em public/robots, manifest 120)
-- [x] 100 blueprints injetados em game/robots.ts (assets/gen_blueprints.py)
-- [x] 100 torneios em game/tournaments_extra.ts (assets/gen_tournaments.py) + campos element/station/x/y e MAP_WIDTH/HEIGHT em tournaments.ts
-- [ ] assets do mapa espacial (fundo + estações)
-- [ ] redesign screens/tournaments.tsx (mapa com pan/zoom, filtros por elemento)
-- [ ] mobile Expo WebView
-- [ ] typecheck/build/E2E/deliver
+## Overhaul MECHA CHAMPIONS — aprovado, em execução (2026-10-07)
+- Decisões e curva de carga/desbloqueios registradas em design.md. Todos os lotes IA autorizados diretamente; não executar E2E/Playwright.
+- [x] Motor: remover combo coletivo, ultimate individual sem MP, carga por ação/dano, IA e loadout 4+2 (regras testadas; auditoria total pendente).
+- [x] Arte de interface: esfera, dois hologramas 25 frames, título e símbolos; inspeção e recorte.
+- [x] Interface de batalha: comandos orbitais, informação separada, especial na arena e fallbacks.
+- [x] Entrada, estado vazio válido, migração sem apagar saves e cinco batalhas de tutorial.
+- [x] Desbloqueios por nível em prédios, atalhos e navegação; HUD de piloto.
+- CANCELADO: 244 novos e respectivos lotes. Não retomar.
+- [x] Verificação estática de regras, TypeScript/build, dimensões/contagem/HTTP. Entrega do checkpoint, não conclusão de toda a auditoria.
 
-## Sessão pets + modos + mapa (220 robôs)
-- [x] Fase 4 PETS: 12 pets com arte processada (public/pets, 192x192), prédio b_pets.png no hub, PetsScreen ligado no game-shell, bônus scavenger(+ouro)/mentor(+XP) aplicados em torneios e modos
-- [x] Fase 5 MODOS: 9 modos (novos: GAUNTLET ELEMENTAL, PROVAS DOS ANCIOES, ASSALTO AO NUCLEO, PESADELO) + arte, stages e progresso salvo
-- [x] Fase 6 MAPA: 8 regiões/biomas com planos de fundo próprios (nebulosa, metrópole neon, selva, dunas, vulcânica, tundra, abismo, ilhas celestes) + rótulo de setor
-- [x] typecheck verde, build verde, E2E sem erros de console e sem imagens quebradas
-- [x] mobile Expo WebView rodando (porta 4300), web na 4200
+## Cidade imersiva — seis sistemas (2026-10-07)
+- Escopo aprovado: seis experiências únicas + mecânicas aprofundadas; lotes IA completos sem prévia. Só web; sem E2E/Playwright.
+- [x] Direção registrada em design.md; seis cenários animados, dez portais 16 frames e 24 relíquias gerados.
+- [x] Inspeção/recorte e assets públicos: seis folhas 12 frames, dez folhas 16 frames e 24 relíquias repaginadas em 6×4. Dimensões e células distintas verificadas.
+- [x] Migração implementada: protocolos/capacitor, rotas pesquisadas, simulações, ressonância, rastreamento/marcos, calibração/tier dimensional. Distribuição sobrecarregada ajustada sem apagar demais campos do save.
+- [x] Seis telas próprias ligadas às ações persistentes; animações pausam fora da área visível e respeitam movimento reduzido.
+- [x] TypeScript e Vite build passaram; preview e todos os 25 assets novos responderam HTTP 200. Nenhum E2E/Playwright nem teste de gameplay no navegador executado.
 
-## Fase A — Sistema de Cards (concluída)
-- [x] game/cards.ts: 30 cards (4 raridades, 10 tags), custo de energia, orçamento por nível (6→12), 22 sinergias/combos, decks de IA determinísticos por robô/nível
-- [x] screens/cards.tsx: SALAO DE CARDS com deck de 3 slots, medidor de energia, sinergias ativas, "A 1 CARD DE:", abas DECK/MEUS/LOJA/TODOS, modal de detalhe
-- [x] 30 artes de card por IA processadas (128x128, 48 cores) em public/cards + prédio public/city/b_cards.png (hub estendido para 4300px)
-- [x] save.ts: cards/deck persistidos + buyCard/toggleCard/clearDeck/deckBonus
-- [x] battle.ts: 19 stats de card aplicados em combate (aegis, evade, crit, amp, opening, rage, lifesteal, thorns, venom, resist, regen, mpregen...) para jogador E inimigos
-- [x] typecheck verde, build verde (EXIT=0)
-- [x] E2E (assets/e2e_cards2.py): deck 3 cards CHAMA → sinergias COMBUSTAO EM CADEIA + INFERNO TOTAL ativas, PODER +72% / FORCA +39% / FURIA +28%, remover/persistir OK, 0 erros de console, 0 imagens quebradas
-- Próxima: Fase B (parallax do hub em camadas geradas por IA)
+## Batalha imersiva (2026-10-07)
+- [x] Oito materiais de chão gerados por IA, inspecionados e exportados WebP: madeira, aço, lava, gelo, cristal, floresta, carpete real e mosaico abissal. Mapeados às 41 arenas com fallback.
+- [x] Mundo separado do HUD: plano panorâmico, robôs afastados e redimensionados, plataformas em perspectiva, piso contínuo e sombras de contato.
+- [x] Câmera por eventos reais: antecipa ações anunciadas, aproxima autor/entrada/ultimate, acompanha impactos e retorna ao plano aberto no fim da fila. UIDs mostram o participante correto mesmo em ações da reserva.
+- [x] Projéteis percorrem a distância real entre lados, avanços ajustados ao palco. Console centralizado e rolável, HUD/ordem sem zoom. Câmera fixa e movimento reduzido desativam câmera/tremores; movimento reduzido oculta VFX de tela.
+- [x] TypeScript/build aprovados após integração. Sem alterações deliberadas nas regras de dano, recursos, fila ou recompensas; gameplay visual não verificado, conforme proibição de E2E/Playwright.
 
-## Fase B — Parallax do hub (concluída)
-- [x] 6 artes de camada por IA processadas em public/city: pl_sky (960x540), pl_mountains, pl_skyline, pl_mid, pl_fg + 6 props (lamp, sign, crates, vending, antenna, trash)
-- [x] hub-city.tsx: 7 camadas independentes com speed/scale/anchor/alpha próprios (0.04 → 1.25), tiling infinito com módulo corrigido para offsets negativos
-- [x] camada de primeiro plano (pl_fg) desenhada na frente do robô, ajustada para faixa baixa (scale 0.15, anchor -4) para não cobrir o jogador
-- [x] ~30 decorações espalhadas pelo mundo com RNG determinístico (seed 20260831), 45% no plano de fundo (speed 0.88, brilho 0.7) e o resto no plano do jogador
-- [x] typecheck verde, build verde (EXIT=0), E2E do hub sem erros de console e sem requisições falhas; screenshots conferidos em 3 pontos do mundo
-- Próxima: Fase C (exploração com sprites animados por ação e todos os robôs jogáveis)
+## Vitória cinematográfica (2026-10-07)
+- [x] Três imagens geradas por IA e inspecionadas: duas folhas 5×5 com 25 frames distintos cada; um santuário animado 3×3 com 9 frames distintos.
+- [x] Assets WebP em public/victory; reprodução de 50 frames a ~14 fps com luz contínua e dissolução de 850 ms. Pré-carregamento durante a batalha, timeout de segurança e botão de pular.
+- [x] Vitória integrada ao encerramento real do BattleScreen, somente após esvaziar os eventos. Derrota preserva relatório anterior; continuação mantém gravação e snapshot existentes, sem duplicar recompensas.
+- [x] Tela dividida: arte/MVP aliado à esquerda, resultado/estatísticas reais/abas de equipe, adversários e cronologia à direita; empilhamento em largura pequena.
+- [x] Foco de diálogo, navegação por teclado, movimento reduzido e proteção de clique duplicado.
+- [x] TypeScript e Vite build passaram; HTTP do preview respondeu 200. Sem execução de E2E/Playwright ou verificação visual de gameplay no navegador.
 
-## Fase C — Exploração com sprites por ação (concluída)
-- [x] game/hero.ts: leitura da tira 2048x128 (16 quadros de 128px) de QUALQUER robô — quadros 0-3 ocioso, 4-7 ataque, 8-11 dano, 12-15 teleporte
-- [x] 9 clipes de exploração (idle, walk, run, jump, fall, land, attack, interact, hurt) com fps, loop, bob, tilt e escala próprios
-- [x] hub-city.tsx: máquina de estados de animação ligada à física (subida x queda separadas, pousada com squash, rastro de partículas ao correr, sombra que encolhe no ar)
-- [x] TODOS os 220 robôs jogáveis no hub — seletor "TROCAR" com retrato 64x64, nome e nível de cada robô do hangar
-- [x] save.ts: campo `explorer` persistido + explorerId()/setExplorer(), com fallback para o líder da equipe
-- [x] camada de sucata do primeiro plano rebaixada (scale 0.075) para não cobrir o robô
-- [x] typecheck verde, build verde (EXIT=0), E2E do hub com troca de robô + ataque: 0 erros de console, 0 imagens quebradas
-- Próxima: Fase D (1000+ robôs via biblioteca modular de peças pixel art compostas programaticamente)
+## Expansão da cidade e dimensões (2026-10-05)
+- Plano aprovado: 6 construções físicas (Observatório, Academia, Contratos, Usina, Museu, Portal).
+- 10 modos aprovados: Draft, Caravana, Fenda, Espelhos, Cerco, Caça, Reatores, Monoelemental, Apostas, Labirinto.
+- Arte: lotes de vários assets por imagem; inimigos exclusivos com 16 frames/chassi, não recrutáveis; 10 arenas novas com 4 frames.
+- Sem E2E/Playwright conforme instrução do usuário. Só TypeScript e build.
+- [ ] Integrar VFX gl/ult/imp/st_burst/sup/wld e 14 cenários antigos.
+- [ ] Recortar e inspecionar arte nova (6 prédios, 8 inimigos, 10 cenários).
+- [ ] Estado/migração: sistemas da cidade, talentos, contratos, energia, relíquias, campanhas e percursos.
+- [ ] Telas e entradas físicas da cidade.
+- [ ] Modos com regras reais de combate e escolhas entre etapas.
+- [ ] TypeScript/build e entrega.
 
-## Fase D — 1000+ robôs, lote 1 (250/1000)
-- [x] Correção de rota: os robôs do roster voltam a ser feitos como os 220 originais (1 sprite sheet 4x4 por IA + pipeline). As 56 peças modulares (public/parts, game/parts.ts, game/compose.ts) ficam reservadas para o laboratório da Fase F
-- [x] game/robots.ts revertido ao formato original (spriteUrl/faceUrl → /robots/<id>.png); robots_modular.ts removido
-- [x] 30 robôs novos em 5 temas: insetoides/aracnídeos (vespirion, scarabyss, aranthrax, mantivore, formicore, cicadron), ninjas/ágeis (kagemaru, shurikage, fumikaze, kunailock, hayatezero, nokusaki), colossos/tanques (bastionox, mortarhulk, granithor, juggerspine, tectomaul, ferroatlas), alienígenas orgânico-tecnológicos (xenovyre, myconaut, nebulith, bioquell, hollowseer, gastropodo), cavaleiros e samurais (ronin_akatsu, bushidorne, lanceviel, templarion, kuroyari, gwenshield)
-- [x] assets/roster_b1.py → roster_b1.json; assets/process_batch1.py gerou 30 tiras 2048x128 + 30 faces 64x64 em public/robots (500 PNGs no total) e atualizou o manifest (250 robôs)
-- [x] assets/gen_blueprints_b1.py injetou os 30 Blueprints em game/robots.ts com 25 elementos novos mapeados no VFX_BY_ELEM (FERRAO, TEIA, XENO, JURAMENTO, GRANITO...)
-- [x] game/assets.ts: ROBOT_ASSETS regenerado a partir de public/robots (500 entradas) para o pré-carregamento
-- [x] roster.tsx paginado (PAGE=120 + botão MOSTRAR MAIS) para aguentar o roster crescendo até 1000
-- [x] typecheck verde, build verde (EXIT=0), E2E assets/e2e_lote1.py: ROBOTS=250, COLECAO x/250, 503 imagens sem nenhuma quebrada, 0 erros de console
-- Próxima: Fase D lote 2 — mais robôs no mesmo pipeline (faltam 750 para 1000)
+### Estado anterior
+- Perfil, 250 conquistas, 12 ranks de maestria, equipamentos e skins implementados; tsc/build passaram.
+- 106 VFX e 20 fundos gerados na fase H2, parte ainda sem uso no código.
+- Último E2E anterior falhou no painel pós-luta; rodada posterior interrompida. Não retomar.
+- As regras históricas de proibir arte nova abaixo foram substituídas: nova arte IA autorizada.
 
+## Histórico (fases A–G3)
+ver roadmap.md — cards, parallax, exploração, 256 robôs, mineração, laboratório,
+pets, cards/gadgets 100x, batalha 100x (100 animações + 28 VFX + 11 arenas).
 
-## Fase D — congelada a pedido do usuário (256 robôs)
-- [x] 6 robôs do lote 2 já gerados foram aproveitados (lupvexor, tigravox, ursagrind, cornubrute, simiaslam, draknoir — tema bestas selvagens): 12 PNGs novos, manifest com 256 robôs, 6 Blueprints em game/robots.ts, ROBOT_ASSETS com 512 entradas
-- [x] Geração de novos sprites de personagem interrompida conforme pedido; retomar só com pedido explícito
+## FASE H1 — Batalha 100x mais profunda (EM ANDAMENTO)
 
-## Fase E — Mineração em tempo real (concluída)
-- [x] Arte por IA processada em assets/process_mine.py: /city/b_mine.png (fachada da mina no hub), /ui/bg_mine.png (interior da caverna) e /ui/ore_0..7.png (8 minérios)
-- [x] game/mining.ts: 8 minérios (ferro 3g → prisma 440g), 8 camadas de profundidade (custo 0 → 800.000g, dureza crescente), sorteio de minério por camada, picareta (Lv30), silo (Lv30), perfuratriz por camada (Lv20) com produção offline de até 8h, refinaria (Lv20, 10 brutos = 1 lingote valendo 3,5x)
-- [x] game/save.ts: estado mining persistido + ações mineOre, miningTick, upgradePick/Silo/Refinery/Drill, descendMine, startRefine, collectRefine, sellMining
-- [x] screens/mine.tsx: parede de rocha com 6 veios clicáveis (HP, respawn de 9s, floaters de dano/ganho), robô explorador tocando "attack" a cada golpe, barra do silo, abas MINA / PERFURATRIZ / REFINO / ESTOQUE
-- [x] Fiação: prédio MINA PROFUNDA no hub (x=4320, WORLD_W 4300 → 4900), Screen "mine", modal no game-shell, assets no CORE_ASSETS
-- [x] typecheck verde, build verde, E2E assets/e2e_mine.py: 6 veios, silo 0 → 17 minérios (ferro 12 + cobre 5), perfuratriz N1 instalada, 4 abas abrindo, 0 imagens quebradas, 0 erros de console
-- Próxima: Fase F — laboratório de construção de robô com as 56 peças modulares
+Pedido do usuário (2026-09-30):
+- aprofundar o combate 1v1 por turnos **E** criar modos novos por cima
+- **cada um dos 256 robôs com ataques e defesas escritos à mão**, nenhum repetido
+- sistemas marcados: passivas/talentos, elementos com fraqueza/resistência/absorção,
+  status avançados, timing (parry/esquiva/carga), combos + ultimate combinado,
+  IA tática com dificuldades, chefes multi-fase, terreno com hazards, raid/sobrevivência,
+  log detalhado + análise pós-luta, UI de combate nova
+- entrega: só web por enquanto
 
-## Fase F — Laboratório (concluída)
-- [x] game/lab.ts (núcleos, stats de peça, draft, custo, CustomRobot, activate/deactivate)
-- [x] compose.ts: setCustomSet/clearCustomSet + setFor(id)
-- [x] robots.ts: setSpriteResolver/setFaceResolver + registerCustom/unregisterCustom
-- [x] save.ts: campo customs, normalize+activate no read(), buildCustom/renameCustom/scrapCustom, totalBars, lockedRobotIds ignora lab_
-- [x] screens/lab.tsx (bancada com carrosséis + hangar de protótipos)
-- [x] menu.tsx: Screen "lab"
-- [x] game-shell.tsx wiring
-- [x] hub-city.tsx prédio b_lab (x 4840) + WORLD_W 5400
-- [x] arte: /city/b_lab.png (320x384) e /ui/bg_lab.png (480x816) via assets/process_lab.py
-- [x] assets.ts CORE_ASSETS
-- [x] roster.tsx: robôs do laboratório no topo da grade
-- [x] typecheck --force OK, build OK, assets/e2e_lab.py OK (0 erros, 0 imagens quebradas)
-- [x] roadmap.md: F concluída + linhas G1..G5 do pedido novo
+### Checklist
+- [x] recon do repo (battle.ts, skills.ts, robots.ts, engin/config, save.ts, battle.tsx)
+- [ ] game/status.ts — 36 status avançados com mods/tick/reações
+- [ ] game/elements.ts — 18 famílias + matriz de afinidade (fraco/resiste/imune/absorve)
+- [ ] game/skills.ts — Skill estendida (tags, mecânicas, status, carga, recurso)
+- [ ] game/kits/types.ts + index.ts — DSL autoral
+- [ ] game/kits/b01..b08.ts — 256 kits autorais (32 por arquivo)
+- [ ] game/passives.ts — ~26 hooks + passivas/talentos de cada robô
+- [ ] game/mechanics.ts — ~60 mecânicas nomeadas resolvidas no motor
+- [ ] game/terrain.ts — terreno/zona/hazard por arena
+- [ ] game/combat.ts — motor profundo (iniciativa, formação, timing, combos, fases, IA)
+- [ ] game/raid.ts — modo raid/sobrevivência com ondas
+- [ ] screens/battle.tsx — UI nova (ordem de turno, preview de dano, fraquezas, combo, log)
+- [ ] screens/codex.tsx — arquivo de combate (256 kits navegáveis)
+- [ ] fiação: save.ts (formação/raid/loadout 6), menu, game-shell
+- [ ] typecheck + build + E2E + deliver website
 
-## Fase G1 — Pets em carrossel + sistema 100x (concluída)
-- [x] game/pets.ts reescrito: 12 espécies × 12 linhagens = **144 pets** (12 → 144), cada um com afinidade principal + secundária (metade da força), 2 traços sorteados de 20, preço/raridade/requisito derivados da linhagem
-- [x] Linhagens recolorem a arte da espécie por filtro CSS (petFilter: sepia+saturate+hue-rotate) — nenhuma arte de personagem nova gerada, respeitando a ordem de não gerar personagem
-- [x] Progressão: PET_MAX_LEVEL 5 → **20**, em 3 estágios de evolução (FILHOTE / ADULTO / ANCIÃO, caps 6/13/20) com multiplicador de bônus 1 / 1.35 / 1.8; o pet cresce visualmente a cada estágio
-- [x] Evoluir de estágio consome lingotes da mina (petUpgradeBars), ligando pets à Fase E
-- [x] Slots de equipe: 1 → **3 pets simultâneos**, liberados nos níveis 1 / 22 / 48 (PET_SLOT_LEVELS)
-- [x] save.ts: activePet (string|null) → **activePets (string[])** com migração automática do save antigo (normalizeActivePets), togglePetSlot/clearPetSlots/petSlotCount, petBonusTable, upgradePet cobrando ouro + lingotes
-- [x] battle.ts: Fighter.pet → Fighter.pets (tabela somada dos 3 pets), petBonus lê a tabela — bônus de todos os pets levados valem juntos em combate
-- [x] screens/pets.tsx refeito como **carrossel**: pet grande no centro, seta `<` à esquerda e `>` à direita, `<<`/`>>` pulam de espécie, contador N/144, filtro TODOS/MEUS/A ADOTAR, fileira dos 3 slots no topo, ficha com efeito principal/secundário/traços, barra de nível e etiqueta de estágio I/II/III
-- [x] styles.css: animações mk-petbob (flutuação do pet), mk-petin (entrada lateral na direção da seta) e mk-aura (aura pulsante na cor da raridade)
-- [x] typecheck --force OK, build OK, assets/e2e_pets_g1.py OK (setas de pet, setas de espécie, filtro, adoção, treino, evolução Lv6→7 cobrando lingotes, slots; 0 erros de console, 0 imagens quebradas)
+### Regras mantidas
+- NENHUMA arte de personagem nova (só composição/recoloração + 28 VFX existentes)
+- 4 fps idle / 8 fps ações; `image-rendering: pixelated`
+- salvar em localStorage via save.ts
 
-
-
-## Fase G2 — Cards e gadgets 100x (concluída)
-
-### Cards (game/cards.ts, screens/cards.tsx)
-- [x] 30 cards base × **7 selos** (BRUTO, RUBRO, POLAR, VOLTAICO, UMBRAL, AUREO, PRISMA) = **210 cards**; cada selo multiplica os mods, adiciona bônus/tag próprios e sobe raridade, preço e nível exigido
-- [x] Selos recolorem a arte base por filtro CSS (cardFilter: sepia+saturate+hue-rotate+brightness) — **nenhuma arte nova gerada**, respeitando a ordem de não gerar personagem
-- [x] **Refino +0..+9** por card (CARD_MAX_REFINE 10): custo em ouro escalando e **lingotes da mina** nos marcos, multiplicando os mods (cardModsAt/refineMult)
-- [x] Slots de deck 3 → **5** (CARD_SLOT_LEVELS 1/1/1/20/45) e orçamento de energia crescendo com o nível (deckBudget)
-- [x] Sinergias em **3 camadas**: por tag, por selo e **17 combos nomeados**; nearSynergies sugere o que falta
-- [x] IA usa decks selados e refinados (aiDeck + aiRefineMap), escalando com o nível do adversário
-- [x] Tela refeita: lista agrupada por base com contador de selos possuídos (N/7), modal com grade dos 7 selos, mods somados, comprar/equipar/remover e **refinar**
-- [x] Correção de UI: clique dentro do modal não fecha mais o modal (o backdrop só fecha no toque fora)
-
-### Gadgets (game/gadgets.ts, screens/engineer.tsx)
-- [x] Nível máximo 10 → **30**, em 3 marcos **MK-I / MK-II / MK-III** (caps 10/20/30); cruzar marco cobra **lingotes**
-- [x] **3 sockets** por gadget, liberados em Lv5/15/25 (gadgetSockets)
-- [x] **48 chips** forjáveis (12 tipos × 4 tiers BRUTO/REFINADO/OTIMIZADO/SINGULAR), custando ouro + lingotes; gadgetTotals soma gadget + chips
-- [x] IA também equipa chips (aiChips) conforme o nível
-- [x] Tela com duas abas (GADGETS / FORJA DE CHIPS), etiqueta MK, fileira de sockets clicáveis, picker de chip e efeitos somados na ficha
-
-### Save e batalha
-- [x] save.ts: novos campos cardRefine / chips / gadgetChips com migração do save antigo; refineCard, buyChip, equipChip, gadgetChipsOf, cardSlotCount, gadgetBonusTable
-- [x] battle.ts: Fighter.gadget → **gadgetLevel + gadgetMk + gadgetMods** (gadget + chips somados); deck do jogador e da IA resolvidos já com refino
-
-### Verificação
-- [x] typecheck --force OK, build OK
-- [x] assets/e2e_cards_g2.py OK — 210 cards, 30 tiles, 7 miniaturas de selo com 7 filtros distintos, compra do bruto + do selado, equipar, refinar até +3 cobrando lingotes no marco, forja de chip, upgrade de gadget Lv10→11 virando MK-II com lingotes, chip encaixado no socket; 0 erros de console, 0 imagens quebradas, 0 HTTP>=400
-- [x] assets/e2e_battle_g2.py OK — gadget MK-II sozinho +49.8% de força, com 2 chips T4 vai a **+67.3%** e ganha +10% de crítico; card selado rubro sai de +12.5% para **+20.4%** de poder com refino +7; força do lutador 131 → 219
-- [x] assets/e2e_battle.py OK (partida real sem erros de console nem sprites quebrados)
-
-### Próxima fase: G3 — batalha 100x com 100 animações novas
-
-## Fase G3 — Batalha 100x, 100 animações, novos VFX e arenas animadas (concluída)
-
-### Catálogo de animações (game/anim.ts — novo)
-- [x] **100 AnimSpec** nomeadas em 5 camadas (`sprite`, `aura`, `burst`, `screen`, `float`), cada uma com keyframe, duração, VFX, filtro de cor, escala e nível de tremor
-- [x] **20 famílias elementais de impacto** (`burst_fogo`, `burst_gelo`, `burst_luz`, …) resolvidas a partir do elemento do chassi — os 157 elementos dos robôs caem em 20 bursts distintos, sem nenhum id inválido
-- [x] Resolvedores determinísticos: `burstAnimFor` (elemento), `hitAnimFor` (dano relativo + crítico → 5 faixas: leve/médio/pesado/crit/mega), `windupAnimFor` (preparo por skill, 6 gestos + carga de MP alto)
-- [x] 64 novos `@keyframes mk-a-*` em styles.css + classes base `.mk-a`/`.mk-a-smooth` e `mk-shake-2`/`mk-shake-3`
-
-### Instrumentação do combate (game/battle.ts)
-- [x] Nova variante de evento `{ t: "anim"; side; id; hold }` — `hold 0` empilha animações em paralelo, permitindo sprite + aura + burst + tela simultâneos
-- [x] **70 pontos de disparo** cobrindo `doAttack`, `doDefense`, `doItem`, `doSwap`, `runAction`, `tickEffects`, `handleFaints`, `checkEnd`, `resolveTurn`, `applyForcedSwap`
-- [x] battle.tsx: `AnimInst`, fila com `hold`, `Stage` reescrito, novos componentes `AnimVfx` (por lutador) e `ScreenFx` (tela cheia), tremor de tela em 3 níveis
-- [x] Menu de golpes virou lista rolável (máx. 148px) para não cobrir o palco durante as animações
-
-### Novos VFX de ataque (20 novos, 28 no total)
-- [x] 5 folhas 4×4 geradas em fundo magenta e processadas por `assets/process_vfx_g3.py` (chroma-key → alpha, tiras de 4 frames 96×96, padrão idêntico aos 8 originais): frost, toxic, cyclone, quake, torrent, prism, plasma, clang, bloom, cosmos, sonic, chrono, siphon, ward, laser, meteor, inferno, shockwave, buffup, curse
-- [x] Chroma-key endurecido (`r>180 & b>180 & g<95 & |r-b|<70`) — o limiar antigo comia os roxos legítimos de toxic/cosmos/curse/prism/chrono/siphon
-- [x] skills.ts: `ELEMENT_VFX` com 21 grupos de palavras-chave PT-BR + `vfxForElement` (fallback por hash) — os tiers `pierce/siphon/overdrive/ultimate` passaram a usar laser/siphon/buffup/meteor
-- [x] `matchKeyword` compartilhado: palavras de até 4 letras só casam palavra inteira, então "SOM" não captura mais "SOMBRA" nem "AR" captura "AREIA"
-
-### Arenas animadas em spritesheet único (11 no total)
-- [x] 6 arenas novas geradas (neodojo, sunken, canyon, foundry, crystal, storm) + as 5 antigas migradas — **todos os 4 frames numa única imagem** `{arena}_sheet.png` (480×1088)
-- [x] `ArenaBackdrop` reescrito: rola o sheet no eixo Y por `translateY` a cada 250ms, em vez de trocar 4 arquivos separados; os 20 PNGs `_f1..\_f4` foram removidos (10MB → 7.1MB) e o manifesto de carregamento foi atualizado
-- [x] `game/arenas.ts` (novo): `ARENA_IDS`, `ARENA_NAMES`, `arenaForElement` (11 grupos temáticos) e `arenaForKey` (hash estável)
-- [x] As 11 arenas entraram em rotação de verdade: `ARENAS` (modos), `RANKED_ARENAS` (ranqueada) e os **220 torneios** agora derivam a arena do elemento do torneio, em vez de 88 deles ficarem fixos em "dojo"
-- [x] **Correção do bug relatado**: o vídeo de round era desenhado opaco por cima da arena com `objectFit: cover`, então só 2 fundos apareciam (`round % 5` quase sempre caía em round1/round2 nas lutas curtas). Agora ele é uma camada atmosférica (`opacity 0.22`, `mixBlendMode: screen`), a escolha mistura arena + round (todos os 5 entram em rotação) e há scanlines de CRT sobre tudo
-
-### Verificação
-- [x] typecheck --force OK (3/3), build OK
-- [x] `assets/e2e_battle_g3.py` OK — 100 animações sem id duplicado, 157 elementos resolvidos em 20 bursts, 5 faixas de impacto distintas, 28 VFX todos 200/384×96, 11 sheets todos 200/480×1088, 60 turnos simulados gerando **893 eventos de animação / 31 ids distintos e nenhum fora do catálogo**; 0 erro de console, 0 pageerror, 0 imagem quebrada, 0 HTTP>=400
-- [x] `assets/e2e_battle.py` OK (regressão: partida real sem erros nem sprites quebrados)
-
-### Próxima fase: G4 — torneios como mundo explorável
+## 2026-10-07 — PvP integrado + pedido de publicação na Play Store
+- OnlineScreen integrada (título "ONLINE · PvP", dock PILOTO, guia). Redirect do login gerenciado concluído no Provider.
+- Servidor recusa ações durante golpe carregado (só pass). Replay online com teto (3 revisões/140 eventos).
+- Testes: API real 49 ✓, motor competitivo (48 partidas 1v1–4v4, simetria, travas) ✓, regressões 10 ✓, build ✓, HTTP 4200 root/health/auth ✓.
+- Pendente: Google login não verificado; .env veio do scaffold mechach-hkul1er (app = campeoe-xwr5e13); exclusão de conta exigida pela Play Store não implementada.
+- Play Store: publicar site → publicar mobile pelo painel do preview (conta Expo). Nunca buildar no sandbox.

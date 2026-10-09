@@ -1,4 +1,6 @@
 import { buildKit, VFX, type Skill, type SkillEffect } from "./skills";
+import { NPC_DEFS } from "./enemies";
+import { MYTHIC_ROBOTS } from "./mythic-roster";
 
 export type {
   EffectType,
@@ -19,7 +21,8 @@ export interface Ratios {
   xv: number; // multiplicador de xp
 }
 
-export type Rarity = "bronze" | "silver" | "gold";
+/** "mythic" (MÍTICO) fica acima de ouro e só existe no Panteão Mítico. */
+export type Rarity = "bronze" | "silver" | "gold" | "mythic";
 
 export interface RobotDef {
   id: string;
@@ -29,6 +32,8 @@ export interface RobotDef {
   ratios: Ratios;
   skills: Skill[];
   bio: string;
+  /** nomes autorais dos quatro golpes-base do blueprint (basic/strong/special/defesa). */
+  names: [string, string, string, string];
 }
 
 interface Blueprint {
@@ -3143,12 +3148,18 @@ export const ROBOTS: RobotDef[] = BLUEPRINTS.map((b) => ({
   rarity: b.rarity,
   ratios: b.ratios,
   bio: b.bio,
+  names: b.names,
   skills: buildSkills(b),
 }));
 
+/** Catálogo fixo de recrutáveis (sem NPCs nem robôs de laboratório) — base do competitivo online. */
+export const CATALOG_IDS: readonly string[] = Object.freeze(BLUEPRINTS.map((b) => b.id));
+
 export const ROBOT_MAP: Record<string, RobotDef> = Object.fromEntries(
-  ROBOTS.map((r) => [r.id, r]),
+  [...ROBOTS, ...NPC_DEFS, ...MYTHIC_ROBOTS].map((r) => [r.id, r]),
 );
+
+export { MYTHIC_ROBOTS, MYTHIC_IDS, isMythic } from "./mythic-roster";
 
 export const STARTER_ROBOTS = ["aurorion", "ferrovax", "cryolance", "voltronin"];
 
@@ -3179,10 +3190,12 @@ export function setFaceResolver(fn: SpriteResolver | null): void {
 }
 
 export function spriteUrl(id: string): string {
+  if (id.startsWith("npc_")) return `/enemies/${id.slice(4)}.png`;
   return spriteResolver?.(id) ?? `/robots/${id}.png`;
 }
 
 export function faceUrl(id: string): string {
+  if (id.startsWith("npc_")) return `/enemies/${id.slice(4)}_face.png`;
   return faceResolver?.(id) ?? `/robots/${id}_face.png`;
 }
 

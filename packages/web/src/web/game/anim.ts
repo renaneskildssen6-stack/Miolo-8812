@@ -12,7 +12,10 @@
  *   screen  -> efeito de tela cheia (flash, vinheta, zoom, speed lines, faixa)
  */
 
-export type AnimLayer = "sprite" | "aura" | "burst" | "screen";
+import { STATUSES } from "./status";
+import { ROBOTS } from "./robots";
+
+export type AnimLayer = "sprite" | "aura" | "burst" | "screen" | "decal" | "projectile" | "trail";
 
 export interface AnimSpec {
   id: string;
@@ -75,20 +78,20 @@ export interface BurstFamily {
 
 const FAMILIES: BurstFamily[] = [
   { key: "fogo", label: "Ignicao", hue: 8, vfx: V.explosion, keyframe: "burst", words: ["FOGO", "CHAMA", "INFERNO", "BRASA", "PIRA", "FORJA", "MAGMA", "VULCAO", "CINZAS", "SOLDA"] },
-  { key: "gelo", label: "Fratura Glacial", hue: 190, vfx: V.impact, keyframe: "shatter", words: ["GELO", "GEADA", "NEVE", "GLACIAL", "POLAR", "TUNDRA"] },
-  { key: "trovao", label: "Descarga", hue: 55, vfx: V.thunder, keyframe: "bolt", words: ["TROVAO", "FAISCA", "TEMPESTADE", "PULSAR", "CIRCUITO", "NEON", "MAGNETISMO"] },
-  { key: "terra", label: "Falha Tectonica", hue: 28, vfx: V.impact, keyframe: "quake", words: ["TERRA", "PEDRA", "ROCHA", "GRANITO", "BASALTO", "TECTONICA", "TERREMOTO", "AREIA", "DESERTO", "POEIRA", "OBSIDIANA", "MARMORE"] },
-  { key: "vento", label: "Corte de Vento", hue: 120, vfx: V.slash, keyframe: "gust", words: ["VENTO", "BRISA", "VENTANIA", "NUVEM", "CEU", "PENA", "CALMARIA"] },
-  { key: "luz", label: "Lanca de Luz", hue: 48, vfx: V.levelup, keyframe: "flare", words: ["LUZ", "SOL", "FOTON", "AURORA", "SANTO", "ZENITE", "CATEDRAL", "ESTRELA"] },
-  { key: "sombra", label: "Mordida Sombria", hue: 275, vfx: V.void, keyframe: "swallow", words: ["SOMBRA", "NOITE", "BREU", "ECLIPSE", "LUA", "TUMULO", "LAMENTO", "PICHE"] },
-  { key: "veneno", label: "Nevoa Toxica", hue: 100, vfx: V.void, keyframe: "seep", words: ["VENENO", "TOXINA", "ACIDO", "PRAGA", "LODO", "MUCO", "PANTANO", "FUMACA"] },
-  { key: "agua", label: "Ressaca", hue: 205, vfx: V.impact, keyframe: "surge", words: ["AGUA", "MARE", "TSUNAMI", "RECIFE", "CORAL", "ALGA", "VAPOR"] },
-  { key: "metal", label: "Prensa de Ferro", hue: 220, vfx: V.impact, keyframe: "clang", words: ["FERRO", "TITANIO", "LATAO", "OURO", "AMBAR", "ENGRENAGEM", "RELOJOARIA", "SUCATA", "FERRUGEM", "ANEL", "CORRENTE", "GRAFENO"] },
+  { key: "gelo", label: "Fratura Glacial", hue: 190, vfx: "/vfx/nov_cryo.png", keyframe: "shatter", words: ["GELO", "GEADA", "NEVE", "GLACIAL", "POLAR", "TUNDRA"] },
+  { key: "trovao", label: "Descarga", hue: 55, vfx: "/vfx/nov_volt.png", keyframe: "bolt", words: ["TROVAO", "FAISCA", "TEMPESTADE", "PULSAR", "CIRCUITO", "NEON", "MAGNETISMO"] },
+  { key: "terra", label: "Falha Tectonica", hue: 28, vfx: "/vfx/nov_geo.png", keyframe: "quake", words: ["TERRA", "PEDRA", "ROCHA", "GRANITO", "BASALTO", "TECTONICA", "TERREMOTO", "AREIA", "DESERTO", "POEIRA", "OBSIDIANA", "MARMORE"] },
+  { key: "vento", label: "Corte de Vento", hue: 120, vfx: "/vfx/nov_aero.png", keyframe: "gust", words: ["VENTO", "BRISA", "VENTANIA", "NUVEM", "CEU", "PENA", "CALMARIA"] },
+  { key: "luz", label: "Lanca de Luz", hue: 48, vfx: "/vfx/nov_luma.png", keyframe: "flare", words: ["LUZ", "SOL", "FOTON", "AURORA", "SANTO", "ZENITE", "CATEDRAL", "ESTRELA"] },
+  { key: "sombra", label: "Mordida Sombria", hue: 275, vfx: "/vfx/nov_umbra.png", keyframe: "swallow", words: ["SOMBRA", "NOITE", "BREU", "ECLIPSE", "LUA", "TUMULO", "LAMENTO", "PICHE"] },
+  { key: "veneno", label: "Nevoa Toxica", hue: 100, vfx: "/vfx/nov_toxa.png", keyframe: "seep", words: ["VENENO", "TOXINA", "ACIDO", "PRAGA", "LODO", "MUCO", "PANTANO", "FUMACA"] },
+  { key: "agua", label: "Ressaca", hue: 205, vfx: "/vfx/nov_aqua.png", keyframe: "surge", words: ["AGUA", "MARE", "TSUNAMI", "RECIFE", "CORAL", "ALGA", "VAPOR"] },
+  { key: "metal", label: "Prensa de Ferro", hue: 220, vfx: "/vfx/nov_ferra.png", keyframe: "clang", words: ["FERRO", "TITANIO", "LATAO", "OURO", "AMBAR", "ENGRENAGEM", "RELOJOARIA", "SUCATA", "FERRUGEM", "ANEL", "CORRENTE", "GRAFENO"] },
   { key: "cristal", label: "Prisma", hue: 170, vfx: V.shield, keyframe: "prism", words: ["CRISTAL", "VIDRO", "ESPELHO", "JADE"] },
-  { key: "plasma", label: "Jato de Plasma", hue: 300, vfx: V.explosion, keyframe: "beam", words: ["PLASMA", "QUANTUM", "ETER", "NEBULOSA"] },
+  { key: "plasma", label: "Jato de Plasma", hue: 300, vfx: "/vfx/nov_nova.png", keyframe: "beam", words: ["PLASMA", "QUANTUM", "ETER", "NEBULOSA"] },
   { key: "vazio", label: "Colapso", hue: 250, vfx: V.void, keyframe: "collapse", words: ["VAZIO", "ABISMO", "ABISSO", "RUINA", "SILENCIO", "ESPIRITO", "ALMA"] },
   { key: "bio", label: "Enxame", hue: 90, vfx: V.void, keyframe: "swarm", words: ["BIO", "FUNGO", "ESPORO", "SELVA", "FLOR", "COLHEITA", "SIMBIOSE", "COLONIA", "BESOURO", "ESCARAVELHO", "FERRAO", "TEIA", "TECELA", "SEDA", "ESTACAO"] },
-  { key: "cosmico", label: "Chuva de Meteoro", hue: 265, vfx: V.explosion, keyframe: "meteor", words: ["COSMICO", "METEORO", "ORBITA", "GRAVIDADE"] },
+  { key: "cosmico", label: "Chuva de Meteoro", hue: 265, vfx: "/vfx/nov_nova.png", keyframe: "meteor", words: ["COSMICO", "METEORO", "ORBITA", "GRAVIDADE"] },
   { key: "sonoro", label: "Estrondo", hue: 320, vfx: V.impact, keyframe: "boom", words: ["SONORO", "CANTO", "IMPACTO", "ARTILHARIA", "GUERRA"] },
   { key: "tempo", label: "Distorcao", hue: 200, vfx: V.levelup, keyframe: "warp", words: ["TEMPO", "RUNA", "PSIQUICO", "PEREGRINO", "JURAMENTO", "DISCIPLINA", "HONRA"] },
   { key: "lamina", label: "Lamina Tripla", hue: 210, vfx: V.slash, keyframe: "triple", words: ["LAMINA", "LANCA", "ESPINHO", "PRESA", "CHIFRE", "OSSO", "SAMURAI", "VALQUIRIA", "AGIL"] },
@@ -133,18 +136,34 @@ export function burstAnimFor(element: string): string {
 
 /* ------------------------------------------------- 2) status: aplicar + tick (20) */
 
-const STATUS: { type: string; label: string; hue: number; kf: string; vfx: string }[] = [
-  { type: "burn", label: "Queimadura", hue: 10, kf: "seep", vfx: V.explosion },
-  { type: "poison", label: "Veneno", hue: 100, kf: "seep", vfx: V.void },
-  { type: "paralyze", label: "Paralisia", hue: 55, kf: "bolt", vfx: V.thunder },
-  { type: "blind", label: "Cegueira", hue: 270, kf: "swallow", vfx: V.void },
-  { type: "weakening", label: "Enfraquecido", hue: 285, kf: "collapse", vfx: V.void },
-  { type: "drain", label: "Dreno", hue: 250, kf: "siphon", vfx: V.void },
-  { type: "damage_reduction", label: "Blindagem", hue: 200, kf: "ward", vfx: V.shield },
-  { type: "adrenalin", label: "Adrenalina", hue: 20, kf: "pulse", vfx: V.levelup },
-  { type: "hp_regen", label: "Regeneracao", hue: 130, kf: "drip", vfx: V.heal },
-  { type: "trapped", label: "Preso", hue: 230, kf: "ring", vfx: V.shield },
-];
+function hexHue(hex: string): number {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return 200;
+  const n = parseInt(m[1], 16);
+  const r = ((n >> 16) & 255) / 255;
+  const g = ((n >> 8) & 255) / 255;
+  const b = (n & 255) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  if (d === 0) return 200;
+  let h: number;
+  if (max === r) h = ((g - b) / d) % 6;
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  return Math.round((((h * 60) % 360) + 360) % 360);
+}
+
+/** Fase H1: um par on/tick por cada um dos 36 status de status.ts. */
+const STATUS_KF = ["seep", "bolt", "ward", "pulse", "drip", "ring", "haze", "swallow"] as const;
+
+const STATUS = STATUSES.map((s, i) => ({
+  type: s.id as string,
+  label: s.label,
+  hue: hexHue(s.color),
+  kf: STATUS_KF[i % STATUS_KF.length],
+  vfx: s.vfx,
+}));
 
 for (const s of STATUS) {
   add({
@@ -249,7 +268,7 @@ add({ id: "res_victory_fanfare", label: "Fanfarra de vitoria", layer: "screen", 
 add({ id: "res_defeat_slump", label: "Colapso de derrota", layer: "sprite", keyframe: "slump", duration: 900 });
 add({ id: "res_defeat_fade", label: "Apagao de derrota", layer: "screen", keyframe: "darken", duration: 1100, color: "#000208" });
 
-/* ---------------------------------------------------- 9) suporte e reacao (8) */
+/* ---------------------------------------------------- 9) suporte e reacao (11) */
 
 add({ id: "sup_heal_pulse", label: "Pulso de reparo", layer: "aura", keyframe: "pulse", duration: 560, vfx: V.heal, filter: tint(130, 2.4, 1.15), scale: 1.25 });
 add({ id: "sup_mp_surge", label: "Surto de energia", layer: "aura", keyframe: "rise", duration: 520, vfx: V.levelup, filter: tint(200, 2.2, 1.1), scale: 1.1 });
@@ -259,19 +278,116 @@ add({ id: "sup_thorns", label: "Repulsor de espinhos", layer: "aura", keyframe: 
 add({ id: "sup_counter", label: "Revide", layer: "burst", keyframe: "bolt", duration: 520, vfx: V.thunder, filter: tint(320, 2.6, 1.15), scale: 1.25, shake: 2 });
 add({ id: "sup_resist", label: "Barreira resistente", layer: "aura", keyframe: "ward", duration: 520, vfx: V.shield, filter: tint(185, 2.2, 1.15), scale: 1.2 });
 add({ id: "sup_purify", label: "Anel purificador", layer: "aura", keyframe: "ring", duration: 620, vfx: V.heal, filter: tint(175, 2.4, 1.2), scale: 1.35 });
+add({ id: "sup_faint", label: "Queda do lutador", layer: "sprite", keyframe: "collapse", duration: 720 });
+add({ id: "sup_ward", label: "Campo de cobertura", layer: "aura", keyframe: "ward", duration: 640, vfx: V.shield, filter: tint(210, 2.4, 1.15), scale: 1.45 });
+add({ id: "sup_revive", label: "Reanimacao de nucleo", layer: "aura", keyframe: "rise", duration: 780, vfx: V.levelup, filter: tint(48, 2.5, 1.2), scale: 1.4 });
 
-/* ------------------------------------------------- 10) faixas e combos (10) */
+/* ------------------------------------------------- 10) faixas e combos (12) */
 
 add({ id: "ban_turn", label: "Faixa de turno", layer: "screen", keyframe: "banner", duration: 720, color: "#35e2f0", text: "TURNO" });
 add({ id: "ban_crit", label: "Faixa de critico", layer: "screen", keyframe: "banner", duration: 760, color: "#ffb43a", text: "CRITICO!" });
 add({ id: "ban_ultimate", label: "Faixa de ultimate", layer: "screen", keyframe: "banner-big", duration: 980, color: "#ff5bd0", text: "ULTIMATE" });
 add({ id: "ban_combo", label: "Faixa de combo", layer: "screen", keyframe: "banner", duration: 680, color: "#57d76a", text: "COMBO" });
+add({ id: "ban_stun", label: "Faixa de atordoamento", layer: "screen", keyframe: "banner", duration: 680, color: "#ffe14d", text: "ATORDOADO" });
+add({ id: "ban_phase", label: "Faixa de nova fase", layer: "screen", keyframe: "banner-big", duration: 1020, color: "#c86bff", text: "NOVA FASE" });
 add({ id: "combo_1", label: "Combo — primeiro golpe", layer: "sprite", keyframe: "combo1", duration: 320 });
 add({ id: "combo_2", label: "Combo — segundo golpe", layer: "sprite", keyframe: "combo2", duration: 340 });
 add({ id: "combo_3", label: "Combo — finalizacao", layer: "sprite", keyframe: "combo3", duration: 420, shake: 2 });
 add({ id: "ult_charge", label: "Ultimate — carregando", layer: "aura", keyframe: "charge-aura", duration: 900, vfx: V.levelup, filter: tint(300, 2.6, 1.2), scale: 1.5 });
 add({ id: "ult_beam", label: "Ultimate — disparo", layer: "burst", keyframe: "beam", duration: 760, vfx: V.explosion, filter: tint(300, 2.4, 1.2), scale: 1.7, shake: 3 });
 add({ id: "ult_finisher", label: "Ultimate — finalizacao", layer: "sprite", keyframe: "finisher", duration: 700, shake: 2 });
+
+/* ------------------------------------------- 5) decalques, projeteis e rastros (H2) */
+
+const DECAL_BY_FAMILY: Record<string, string> = {
+  fogo: "dec_scorch", gelo: "dec_frost", trovao: "dec_grid", terra: "dec_fissure",
+  veneno: "dec_acid", agua: "dec_oil", sangue: "dec_blood", bio: "dec_bloom",
+  vazio: "dec_rift", cristal: "dec_geode", sombra: "dec_rift", metal: "dec_grid",
+};
+const PROJ_BY_FAMILY: Record<string, string> = {
+  gelo: "prj_shard", terra: "prj_seismic", trovao: "prj_arc", plasma: "prj_ion",
+  vazio: "prj_voidray", sonoro: "prj_sonic", cosmico: "prj_grav", agua: "prj_stream",
+  lamina: "prj_rail", luz: "prj_photon", fogo: "prj_photon",
+};
+const TRAIL_KEYS = ["trl_dash", "trl_jet", "trl_blade", "trl_chain", "trl_tele", "trl_slip", "trl_magnet", "trl_shear", "trl_thrust", "trl_reel"];
+
+for (const d of new Set(Object.values(DECAL_BY_FAMILY))) {
+  add({ id: `decal_${d}`, label: `Decalque — ${d}`, layer: "decal", keyframe: "decal", duration: 1400, vfx: `/vfx/${d}.png`, scale: 1 });
+}
+for (const d of new Set(Object.values(PROJ_BY_FAMILY))) {
+  add({ id: `proj_${d}`, label: `Projetil — ${d}`, layer: "projectile", keyframe: "proj", duration: 380, vfx: `/vfx/${d}.png`, scale: 1 });
+}
+for (const t of TRAIL_KEYS) {
+  add({ id: `trail_${t}`, label: `Rastro — ${t}`, layer: "trail", keyframe: "trail", duration: 460, vfx: `/vfx/${t}.png`, scale: 1.2 });
+}
+
+/** Decalque de chao deixado pelo elemento (ou null). */
+export function decalAnimFor(element: string): string | null {
+  const fam = burstAnimFor(element).replace("burst_", "");
+  const d = DECAL_BY_FAMILY[fam];
+  return d ? `decal_${d}` : null;
+}
+
+/** Projetil do elemento; golpes perfurantes usam o trilho. */
+export function projectileAnimFor(element: string, pierce: boolean): string {
+  if (pierce) return "proj_prj_rail";
+  const fam = burstAnimFor(element).replace("burst_", "");
+  return `proj_${PROJ_BY_FAMILY[fam] ?? "prj_photon"}`;
+}
+
+/** Rastro de avanço determinístico por skill. */
+export function trailAnimFor(skillId: string): string {
+  return `trail_${TRAIL_KEYS[hash(skillId) % TRAIL_KEYS.length]}`;
+}
+
+// Folhas H2 agora ligadas a eventos reais, não apenas catalogadas.
+const GLITCHES = ["datamosh", "feedback", "glitch", "lens", "mirror", "roll", "scan", "static", "strobe", "tear"];
+const ULTIMATES = ["blackhole", "chorus", "freeze", "genesis", "groundbreak", "singularity", "skysplit", "solarflare", "thunder", "titanfist"];
+const IMPACTS = ["arcane", "beast", "mycel", "prime", "scrap", "seraph", "siege", "specter", "swift", "titan"];
+const STATUS_BURSTS = ["bleed", "boost", "burn", "corrode", "daze", "freeze", "hex", "poison", "shock", "weaken"];
+const SUPPORTS = ["aegis", "ammo", "coolant", "medic", "nanite", "patch", "rally", "recharge", "repair", "ward"];
+export const WORLD_EFFECTS = ["alarm", "ash", "aurora", "blizzard", "eclipse", "gears", "holy", "meteor", "overgrowth", "rain", "sand", "steam", "thunderstorm", "tsunami", "vortex", "wildfire"];
+for (const key of GLITCHES) add({ id: `gl_${key}`, label: `Distorção ${key}`, layer: "screen", keyframe: "distort", duration: 620, vfx: `/vfx/gl_${key}.png`, scale: 1.2 });
+for (const key of ULTIMATES) add({ id: `ult_${key}`, label: `Ultimate ${key}`, layer: "screen", keyframe: "cinematic", duration: 1300, vfx: `/vfx/ult_${key}.png`, scale: 2 });
+for (const key of IMPACTS) add({ id: `imp_${key}`, label: `Impacto ${key}`, layer: "burst", keyframe: "burst", duration: 520, vfx: `/vfx/imp_${key}.png` });
+for (const key of STATUS_BURSTS) add({ id: `st_burst_${key}`, label: `Condição ${key}`, layer: "aura", keyframe: "pulse", duration: 620, vfx: `/vfx/st_burst_${key}.png` });
+for (const key of SUPPORTS) add({ id: `support_${key}`, label: `Suporte ${key}`, layer: "aura", keyframe: "ring", duration: 650, vfx: `/vfx/sup_${key}.png` });
+// Cada chassi tem assinatura de impacto e uma faixa/cinemática nomeada.
+for (const [i, r] of ROBOTS.entries()) {
+  const u = ULTIMATES[hash(r.element) % ULTIMATES.length];
+  add({ id: `cin_${r.id}`, label: `${r.name} — ultimate`, layer: "screen", keyframe: "cinematic", duration: 1400, vfx: `/vfx/ult_${u}.png`, text: r.name, color: "#ffe36a" });
+  add({ id: `chassis_${r.id}`, label: `${r.name} — reação`, layer: "burst", keyframe: ["burst", "shatter", "quake", "clang", "swallow"][i % 5], duration: 440 + i % 7 * 30, scale: 0.9 + i % 9 * 0.07, vfx: `/vfx/imp_${IMPACTS[i % IMPACTS.length]}.png` });
+}
+export function glitchAnimFor(key: string): string { return `gl_${GLITCHES[hash(key) % GLITCHES.length]}`; }
+export function ultimateAnimFor(robotId: string, element: string): string {
+  return ROBOTS.some((r) => r.id === robotId) ? `cin_${robotId}` : `ult_${ULTIMATES[hash(element) % ULTIMATES.length]}`;
+}
+export function chassisAnimFor(robotId: string): string {
+  return ROBOTS.some((r) => r.id === robotId) ? `chassis_${robotId}` : `imp_${IMPACTS[hash(robotId) % IMPACTS.length]}`;
+}
+export function statusBurstFor(id: string): string {
+  const key = /burn|overheat/.test(id) ? "burn" : /poison|toxin/.test(id) ? "poison" : /bleed/.test(id) ? "bleed" : /corro|shatter/.test(id) ? "corrode" : /freeze|chill/.test(id) ? "freeze" : /shock|paraly/.test(id) ? "shock" : /stun|daze|sleep/.test(id) ? "daze" : /hex|curse|doom/.test(id) ? "hex" : /weak|slow|silence|blind/.test(id) ? "weaken" : "boost";
+  return `st_burst_${key}`;
+}
+export function worldEffectFor(arena: string, weather: string): string {
+  const s = `${arena} ${weather}`;
+  if (/espor|biodome|swarm/.test(s)) return "overgrowth";
+  if (/nevas|frozen|tundra/.test(s)) return "blizzard";
+  if (/vulc|erup|wildfire/.test(s)) return "wildfire";
+  if (/cinza|fuligem/.test(s)) return "ash";
+  if (/eclipse|necropolis|graveyard/.test(s)) return "eclipse";
+  if (/spire|sagrado/.test(s)) return "holy";
+  if (/aurora|crystal/.test(s)) return "aurora";
+  if (/mare|sunken|trench/.test(s)) return "tsunami";
+  if (/sand|areia|canyon/.test(s)) return "sand";
+  if (/thunder|tempestade|storm/.test(s)) return "thunderstorm";
+  if (/vapor|foundry/.test(s)) return "steam";
+  if (/prensa|forge|reactor/.test(s)) return "gears";
+  if (/orbital|meteor|skyfall/.test(s)) return "meteor";
+  if (/neon|alarm|siege/.test(s)) return "alarm";
+  if (/vento|sky/.test(s)) return "vortex";
+  return WORLD_EFFECTS[hash(s) % WORLD_EFFECTS.length];
+}
 
 export const ANIMS: Record<string, AnimSpec> = Object.fromEntries(
   list.map((a) => [a.id, a]),
