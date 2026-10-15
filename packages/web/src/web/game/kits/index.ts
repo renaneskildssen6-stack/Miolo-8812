@@ -19,7 +19,6 @@ import { B06 } from "./b06";
 import { B07 } from "./b07";
 import { B08 } from "./b08";
 import { ENEMY_KITS } from "./enemies";
-import { MYTHIC_KITS } from "./mythic";
 import {
   emptyKit,
   mechList,
@@ -29,7 +28,7 @@ import {
   type MechId,
 } from "./types";
 
-const BATCHES: Kit[][] = [B01, B02, B03, B04, B05, B06, B07, B08, ENEMY_KITS, MYTHIC_KITS];
+const BATCHES: Kit[][] = [B01, B02, B03, B04, B05, B06, B07, B08, ENEMY_KITS];
 
 export const KITS: Record<string, Kit> = {};
 for (const batch of BATCHES) {

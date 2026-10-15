@@ -1,6 +1,5 @@
 import { buildKit, VFX, type Skill, type SkillEffect } from "./skills";
 import { NPC_DEFS } from "./enemies";
-import { MYTHIC_ROBOTS } from "./mythic-roster";
 
 export type {
   EffectType,
@@ -21,8 +20,7 @@ export interface Ratios {
   xv: number; // multiplicador de xp
 }
 
-/** "mythic" (MÍTICO) fica acima de ouro e só existe no Panteão Mítico. */
-export type Rarity = "bronze" | "silver" | "gold" | "mythic";
+export type Rarity = "bronze" | "silver" | "gold";
 
 export interface RobotDef {
   id: string;
@@ -3156,10 +3154,9 @@ export const ROBOTS: RobotDef[] = BLUEPRINTS.map((b) => ({
 export const CATALOG_IDS: readonly string[] = Object.freeze(BLUEPRINTS.map((b) => b.id));
 
 export const ROBOT_MAP: Record<string, RobotDef> = Object.fromEntries(
-  [...ROBOTS, ...NPC_DEFS, ...MYTHIC_ROBOTS].map((r) => [r.id, r]),
+  [...ROBOTS, ...NPC_DEFS].map((r) => [r.id, r]),
 );
 
-export { MYTHIC_ROBOTS, MYTHIC_IDS, isMythic } from "./mythic-roster";
 
 export const STARTER_ROBOTS = ["aurorion", "ferrovax", "cryolance", "voltronin"];
 

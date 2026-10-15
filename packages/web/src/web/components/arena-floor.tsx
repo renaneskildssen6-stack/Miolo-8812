@@ -139,8 +139,7 @@ export function Plinth({ arena, side, size = 132 }: { arena: string; side: "play
           height: 16,
           marginLeft: -44,
           borderRadius: "50%",
-          background: "rgba(0,0,0,0.45)",
-          filter: "blur(2px)",
+          background: "radial-gradient(closest-side, rgba(0,0,0,0.5), rgba(0,0,0,0))",
         }}
       />
     </div>

@@ -5,6 +5,8 @@ import { GENERAL } from "./config";
 import { playerMaxXP, statHooks, type RobotSave } from "./engine";
 import { initialMeta, normalizeMeta, masteryBonus, equipStats, TOURNAMENT_DIAMONDS, type MetaState } from "./meta";
 import { ROBOT_MAP, ROBOTS } from "./robots";
+import { isPantheonRobot } from "./pantheon-roster";
+import { TRIAL_STAGES, canSummon, initialPantheon, normalizePantheon, trialOf, type PantheonState } from "./pantheon";
 import {
   applyMatch,
   claimMission,
@@ -129,6 +131,8 @@ export interface GameState extends MetaState {
   mining: MiningState;
   /** robôs montados no laboratório (Fase F). */
   customs: CustomRobot[];
+  /** Panteão: provações vencidas por chassi exclusivo. */
+  pantheon: PantheonState;
   /** progresso dos modos de jogo. */
   modes: {
     babelFloor: number;
@@ -150,6 +154,7 @@ const VERSION = 3;
 function initialState(): GameState {
   return {
     version: VERSION,
+    pantheon: initialPantheon(),
     tutorial: freshTutorial(),
     expansion: initialExpansion(),
     gold: 0,
@@ -286,6 +291,7 @@ function read(): GameState {
       mining: normalizeMining(parsed.mining),
       customs,
       modes: { ...base.modes, ...(parsed.modes ?? {}) },
+      pantheon: normalizePantheon((parsed as { pantheon?: unknown }).pantheon),
       ...normalizeMeta(parsed),
       expansion: normalizeExpansion(parsed.expansion),
     };
@@ -352,6 +358,8 @@ export function addPlayerXP(amount: number) {
 }
 
 export function unlockRobot(id: string): boolean {
+  // chassis do Panteão só são recrutados lá (summonPantheon) — nunca por loja/contrato/cápsula.
+  if (isPantheonRobot(id)) return false;
   if (!ROBOT_MAP[id] || state.robots.some((r) => r.id === id)) return false;
   const avgLevel = Math.max(
     1,
@@ -364,9 +372,40 @@ export function unlockRobot(id: string): boolean {
   return true;
 }
 
+/** Registra uma provação vencida do Panteão (só avança em sequência). */
+export function recordTrialWin(id: string, stage: number, flawless: boolean): boolean {
+  if (!trialOf(id)) return false;
+  const cur = state.pantheon.wins[id] ?? 0;
+  if (stage !== cur || cur >= TRIAL_STAGES) return false;
+  setState((s) => ({
+    ...s,
+    pantheon: {
+      wins: { ...s.pantheon.wins, [id]: cur + 1 },
+      flawless:
+        flawless && stage === TRIAL_STAGES - 1 && !s.pantheon.flawless.includes(id)
+          ? [...s.pantheon.flawless, id]
+          : s.pantheon.flawless,
+    },
+  }));
+  return true;
+}
+
+/** Desperta um chassi do Panteão: exige provações + missões e cobra a oferenda em diamantes. */
+export function summonPantheon(id: string): boolean {
+  const t = trialOf(id);
+  if (!t || !canSummon(state, id)) return false;
+  const level = Math.max(1, ...state.robots.map((r) => r.level));
+  setState((s) => ({
+    ...s,
+    diamonds: s.diamonds - t.cost,
+    robots: [...s.robots, { id, level, xp: 0, trained: { str: 0, def: 0, agl: 0 } }],
+  }));
+  return true;
+}
+
 export function lockedRobotIds(): string[] {
   const owned = new Set(state.robots.map((r) => r.id));
-  return ROBOTS.filter((r) => !owned.has(r.id) && !isCustom(r.id)).map((r) => r.id);
+  return ROBOTS.filter((r) => !owned.has(r.id) && !isCustom(r.id) && !isPantheonRobot(r.id)).map((r) => r.id);
 }
 
 export function addItem(id: string, qty: number) {

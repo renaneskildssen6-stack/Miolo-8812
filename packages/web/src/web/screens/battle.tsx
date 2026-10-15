@@ -671,84 +671,29 @@ export function BattleScreen({
             {menu === "root" && <>
               <TargetPicker foes={foeList} chosen={foeUid} activeUid={eActive.uid} onPick={setTargetUid}/>
               <BattleCommands key={pActive.uid} fighter={pActive} skills={pSkills} ultimate={finalUlt} competitive={!!remote}
-                onMenu={setMenu} onSelect={setSelSkill}
+                onSelect={setSelSkill}
                 forecast={id=>damagePreview(combat,pActive.uid,foeUid,id)}
-                onAction={action=>act(action.kind==="skill"||action.kind==="ultimate" ? {...action,targetUid:foeUid||undefined}:action)}/>
+                onAction={action=>act(action.kind==="skill"||action.kind==="ultimate" ? {...action,targetUid:foeUid||undefined}:action)}
+                items={remote ? [] : ownedItems.flatMap(([id, qty]) => {
+                  const item = ITEM_MAP[id];
+                  if (!item?.battle) return [];
+                  const targetIndex = item.effect.kind === "revive" ? battle.player.fighters.findIndex((f) => f.hp <= 0) : battle.player.active;
+                  return [{ id, label: item.name, sub: `x${qty}`, glyph: item.icon, tone: "#7dff8a",
+                    blocked: targetIndex < 0 ? "SEM ALVO" : false,
+                    info: { title: item.name, lines: [item.desc, `Você tem ${qty}.`, "Usar um item consome o turno."] },
+                    run: () => actLegacy({ kind: "item", itemId: id, targetIndex }) }];
+                })}
+                team={battle.player.fighters.map((f, i) => ({ id: f.uid, label: f.name, sub: `${f.hp}/${f.maxHp} · ${POS_ABBR[f.pos] ?? f.pos}`,
+                  glyph: faceUrl(f.robotId), tone: "#7dff8a",
+                  blocked: f.hp <= 0 ? "FORA DE COMBATE" : i === battle.player.active ? "EM CAMPO" : false,
+                  info: { title: f.name, lines: [`HP ${f.hp}/${f.maxHp} · MP ${f.mp}/${f.maxMp}`, `Posição: ${POS_ABBR[f.pos] ?? f.pos}`, "Trocar de robô consome o turno."] },
+                  run: () => actLegacy({ kind: "swap", index: i }) }))}
+                tactics={[
+                  { id: "dodge", label: "ESQUIVA ATIVA", orb: "cycle", sub: "+1 RECURSO", info: { title: "ESQUIVA ATIVA", lines: ["+1 recurso e golpes erram no próximo turno."] }, run: () => act({ kind: "dodge" }) },
+                  { id: "analyze", label: "ANALISAR ALVO", orb: "tactics", sub: "PREVISÃO", info: { title: "ANALISAR ALVO", lines: ["Marca o alvo e lê a previsão exata de dano."] }, run: () => act({ kind: "analyze", targetUid: foeUid }) },
+                  { id: `guard-${pGuard.id}`, label: pGuard.name, orb: "defend", sub: `${pGuard.mp} MP`, info: { title: pGuard.name, lines: [pGuard.desc, `${pGuard.mp} MP`] }, run: () => actLegacy({ kind: "skill", skillId: pGuard.id }) },
+                ]}/>
             </>}
-
-            {menu === "extra" && (
-              <Panel>
-                <div className="mk-title" style={{ fontSize: 7, marginBottom: 4 }}>
-                  TATICAS DE CAMPO
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
-                  <PixelButton onClick={() => act({ kind: "dodge" })}>ESQUIVA ATIVA</PixelButton>
-                  <PixelButton
-                    onClick={() => act({ kind: "analyze", targetUid: foeUid })}
-                  >
-                    ANALISAR ALVO
-                  </PixelButton>
-                </div>
-                <div className="mk-title" style={{ fontSize: 5, color: "var(--mk-muted)", marginTop: 4 }}>
-                  ESQUIVA: +1 recurso e golpes erram no proximo turno. ANALISAR: marca o alvo e le a previsao exata.
-                </div>
-                <div style={{ marginTop: 4 }}>
-                  <PixelButton onClick={() => actLegacy({ kind: "skill", skillId: pGuard.id })}>
-                    {pGuard.name} ({pGuard.mp} MP)
-                  </PixelButton>
-                </div>
-                <div style={{ marginTop: 4 }}>
-                  <PixelButton onClick={() => setMenu("root")}>VOLTAR</PixelButton>
-                </div>
-              </Panel>
-            )}
-
-            {menu === "items" && (
-              <Panel>
-                <div style={{ display: "grid", gap: 4 }}>
-                  {ownedItems.length === 0 && (
-                    <div className="mk-title" style={{ fontSize: 8 }}>
-                      SEM ITENS
-                    </div>
-                  )}
-                  {ownedItems.map(([id, qty]) => {
-                    const item = ITEM_MAP[id];
-                    if (!item?.battle) return null;
-                    const targetIndex =
-                      item.effect.kind === "revive"
-                        ? battle.player.fighters.findIndex((f) => f.hp <= 0)
-                        : battle.player.active;
-                    return (
-                      <PixelButton
-                        key={id}
-                        disabled={targetIndex < 0}
-                        onClick={() => actLegacy({ kind: "item", itemId: id, targetIndex })}
-                      >
-                        {item.name} x{qty}
-                      </PixelButton>
-                    );
-                  })}
-                  <PixelButton onClick={() => setMenu("root")}>VOLTAR</PixelButton>
-                </div>
-              </Panel>
-            )}
-
-            {menu === "swap" && (
-              <Panel>
-                <div style={{ display: "grid", gap: 4 }}>
-                  {battle.player.fighters.map((f, i) => (
-                    <PixelButton
-                      key={f.uid}
-                      disabled={f.hp <= 0 || i === battle.player.active}
-                      onClick={() => actLegacy({ kind: "swap", index: i })}
-                    >
-                      {f.name} — {f.hp}/{f.maxHp} · {POS_ABBR[f.pos] ?? f.pos}
-                    </PixelButton>
-                  ))}
-                  <PixelButton onClick={() => setMenu("root")}>VOLTAR</PixelButton>
-                </div>
-              </Panel>
-            )}
           </div>
         )}
       </div>

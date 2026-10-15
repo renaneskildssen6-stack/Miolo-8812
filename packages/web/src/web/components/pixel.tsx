@@ -25,30 +25,22 @@ export function RobotSprite({
   skin?: { filter: string; aura?: string } | null;
 }) {
   const frames = ANIM[clip];
-  const [i, setI] = useState(0);
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
-
-  useEffect(() => {
-    setI(0);
-    const id = window.setInterval(() => {
-      setI((prev) => {
-        const next = prev + 1;
-        if (next >= frames.length) {
-          if (loop) return 0;
-          window.clearInterval(id);
-          doneRef.current?.();
-          return prev;
-        }
-        return next;
-      });
-    }, 1000 / fps);
-    return () => window.clearInterval(id);
-  }, [robotId, clip, fps, loop, frames.length]);
-
-  const frame = frames[Math.min(i, frames.length - 1)];
+  const n = frames.length;
+  const first = frames[0];
   const scale = size / FRAME;
+  const w = FRAME * scale;
 
+  // Clipes de uma vez: avisa onDone por timer (não depende de re-render por frame).
+  useEffect(() => {
+    if (loop) return;
+    const id = window.setTimeout(() => doneRef.current?.(), (n * 1000) / fps);
+    return () => window.clearTimeout(id);
+  }, [robotId, clip, fps, loop, n]);
+
+  // Animação 100% CSS (steps) no compositor: zero setState por frame.
+  const anim = `mk-rsprite ${n / fps}s steps(${n}) ${loop ? "infinite" : "1"}`;
   return (
     <div
       style={{
@@ -65,6 +57,7 @@ export function RobotSprite({
       }}
     >
       <img
+        key={`${clip}-${fps}-${loop ? 1 : 0}`}
         src={spriteUrl(robotId)}
         alt=""
         draggable={false}
@@ -75,7 +68,10 @@ export function RobotSprite({
           width: FRAME * FRAMES * scale,
           height: FRAME * scale,
           maxWidth: "none",
-          transform: `translateX(${-frame * FRAME * scale}px)`,
+          ["--rs-a" as string]: `${-first * w}px`,
+          ["--rs-b" as string]: `${-(first + n) * w}px`,
+          transform: `translateX(${-(loop ? first : first + n - 1) * w}px)`,
+          animation: anim,
           imageRendering: "pixelated",
         }}
       />
@@ -92,23 +88,12 @@ export function VfxSprite({
   size?: number;
   onDone?: () => void;
 }) {
-  const [i, setI] = useState(0);
   const doneRef = useRef(onDone);
   doneRef.current = onDone;
 
   useEffect(() => {
-    setI(0);
-    const id = window.setInterval(() => {
-      setI((p) => {
-        if (p + 1 >= 4) {
-          window.clearInterval(id);
-          doneRef.current?.();
-          return p;
-        }
-        return p + 1;
-      });
-    }, 80);
-    return () => window.clearInterval(id);
+    const id = window.setTimeout(() => doneRef.current?.(), 320);
+    return () => window.clearTimeout(id);
   }, [url]);
 
   const cell = 96;
@@ -116,6 +101,7 @@ export function VfxSprite({
   return (
     <div style={{ width: size, height: size, overflow: "hidden", position: "relative" }}>
       <img
+        key={url}
         src={url}
         alt=""
         style={{
@@ -123,7 +109,10 @@ export function VfxSprite({
           width: cell * 4 * scale,
           height: cell * scale,
           maxWidth: "none",
-          transform: `translateX(${-i * cell * scale}px)`,
+          ["--rs-a" as string]: "0px",
+          ["--rs-b" as string]: `${-4 * cell * scale}px`,
+          transform: `translateX(${-3 * cell * scale}px)`,
+          animation: "mk-rsprite .32s steps(4) 1",
           imageRendering: "pixelated",
         }}
       />
@@ -294,14 +283,8 @@ export function ArenaBackdrop({
   round?: number;
   children?: React.ReactNode;
 }) {
-  const [f, setF] = useState(0);
-  useEffect(() => {
-    const id = window.setInterval(
-      () => setF((p) => (p + 1) % ARENA_FRAMES),
-      250,
-    );
-    return () => window.clearInterval(id);
-  }, []);
+  // Telas pequenas/touch: sem vídeo decodificando atrás da luta (fluidez).
+  const [lite] = useState(() => typeof window === "undefined" || !!window.matchMedia?.("(pointer: coarse), (max-width: 900px)").matches);
   /* O video de round e apenas uma CAMADA ATMOSFERICA por cima da arena.
      Antes ele vinha opaco com objectFit:cover e cobria o spritesheet inteiro,
      entao so os videos apareciam — e como a maioria das lutas dura poucos
@@ -309,7 +292,7 @@ export function ArenaBackdrop({
      Agora: a escolha mistura arena + round (todos os 5 entram em rotacao) e
      ele entra em `screen` com opacidade baixa, deixando a arena dominar. */
   const videoSrc =
-    round === undefined
+    round === undefined || lite
       ? null
       : `/videos/round${(strHash(arena) + Math.max(0, round)) % 5 + 1}.mp4`;
   return (
@@ -335,7 +318,8 @@ export function ArenaBackdrop({
           backgroundImage: `url(/arenas/${arena}_sheet.png)`,
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
-          transform: `translateX(-50%) translateY(-${(f * 100) / ARENA_FRAMES}%)`,
+          transform: "translateX(-50%)",
+          animation: `mk-arena ${ARENA_FRAMES * 0.25}s steps(${ARENA_FRAMES}) infinite`,
           imageRendering: "pixelated",
         }}
       />
@@ -354,8 +338,7 @@ export function ArenaBackdrop({
             height: "100%",
             objectFit: "cover",
             imageRendering: "pixelated",
-            opacity: 0.22,
-            mixBlendMode: "screen",
+            opacity: 0.16,
             pointerEvents: "none",
           }}
         />

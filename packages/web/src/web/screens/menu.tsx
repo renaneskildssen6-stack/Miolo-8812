@@ -25,6 +25,7 @@ export type Screen =
   | "power"
   | "museum"
   | "portal"
+  | "pantheon"
   | "online";
 
 export function MenuScreen({ onGo }: { onGo: (s: Screen) => void }) {

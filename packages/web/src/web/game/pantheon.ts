@@ -1,24 +1,24 @@
 /**
- * Panteão Mítico — regras puras do modo exclusivo dos robôs MÍTICOS.
+ * Panteão — regras puras do modo exclusivo de 27 chassis do catálogo.
  *
- * Para despertar um robô mítico o piloto precisa, nesta ordem lógica:
+ * Para despertar um chassi do Panteão o piloto precisa, nesta ordem lógica:
  *  1. vencer as 3 provações (batalhas) daquele deus, em sequência;
  *  2. cumprir as 3 missões do deus (nível, vitórias e um desafio próprio);
  *  3. ofertar diamantes — no mínimo 100 por robô (100…300).
- * Míticos nunca entram em torneios, loja, cápsulas, contratos ou PvP:
- * esta é a única fonte (ver `summonMythic` em save.ts).
+ * Esses chassis não são prêmio de torneio, cápsula, loja ou contrato:
+ * esta é a única fonte (ver `summonPantheon` em save.ts).
  */
 import type { RobotSave } from "./engine";
 import { randomEnemyTeam, teamAverageLevel } from "./modes";
 import {
-  MYTHIC_IDS,
-  MYTHIC_PANTHEON,
+  PANTHEON_IDS,
+  PANTHEON_OF,
   PANTHEONS,
-  isMythic,
-  mythicsOf,
+  isPantheonRobot,
+  robotsOf,
   type PantheonDef,
   type PantheonId,
-} from "./mythic-roster";
+} from "./pantheon-roster";
 
 export const TRIAL_STAGES = 3;
 export const MIN_OFFERING = 100;
@@ -32,7 +32,7 @@ export interface PantheonState {
 
 export const initialPantheon = (): PantheonState => ({ wins: {}, flawless: [] });
 
-/** Aceita save vazio/antigo/corrompido; só mantém ids míticos válidos. */
+/** Aceita save vazio/antigo/corrompido; só mantém ids do Panteão válidos. */
 export function normalizePantheon(raw: unknown): PantheonState {
   const out = initialPantheon();
   if (!raw || typeof raw !== "object") return out;
@@ -40,10 +40,10 @@ export function normalizePantheon(raw: unknown): PantheonState {
   if (r.wins && typeof r.wins === "object") {
     for (const [id, v] of Object.entries(r.wins)) {
       const n = Math.floor(Number(v));
-      if (isMythic(id) && Number.isFinite(n) && n > 0) out.wins[id] = Math.min(TRIAL_STAGES, n);
+      if (isPantheonRobot(id) && Number.isFinite(n) && n > 0) out.wins[id] = Math.min(TRIAL_STAGES, n);
     }
   }
-  if (Array.isArray(r.flawless)) out.flawless = [...new Set(r.flawless.filter((id) => typeof id === "string" && isMythic(id)))];
+  if (Array.isArray(r.flawless)) out.flawless = [...new Set(r.flawless.filter((id) => typeof id === "string" && isPantheonRobot(id)))];
   return out;
 }
 
@@ -86,7 +86,7 @@ function third(id: string, tier: number): MissionDef {
 
 export const TRIALS: Record<string, MythicTrial> = {};
 for (const p of PANTHEONS) {
-  mythicsOf(p.id).forEach((id, tier) => {
+  robotsOf(p.id).forEach((id, tier) => {
     TRIALS[id] = {
       id,
       pantheon: p.id,
@@ -161,7 +161,7 @@ export interface TrialStage {
   boss: boolean;
 }
 
-/** Provação `stage` (0…2) do deus: guardiões ouro e, na última, o próprio mítico. */
+/** Provação `stage` (0…2) do deus: guardiões ouro e, na última, o próprio chassi. */
 export function trialStage(id: string, stage: number, team: RobotSave[]): TrialStage {
   const t = trialOf(id);
   const tier = t?.tier ?? 0;
@@ -187,6 +187,6 @@ export function trialStage(id: string, stage: number, team: RobotSave[]): TrialS
   };
 }
 
-export const MYTHIC_COUNT = MYTHIC_IDS.length;
-export { MYTHIC_IDS, MYTHIC_PANTHEON, PANTHEONS, isMythic, mythicsOf };
+export const PANTHEON_COUNT = PANTHEON_IDS.length;
+export { PANTHEON_IDS, PANTHEON_OF, PANTHEONS, isPantheonRobot, robotsOf };
 export type { PantheonDef, PantheonId };

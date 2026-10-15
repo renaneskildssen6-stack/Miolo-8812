@@ -957,3 +957,18 @@ img {
 .mc-crash div{display:flex;gap:8px;margin-top:6px}
 .mc-crash button{flex:1;min-height:44px;font:7px 'Press Start 2P',monospace;border:1px solid #35e2f0;background:#0a1d29;color:#bff7ff;cursor:pointer}
 .mc-crash button+button{border-color:#ffb43a;color:#ffd994;background:#1d1608}
+
+/* RobotSprite: frames via steps() no compositor (sem setInterval/setState) */
+@keyframes mk-rsprite {
+  from { transform: translateX(var(--rs-a)); }
+  to { transform: translateX(var(--rs-b)); }
+}
+/* Atmosfera da arena: 4 quadros em loop por CSS */
+@keyframes mk-atmo {
+  from { background-position: 0% 0; }
+  to { background-position: 133.333% 0; }
+}
+@keyframes mk-arena {
+  from { transform: translateX(-50%) translateY(0); }
+  to { transform: translateX(-50%) translateY(-100%); }
+}

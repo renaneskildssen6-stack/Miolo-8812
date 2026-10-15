@@ -1,3 +1,5 @@
+import { PantheonScreen } from "@/screens/pantheon";
+import "@/screens/pantheon.css";
 import { ObservatoryScreen } from "@/screens/city-observatory";
 import { AcademyScreen } from "@/screens/city-academy";
 import { ContractsScreen } from "@/screens/city-contracts";
@@ -26,7 +28,7 @@ import { OnlineScreen } from "@/screens/online";
 import { ScreenBoundary } from "@/components/screen-boundary";
 import { getState, useGame } from "@/game/save";
 import { startTutorial } from "@/game/tutorial";
-import { systemUnlocked } from "@/game/progression";
+import { UNLOCK_LEVEL, systemUnlocked } from "@/game/progression";
 import "@/screens/tutorial.css";
 
 /** Casca do jogo: viewport mobile fixo + hub da cidade + modais de tela. */
@@ -78,7 +80,7 @@ function GameContent() {
   const { transition } = useGate();
   const close = () => transition(() => setScreen("menu"));
   const enter = (id:Screen) => { if(systemUnlocked(getState(),id))setScreen(id); };
-  const immersive = ["observatory", "academy", "contracts", "power", "museum", "portal", "modes", "ranked", "tournaments", "online"].includes(screen);
+  const immersive = ["observatory", "academy", "contracts", "power", "museum", "portal", "modes", "ranked", "tournaments", "online", "pantheon"].includes(screen);
 
   const beginTutorial=()=>{
     const replay=g.tutorial.completed;
@@ -106,8 +108,7 @@ function GameContent() {
           style={{
             position: immersive ? "fixed" : "absolute",
             inset: 0,
-            background: "rgba(2,6,12,0.72)",
-            backdropFilter: "blur(2px)",
+            background: immersive ? "#02060c" : "rgba(2,6,12,0.82)",
             zIndex: 20,
             display: "grid",
             placeItems: "center",
@@ -146,10 +147,12 @@ function GameContent() {
             {screen === "museum" && <MuseumScreen onBack={close} />}
             {screen === "portal" && <PortalScreen onBack={close} />}
             {screen === "online" && <OnlineScreen backLabel="CIDADE" onBack={close} />}
+            {screen === "pantheon" && <PantheonScreen onBack={close} />}
             </ScreenBoundary>
           </div>
         </div>
       )}
+      {screen==="menu"&&<button className="mc-pantheon-trigger" data-testid="pantheon-button" disabled={!systemUnlocked(g,"pantheon")} onClick={()=>enter("pantheon")} aria-label="Abrir Panteão"><span className="pt-sheet" style={{width:30,height:30,backgroundImage:"url(/mythic/emblem.webp)"}}/>{systemUnlocked(g,"pantheon")?"PANTEÃO":`PANTEÃO · NV ${UNLOCK_LEVEL.pantheon}`}</button>}
       {screen==="menu"&&<button className="mc-guide-trigger" onClick={()=>setGuideOpen(true)} aria-label="Abrir briefing e rota de desbloqueios"><img src="/overhaul/pilot.webp" alt=""/>BRIEFING</button>}
       <SystemGuide screen={screen} open={guideOpen} onClose={()=>setGuideOpen(false)} onEnter={enter}/>
     </>

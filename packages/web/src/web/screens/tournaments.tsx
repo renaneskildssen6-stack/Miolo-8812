@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Icon, Panel, PixelButton, RobotSprite, StatBar } from "@/components/pixel";
-import { TournamentMap } from "@/components/tourmap";
+import { WorldMap } from "@/components/world-map";
 import { fightReward, grantXP, robotMaxXP, type RobotSave } from "@/game/engine";
 import {
   addGold,
@@ -295,7 +295,7 @@ export function TournamentsScreen({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <TournamentMap
+    <WorldMap
       playerLevel={g.playerLevel}
       won={g.wonTournaments}
       teamEmpty={team.length === 0}
